@@ -2,6 +2,17 @@
 
 Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz ([NIU](https://niu.wrk.at/)).
 
+Derzeit werden drei Funktionen unterstützt:
+
+### Erweiterte Filter für den Dienstplan
+![Erweiterte Filter für den Dienstplan](screenshots/dienstplan.png)
+
+### Erweiterte Filter für offene Positionen (Ambulanzen & KHD)
+![Erweiterte Filter für offene Positionen](screenshots/offene_positionen.png)
+
+### Zusätzliche Daten zur Dienststatistik
+![Zusätzliche Daten zur Dienststatistik](screenshots/mitarbeiterbezogene_dienststatistik.png)
+
 ## Getting Started
 
 Diese Anleitung ermöglicht Dir die Erweiterung direkt in Google Chrome zu testen, bevor sie im Google Store erscheint. Der empfohlene Weg ist die Extension über den Google Store zu installieren.
@@ -33,8 +44,6 @@ Always welcome just fork and commit.
 ## Authors
 
 * **Gerald Bäck** - *Coinomentum* - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
 ## License
 
