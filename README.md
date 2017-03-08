@@ -15,7 +15,7 @@ Derzeit werden drei Funktionen unterstützt:
 
 ## Getting Started
 
-Diese Anleitung ermöglicht Dir die Erweiterung direkt in Google Chrome zu testen, bevor sie im Google Store erscheint. Der empfohlene Weg ist die Extension über den Google Store zu installieren.
+Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu testen, bevor sie im Google Store erscheint. Der empfohlene Weg ist, die Extension über den Google Store zu installieren.
 
 ### Prerequisites
 
