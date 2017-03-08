@@ -1,36 +1,24 @@
 # NIU's little helper
 
-Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz (NIU).
+Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz ([NIU](https://niu.wrk.at/)).
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Diese Anleitung ermöglicht Dir die Erweiterung direkt in Google Chrome zu testen, bevor sie im Google Store erscheint. Der empfohlene Weg ist die Extension über den Google Store zu installieren.
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
-
-```
-Give examples
-```
+[Google Chrome Browser](https://www.google.com/chrome/browser/desktop/)
 
 ### Installing
 
-A step by step series of examples that tell you have to get a development env running
+1. [Gepackte Extension herunterladen](https://github.com/geraldbaeck/NIUsLittleHelper/archive/master.zip)
+2. Zip file in beliebiges Verzeichnis entpacken
+3. Gehe zu [chrome://extensions/](chrome://extensions/) und Developer mode oben rechts einschalten.
+4. Klick auf den Load unpacked extension button und wähle das vorher entpackte Verzeichnis aus.
 
-Say what the step will be
+![Extension Setup im Developer Mode](screenshots/extension_setup.png)
 
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
 
 ## Built With
 
