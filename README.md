@@ -15,7 +15,7 @@ Derzeit werden drei Funktionen unterstützt:
 
 ## Getting Started
 
-Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu testen, bevor sie im Google Store erscheint. Der empfohlene Weg ist, die Extension über den Google Store zu installieren.
+Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu testen, bevor sie im [Google Store](https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de) erscheint. Der empfohlene Weg ist, die Extension über den [Google Store](https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de) zu installieren.
 
 ### Prerequisites
 
