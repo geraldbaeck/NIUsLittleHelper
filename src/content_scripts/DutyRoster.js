@@ -7,19 +7,33 @@ $(document).ready(function() {
     var rtrn = {NKTW: false};
     var $table = $('table#DutyRosterTable tbody');
     $table.find('tr').each(function(key, val) {
+
+      // create placholder vars
       var dienstID = $(this).attr('id');
-      console.log(dienstID);
       var isEmpty = true;
       var isNotMeldable = true;
       var isNKTW = false;
+      var currentDateString;
+      var isKurzdienst = false;
+      var dienstLaenge;
+
       $(this).find('td').each(function(key, val) {
         val = val.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
         console.log(key + ': ' + val);
         var openIndikator = 'title="Melden"';
         switch (key) {
           case 0: // Wochentag
+            break;
           case 1: // Datum
+            currentDateString = val;
+            break;
           case 2: // Uhrzeit
+            dienstLaenge = getDurationFromTimeString(currentDateString, val);
+            // $(this).after('<td>' + dienstLaenge + '</td>');  // Stunden einblenden nicht nötig
+            if (dienstLaenge < 8) {
+              isKurzdienst = true;
+            }
+            break;
           case 3: // Ort
             break;
           case 4: // SEW
@@ -42,7 +56,7 @@ $(document).ready(function() {
 
             break;
           case 8: // PAL
-          case 9: // P?
+          case 9: // P = Permanenz
           case 10: // no idea
           default:
             break;
@@ -52,6 +66,8 @@ $(document).ready(function() {
       $('tr#' + dienstID).attr('isEmpty', isEmpty);
       $('tr#' + dienstID).attr('isMeldable', !isNotMeldable);
       $('tr#' + dienstID).attr('isNKTW', isNKTW);
+      $('tr#' + dienstID).attr('isKurzdienst', isKurzdienst);
+      $('tr#' + dienstID).attr('dienstLaenge', dienstLaenge);
     });
 
     return rtrn;
@@ -70,6 +86,10 @@ $(document).ready(function() {
     if ($('#DutyRosterFilterNKTW').is(':checked')) {
       $('tr[isNKTW=false]').hide();
     }
+
+    if ($('#DutyRosterFilterKurzDienst').is(':checked')) {
+      $('tr[isKurzdienst=false]').hide();
+    }
   }
 
   tbl = prepareTable();
@@ -81,6 +101,7 @@ $(document).ready(function() {
   if (tbl.NKTW) {
     $('div.whitebox').append(plcDiv + 'NUR NKTW: <input type="checkbox" id="DutyRosterFilterNKTW" class="TableHack"></div>');
   }
+  $('div.whitebox').append(plcDiv + 'Nur Kurzdienste: <input type="checkbox" id="DutyRosterFilterKurzDienst" class="TableHack"></div>');
 
   $('.TableHack').change(function() {
     filterTable();
