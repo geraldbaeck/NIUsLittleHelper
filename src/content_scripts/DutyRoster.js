@@ -99,7 +99,7 @@ $(document).ready(function() {
   $('div.whitebox').append(plcDiv + 'Leerzeilen filtern: <input type="checkbox" id="DutyRosterFilterEmpty" class="TableHack" style="padding:0;"></div>');
   $('div.whitebox').append(plcDiv + 'Nur meldbare Dienste: <input type="checkbox" id="DutyRosterFilterMeldable" class="TableHack"></div>');
   if (tbl.NKTW) {
-    $('div.whitebox').append(plcDiv + 'NUR NKTW: <input type="checkbox" id="DutyRosterFilterNKTW" class="TableHack"></div>');
+    $('div.whitebox').append(plcDiv + 'Nur NKTW: <input type="checkbox" id="DutyRosterFilterNKTW" class="TableHack"></div>');
   }
   $('div.whitebox').append(plcDiv + 'Nur Kurzdienste: <input type="checkbox" id="DutyRosterFilterKurzDienst" class="TableHack"></div>');
 
