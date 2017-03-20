@@ -4,7 +4,7 @@ $(document).ready(function() {
   // and enriches the rows with metadata
   // to enable filtering
   function prepareTable() {
-    var rtrn = {NKTW: false};
+    var rtrn = {NKTW: false, Kurzdienst: false};
     var $table = $('table#DutyRosterTable tbody');
     $table.find('tr').each(function(key, val) {
 
@@ -32,6 +32,7 @@ $(document).ready(function() {
             // $(this).after('<td>' + dienstLaenge + '</td>');  // Stunden einblenden nicht nötig
             if (dienstLaenge < 8) {
               isKurzdienst = true;
+              rtrn.Kurzdienst = true;
             }
             break;
           case 3: // Ort
@@ -96,12 +97,14 @@ $(document).ready(function() {
 
   // add selectors
   var plcDiv = '<div style="float:left; vert-align:middle; font-weight:bold; padding:5px;">';
-  $('div.whitebox').append(plcDiv + 'Leerzeilen filtern: <input type="checkbox" id="DutyRosterFilterEmpty" class="TableHack" style="padding:0;"></div>');
-  $('div.whitebox').append(plcDiv + 'Nur meldbare Dienste: <input type="checkbox" id="DutyRosterFilterMeldable" class="TableHack"></div>');
+  $('div.whitebox:not([id])').append(plcDiv + 'Leerzeilen filtern: <input type="checkbox" id="DutyRosterFilterEmpty" class="TableHack" style="padding:0;"></div>');
+  $('div.whitebox:not([id])').append(plcDiv + 'Nur meldbare Dienste: <input type="checkbox" id="DutyRosterFilterMeldable" class="TableHack"></div>');
   if (tbl.NKTW) {
-    $('div.whitebox').append(plcDiv + 'Nur NKTW: <input type="checkbox" id="DutyRosterFilterNKTW" class="TableHack"></div>');
+    $('div.whitebox:not([id])').append(plcDiv + 'Nur NKTW: <input type="checkbox" id="DutyRosterFilterNKTW" class="TableHack"></div>');
   }
-  $('div.whitebox').append(plcDiv + 'Nur Kurzdienste: <input type="checkbox" id="DutyRosterFilterKurzDienst" class="TableHack"></div>');
+  if (tbl.Kurzdienst) {
+    $('div.whitebox:not([id])').append(plcDiv + 'Nur Kurzdienste: <input type="checkbox" id="DutyRosterFilterKurzDienst" class="TableHack"></div>');
+  }
 
   $('.TableHack').change(function() {
     filterTable();

@@ -37,6 +37,7 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 
 + *0.1* initial commit
 + *0.2* VCF Download
++ *0.21* Kurzdienstselector wird nur mehr angezeigt, wenn es Kurzdienste gibt
 
 ## Built With
 
