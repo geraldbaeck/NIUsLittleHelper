@@ -1,13 +1,28 @@
-function getKuerzel() {
 
-    var username = chrome.sync.getItem("niuUsername");
+
+
+function getKuerzel() {
+  console.log("getKuerzel");
+    return new Promise(function(resolve, reject) {
+      chrome.storage.sync.get(STORAGE_KEY_KUERZEL, function(item) {
+          if (STORAGE_KEY_KUERZEL in item) {
+            resolve(item[STORAGE_KEY_KUERZEL]);
+          } else {
+            resolve("");
+          }
+      });
+    });
+
+    //var username = chrome.sync.getItem("niuUsername");
+    //var STORAGE_KEY_NIU_USERNAME = "niuUsername";
+/*
     if (username) {
         var res = username.split(" ");
         var kuerzel = res[0].substring(0, 2) + res[1].substring(0, 2);
         return kuerzel + " ";
     } else {
         return null;
-    }
+    } */
 }
 
 
@@ -18,7 +33,7 @@ function makeEmployeeSearchField(input) {
     input.find("option").each(function(index, option) {
         var option = $(option);
         names.push(option.text());
-        console.log("collectnig name " + option.text());
+        console.log("collecting name " + option.text());
     });
 
     input.after("<input id='person_autocomplete'></input>");
