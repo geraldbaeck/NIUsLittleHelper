@@ -29,10 +29,12 @@ quartalsweise abgeschlossen!
 * Es wird automatisch ein Kürzel eingetragen, das über die Optionen des Browser Plugins gesetzt werden kann
 * Das Drop-Down select Menü unterstützt jetzt eine Volltextsuche nach den Mitarbeiternamen bzw. der Dienstnummer
 
+### Download von Kontaktdaten als VCF file
+![VCF Download](screenshots/vcf_download.png)
 
 ## Getting Started
 
-Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu testen, bevor sie im Google Store erscheint. Der empfohlene Weg ist, die Extension über den Google Store zu installieren.
+Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu testen, bevor sie im [Google Store](https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de) erscheint. Der empfohlene Weg ist, die Extension über den [Google Store](https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de) zu installieren.
 
 ### Prerequisites
 
@@ -47,6 +49,12 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 
 ![Extension Setup im Developer Mode](screenshots/extension_setup.png)
 
+## Version History
+
++ *0.1* initial commit
++ *0.2* VCF Download
++ *0.21* Kurzdienstselector wird nur mehr angezeigt, wenn es Kurzdienste gibt
++ *0.22* Die Kontakttabelle der Dienstführung wird jetzt standardmäßig ausgeblendet
 
 ## Built With
 

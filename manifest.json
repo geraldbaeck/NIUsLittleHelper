@@ -1,6 +1,9 @@
 {
   "name": "NIU's litte helper",
-  "version": "0.1",
+  "short_name": "NIU++",
+  "author": "Gerald Baeck",
+  "description": "Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz (NIU).",
+  "version": "0.22",
   "homepage_url": "http://baeck.at",
   "options_ui" : {
     "page" : "src/options.html",
@@ -12,9 +15,13 @@
     "48": "icons/niu48.png",
     "128": "icons/niu128.png"
   },
+  "incognito": "not_allowed",
   "permissions": [
     "https://niu.wrk.at/*",
     "storage"
+  ],
+  "web_accessible_resources": [
+    "img/*"
   ],
   "background": {
     "scripts": ["src/background/hot-reload.js"]
@@ -22,7 +29,7 @@
   "content_scripts": [
     {
       "matches": ["https://niu.wrk.at/Kripo/DutyRosterNH/DutyRoster.aspx*"],
-      "js": ["js/jquery/jquery-3.1.1.slim.min.js", "src/content_scripts/DutyRoster.js"],
+      "js": ["js/jquery/jquery-3.1.1.slim.min.js", "src/content_scripts/lib/lib.js", "src/content_scripts/DutyRoster.js"],
       "all_frames": true,
       "run_at": "document_end"
     },
@@ -35,7 +42,13 @@
     {
       "matches": ["https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx*"],
       "css": ["js/chart/chartist.min.css"],
-      "js": ["js/jquery/jquery-3.1.1.slim.min.js", "js/chart/chartist.min.js", "src/content_scripts/EmployeeDutyStatistic.js"],
+      "js": ["js/jquery/jquery-3.1.1.slim.min.js", "js/chart/chartist.min.js", "src/content_scripts/lib/lib.js", "src/content_scripts/EmployeeDutyStatistic.js"],
+      "all_frames": true,
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://niu.wrk.at/Kripo/Employee/shortemployee.aspx*"],
+      "js": ["js/jquery/jquery-3.1.1.slim.min.js", "src/content_scripts/shortemployee.js"],
       "all_frames": true,
       "run_at": "document_end"
     },

@@ -2,6 +2,8 @@
 
 $(document).ready(function() {
 
+  // sorts an object by it's value
+  // returns array
   function sortProperties(obj) {
     // convert object into array
     var sortable = [];
@@ -36,7 +38,6 @@ $(document).ready(function() {
       // add placholder for statistics
       $(this).find('tbody tr').first().after('<tr><td><table class="DutyRoster" cellspacing="0" cellpadding="3" rules="all" border="1"><tbody><tr><td id="charts' + i + '"></td></tr></tbody></table></td></tr>');
 
-
       // add header for duty duration
       $(this).find('td.DRCTime').first().after('<td class="DRCDuration" width="50px">Dauer</td>');
 
@@ -63,15 +64,7 @@ $(document).ready(function() {
               currentDateString = val;
               break;
             case 2: // Zeiten
-              var startTime = val.substring(0, 6);
-              var stopTime = val.substring(8, 15).trim();
-              var pattern = /(\d{2})\.(\d{2})\.(\d{4})/;
-              startDate = new Date(currentDateString.replace(pattern,'$3-$2-$1 ') + startTime);
-              stopDate = new Date(currentDateString.replace(pattern,'$3-$2-$1 ') + stopTime);
-              if (stopDate < startDate) {
-                stopDate.setDate(stopDate.getDate() + 1);  // add one day if dienst ends on the next day
-              };
-              var hours = Math.abs(stopDate - startDate) / 36e5;
+              hours = getDurationFromTimeString(currentDateString, val);
               $(this).after('<td>' + hours + '</td>');
               sumDuty += hours;
               break;
@@ -227,17 +220,6 @@ $(document).ready(function() {
     });
   }
 
-  console.log('hello statistik');
   tbl = prepareTable();
-
-  // add selectors
-  // $('#aspnetForm div').slice(1).first().prepend('<table class="DFTable" style="float:left;margin-bottom:0.9em;margin-top:1em;"><tr><td><div id="TableHack" style="text-align:left;"></div></td></tr></table>');
-  // $.each(tbl, function() {
-  //   $('#TableHack').append('<span style="white-space:nowrap;vertical-align: middle;padding-right:0.5em;"><label for="pos_' + this + '">' + this + '</label>: <input type="checkbox" id="pos_' + this + '" positionID="' + this + '" class="TableHack" style="padding:0;"></span><wbr>')
-  // });
-  //
-  // $('.TableHack').change(function() {
-  //   filterTable();
-  // });
 
 });
