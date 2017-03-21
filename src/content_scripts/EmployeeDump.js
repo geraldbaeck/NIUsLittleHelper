@@ -1,15 +1,6 @@
 $(document).ready(function() {
 
-  dnrToIdentifier().then(
-    function(result) {
-      console.log("success" + result);
-    },
-    function() {
-      console.log("error");
-    }
-  )
-
-  var exportTable = $("#ctl00_main_m_Panel  table  table");
+  var exportTable = $(".export");
 //#ctl00_main_m_Panel > table > tbody > tr:nth-child(2) > td > table
   //exportTable.hide();
 
@@ -34,12 +25,31 @@ $(document).ready(function() {
       clicked["rddienste"] = true;
 
 
-      exportTable.find("tr:gt(0)").append("<td class='rddienste'>berechne...rddienste</td>");
+      exportTable.find("tr:gt(0)").append("<td class='rddienste'>Berechnen...</td>");
       exportTable.find("tr:first").append("<th>Dienste d. l. 6 Monate</th>");
 
-      //TODO: starte berechnung
       exportTable.find("tr:gt(0)").each(function(index, element) {
-          var dnr = element.find("td:first").text();
+          var dnr = $(element).find("td:first").text();
+          
+            dnrToIdentifier(dnr).then(
+            function(result) {
+            console.log("dnrToIdentifier result: " + result);
+
+            calculateStatistic(result, "dienste").then(
+            function(statresult) {
+            $(element).find(".rddienste").text(statresult);
+            },
+            function() {
+            console.log("calculateStatistic --> error");
+            $(element).find(".rddienste").text("statcalc error");
+            });
+            },
+            function() {
+            console.log("error");
+            $(element).find(".rddienste").text("dnrToIdentifier error");
+            });
+
+
       });
 
     });
@@ -51,8 +61,33 @@ $(document).ready(function() {
       }
       clicked["sandienststunden"] = true;
 
-      exportTable.find("tr:gt(0)").append("<td class='dienststunden'>berechne...dienststunden</td>");
+      exportTable.find("tr:gt(0)").append("<td class='dienststunden'>Berechnen...</td>");
       exportTable.find("tr:first").append("<th>Dienststunden d. l. 6 Monate</th>");
+
+         exportTable.find("tr:gt(0)").each(function(index, element) {
+          var dnr = $(element).find("td:first").text();
+          
+            dnrToIdentifier(dnr).then(
+            function(result) {
+            console.log("dnrToIdentifier result: " + result);
+
+            calculateStatistic(result, "stunden").then(
+            function(statresult) {
+            $(element).find(".dienststunden").text(statresult);
+            },
+            function() {
+            console.log("calculateStatistic --> error");
+            $(element).find(".dienststunden").text("statcalc error");
+            });
+            },
+            function() {
+            console.log("error");
+            $(element).find(".dienststunden").text("dnrToIdentifier error");
+            });
+
+
+      });
+
 
     });
   });
