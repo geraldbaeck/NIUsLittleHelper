@@ -19,7 +19,6 @@ $(document).ready(function() {
 
       $(this).find('td').each(function(key, val) {
         val = val.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
-        console.log(key + ': ' + val);
         var openIndikator = 'title="Melden"';
         switch (key) {
           case 0: // Wochentag
@@ -58,7 +57,7 @@ $(document).ready(function() {
             break;
           case 8: // PAL
           case 9: // P = Permanenz
-          case 10: // no idea
+          case 10: // Dienstführung Funktionen
           default:
             break;
         }
@@ -93,6 +92,19 @@ $(document).ready(function() {
     }
   }
 
+  function dfToggle() {
+    $('.DFTable').parent().parent().toggle();
+    if ($('.DFTable').parent().parent().is(':visible')) {
+      $('#DFToggle').text('DF ausblenden');
+    } else {
+      $('#DFToggle').text('DF einblenden');
+    }
+  }
+
+  // hide dienstführungstabelle
+  $('.DFTable').parent().parent().hide();
+  $('h1').before('<a href="#" style="font-size:8px;margin:0;float:right;" id="DFToggle">DF einblenden</a>');
+
   tbl = prepareTable();
 
   // add selectors
@@ -108,6 +120,10 @@ $(document).ready(function() {
 
   $('.TableHack').change(function() {
     filterTable();
+  });
+
+  $('#DFToggle').click(function() {
+    dfToggle();
   });
 
 });
