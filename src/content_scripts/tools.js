@@ -22,7 +22,13 @@ function getKuerzel() {
         } */
 }
 
-function makeEmployeeSearchField(input, overlay) {
+/*
+  verwandelt eine select input feld
+  in ein autocomplete feld, wenn overlay true
+  wird das ganze nach dem focus aktiv als overlay angezeigt
+  damit soll das frame problem umgangen werden!
+*/
+function makeEmployeeSearchFieldOverlay(input, overlay) {
   var names = [];
   //datenstruktur für suche erzeugen
 
@@ -58,7 +64,8 @@ function makeEmployeeSearchField(input, overlay) {
 
 function makeEmployeeSearchField(input) {
 
-  makeEmployeeSearchField(input, false);
+  makeEmployeeSearchFieldOverlay(input, false);
+  input.hide();
 
 };
 
