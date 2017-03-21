@@ -1,5 +1,11 @@
-$(document).ready(function() {
+/*
+TODO: funktion schreiben, die eine spalte hinzufügen kann zur tabelle!
+und diese dann am besten über ein callback oder so befüllt
 
+*/
+
+
+$(document).ready(function() {
 
   var exportTable = $(".export");
 
@@ -34,7 +40,7 @@ $(document).ready(function() {
 
 
       exportTable.find("tr:gt(0)").append("<td class='rddienste'>Berechnen...</td>");
-      exportTable.find("tr:first").append("<th>Dienste d. l. 6 Monate</th>");
+      exportTable.find("tr:first").append("<th>RD Dienste d. l. 6 Monate</th>");
 
       exportTable.find("tr:gt(0)").each(function(index, element) {
           var dnr = $(element).find("td:first").text();
@@ -44,9 +50,9 @@ $(document).ready(function() {
             function(result) {
             console.log("dnrToIdentifier result: " + result);
 
-            calculateStatistic(result, "dienste").then(
+            calculateDutyStatistic(result, "dienste").then(
             function(statresult) {
-            $(element).find(".rddienste").text(statresult);
+            $(element).find(".rddienste").text(statresult['countDienste'] + "Dienste mit " + statresult['sumDuty'] + " Stunden");
             },
             function() {
             console.log("calculateStatistic --> error");
@@ -84,7 +90,7 @@ $(document).ready(function() {
             function(result) {
             console.log("dnrToIdentifier result: " + result);
 
-            calculateStatistic(result, "stunden").then(
+            calculateDutyStatistic(result, "stunden").then(
             function(statresult) {
             $(element).find(".dienststunden").text(statresult);
             },

@@ -143,14 +143,32 @@ function dnrToIdentifier(dnr) {
     });
 }
 
+/*
+  berechnet diverse statistiken wie
+  Dienststunden, Dienste, Dienste auf der jeweiligen positione
+  aus der EmployeeDutyStatistic
 
-function calculateStatistic(empID, reqtype) {
+  Position können sein: SEFNFR, NFR1, NFR2, SEFKTW, SAN1, SAN2, RS (SAN1 + SEFKTW + (?NFR2) + NFR1 + SEFNFR), NFS (SEFNFR + NFR1)
+  //TODO: ambulanzpositionen wie H, NFS, Azubi, etc. sind noch unberücksichtigt
+
+
+  empID : String - die NIU EmployeeNumberID des Mitarbeiters
+  reqtype : String[] - welche Statistik soll erstellt werden
+   -> unterstützt werden im Moment:
+      * stunden (Anzahl der Dienststunden gruppiert nach Position)
+      * dienste (Anzahl der Dienste gruppiert nach Position)
+   reqStartDate - Abfragezeitraum Beginn (wird noch ignoriert!)
+   reqEndDate - Abfragezeitraum Ende (wird noch ignoriert!)
+
+*/
+function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
     return new Promise(function(resolve, reject) {
         var post = {};
         console.log("statcalc --> start");
 
         $.get("https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + empID, function(data) {
-            console.log("statcalc --> rcv from get EmployeeDutyStatistic.aspx" + data);
+            console.log("calculateDutyStatistic --> rcv from get EmployeDutyStatistic.aspx");
+            //console.log("statcalc --> rcv from get EmployeeDutyStatistic.aspx" + data);
             var jData = $(data);
 
             var keyPostfix = jData.find("#__KeyPostfix").val();
@@ -187,13 +205,175 @@ function calculateStatistic(empID, reqtype) {
                     // Weitere Schritte fuer die Berechnung
                     // Statistikseite fuer die angeforderten Daten in der Variable 'data'
 
-                    if(reqtype === "dienste") {} // Berechnung der Dienste
-                    if(reqtype === "stunden") {} // Berechnung der Stunden
 
-                    resolve("incomplete") //Ausgabe des Ergebnisses
+                    var dienstnummer = $(data).find('h3').first().text().substring($(data).find('h3').first().text().indexOf('(')).replace('(', '').replace(')', '').trim();
+                    console.log('Dienstnummer: ' + dienstnummer);
 
-                }
-            });
-        });
-        });
+
+                    // create statistical counters
+                    var rawWochentag = new Array();
+                    var rawDienststellen = new Array();
+                    var currentDateString;
+                    var sumDuty = 0; // Gesamtdauer aller Dienste
+                    var countDienste = 0;
+                    var rawKollegen = new Array();
+                    var rawDutyAs = new Array();
+                    var hourDutyAs = {};
+                    hourDutyAs['SEFNFR'] = 0;
+                    hourDutyAs['NFR1'] = 0;
+                    hourDutyAs['NFR2'] = 0;
+                    hourDutyAs['SEFKTW'] = 0;
+                    hourDutyAs['SAN1'] = 0;
+                    hourDutyAs['SAN2'] = 0;
+
+
+                    // iterate data of each row
+                    var $tables = $(data).find('div.MultiDutyRoster');
+                    $tables.find('table.MessageTable').each(function(i) {
+
+                                // add placholder for statistics
+                                //$(this).find('tbody tr').first().after('<tr><td><table class="DutyRoster" cellspacing="0" cellpadding="3" rules="all" border="1"><tbody><tr><td id="charts' + i + '"></td></tr></tbody></table></td></tr>');
+
+                                // add header for duty duration
+                                //$(this).find('td.DRCTime').first().after('<td class="DRCDuration" width="50px">Dauer</td>');
+
+                                var tableType = $(this).find('td.MessageHeader').text();
+
+
+
+                                $(this).find('table#DutyRosterTable tbody tr').each(function() {
+                                    countDienste += 1;
+                                    $(this).find('td').each(function(i, val) {
+                                        val = val.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
+
+                                        //TODO: unterscheide zwischen NFR & KTW
+
+                                        var isKTW = tableType.includes('KTW');
+                                        var isNFR = tableType.includes('RKS') || tableType.includes('RKL') || tableType.includes('RKP');
+
+
+                                        switch (i) {
+                                            case 0: // Wochentag
+                                                rawWochentag.push(val);
+                                                break;
+                                            case 1: // Datum
+                                                currentDateString = val;
+                                                break;
+                                            case 2: // Zeiten
+                                                hours = getDurationFromTimeString(currentDateString, val);
+                                                $(this).after('<td>' + hours + '</td>');
+                                                sumDuty += hours;
+                                                break;
+                                            case 3: // Dienststellen
+                                                rawDienststellen.push(val);
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                        //TODO: den doppelten Code reduzieren durch geschicktere Anordnung if else switch
+
+                                        var offset = 0;
+                                        if (tableType.includes('geplant')) {
+                                          offset = 1; //weil die spalten um eines verschoben sind! bei den geplanten Diensten fehlt die Spalte KFZ!
+                                        }
+                                        if (tableType.includes('fixiert')) {
+
+                                        }
+
+                                        switch (i + offset) {
+                                                case 5: // Fahrer
+                                                case 6: // SAN1
+                                                case 7: // SAN2
+                                                    if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
+                                                        var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
+                                                        rawKollegen.push(kollege);
+                                                    } else if ($(val).text() !== '') {
+                                                        switch (i + offset) {
+                                                            case 5: // SEF
+                                                                if (isNFR) {
+                                                                  rawDutyAs.push('SEFNFR');
+                                                                  hourDutyAs['SEFNFR'] += hours;
+                                                                }
+                                                                if (isKTW) {
+                                                                  rawDutyAs.push('SEFKTW');
+                                                                  hourDutyAs['SEFKTW'] += hours;
+                                                                }
+                                                                break;
+                                                            case 6: // SAN1
+                                                                if (isNFR) {
+                                                                  rawDutyAs.push('NFR1');
+                                                                  hourDutyAs['NFR1'] += hours;
+                                                                }
+                                                                if (isKTW) {
+                                                                  rawDutyAs.push('SAN1');
+                                                                  hourDutyAs['SAN1'] += hours;
+                                                                }
+                                                                break;
+                                                            case 7: // SAN2
+                                                                if (isNFR) {
+                                                                  rawDutyAs.push('NFR2');
+                                                                  hourDutyAs['NFR2'] += hours;
+                                                                }
+                                                                if (isKTW) {
+                                                                  rawDutyAs.push('SAN2');
+                                                                  hourDutyAs['SAN2'] += hours;
+                                                                }
+                                                                break;
+                                                            default:
+                                                                break;
+                                                        }
+                                                    }
+                                                    break;
+                                                default:
+                                                    break;
+                                        }
+
+                                    });
+                                });
+
+
+                    //console.log("rawWochentag: " + rawWochentag);
+                    //console.log("sumDuty: " + sumDuty);
+                    //console.log("countDienste: " + countDienste);
+                    //console.log("rawDutyAs: " + rawDutyAs);
+
+                    //if("dienste" in reqtype) {} // Berechnung der Dienste
+                    //if("stunden" in reqtype) {} // Berechnung der Stunden
+
+                    //resolve("incomplete") //Ausgabe des Ergebnisses
+
+                }); //ende der each schleife über die duty tabellen
+
+                //TODO: Ambulanzen auswerten!
+
+
+
+
+                // create statistical counters
+                //var rawWochentag = new Array();
+                //var rawDienststellen = new Array();
+                //var currentDateString;
+                //var sumDuty = 0; // Gesamtdauer aller Dienste
+                //var countDienste = 0;
+                //var rawKollegen = new Array();
+                //var rawDutyAs = new Array();
+                //var hourDutyAs = {};
+
+                var duty = {};
+                duty['sumDuty'] = sumDuty;
+                duty['countDienste'] = countDienste;
+                duty['hourDutyAs'] = hourDutyAs;
+                duty['rawDutyAs'] = rawDutyAs;
+
+                console.log("duty: " + duty);
+                console.log("duty['sumDuty']: " + duty['sumDuty']);
+                console.log("duty['countDienste']: " + duty['countDienste']);
+                console.log("duty['hourDutyAs']: " + duty['hourDutyAs']);
+                console.log("duty['rawDutyAs']: " + duty['rawDutyAs']);
+
+                resolve(duty);
+              }
+            }); // $.ajax
+        }); //$.get
+      }); //promise
     }
