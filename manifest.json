@@ -60,10 +60,21 @@
     },
     {
       "matches": ["https://niu.wrk.at/Kripo/Employee/EmployeeDump.aspx*"],
-      "js": ["js/jquery/jquery-3.1.1.slim.min.js", "src/content_scripts/EmployeeDump.js"],
+      "js": ["src/definitions.js",  "js/jquery/jquery.js", "js/jquery-ui/jquery-ui.js", "src/content_scripts/tools.js", "src/content_scripts/EmployeeDump.js"],
+      "css" : ["src/css/style.css"],
+      "all_frames": true,
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx"],
+      "js": ["src/definitions.js",  "js/jquery/jquery.js", "js/jquery-ui/jquery-ui.js", "src/content_scripts/tools.js", "src/content_scripts/ControlCenter.js"],
+      "css" : ["src/css/style.css"],
       "all_frames": true,
       "run_at": "document_end"
     }
+  ],
+  "web_accessible_resources" : [
+    "src/webcontent/*"
   ],
   "manifest_version": 2
 }
