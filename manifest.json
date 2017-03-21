@@ -18,13 +18,15 @@
   "incognito": "not_allowed",
   "permissions": [
     "https://niu.wrk.at/*",
-    "storage"
+    "storage",
+    "webRequest",
+    "webRequestBlocking"
   ],
   "web_accessible_resources": [
     "img/*"
   ],
   "background": {
-    "scripts": ["src/background/hot-reload.js"]
+    "scripts": ["src/background/hot-reload.js", "src/background/referer-change.js"]
   },
   "content_scripts": [
     {

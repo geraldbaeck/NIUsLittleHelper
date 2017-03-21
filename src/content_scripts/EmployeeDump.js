@@ -1,13 +1,6 @@
 $(document).ready(function() {
 
-  dnrToIdentifier().then(
-    function(result) {
-      console.log("success" + result);
-    },
-    function() {
-      console.log("error");
-    }
-  )
+
 
   var exportTable = $("#ctl00_main_m_Panel  table  table");
 //#ctl00_main_m_Panel > table > tbody > tr:nth-child(2) > td > table
@@ -17,6 +10,12 @@ $(document).ready(function() {
 
   var clicked = {};
 
+  /*
+    lade das Menü, mit den möglichen Berechnungen
+    es wäre unklug gleich alle Berechnungen zu machen -> zu viele
+    Requests und nicht jeder MA braucht alle Berechnungen
+    TODO:
+  */
   var path = chrome.extension.getURL("src/webcontent/employee_dump_menu.html");
   console.log("path: " + path);
   $.get(path, function(data) {
@@ -39,10 +38,21 @@ $(document).ready(function() {
 
       //TODO: starte berechnung
       exportTable.find("tr:gt(0)").each(function(index, element) {
-          var dnr = element.find("td:first").text();
+          var dnr = $(element).find("td:first").text();
+
+          var von = "";
+          var bis = "";
+
+          diensteForMa(dnr, undefined, undefined).then(function (dienste) {
+                $(element).find("td.rddienste").text("fertig");
+          });
+
       });
 
     });
+
+    $("#rddienste").trigger("click");
+
 
     $("#sandienststunden").click(function() {
       console.log("sandienststunden gecklickt");
