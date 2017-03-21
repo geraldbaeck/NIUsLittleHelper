@@ -113,7 +113,6 @@ function dnrToIdentifier(dnr) {
 
 
         $.get("https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx", function(data) {
-            console.log("rcv from get ControlCenterHead.aspx" + data);
             var jData = $(data);
 
             var keyPostfix = jData.find("#__KeyPostfix").val();
@@ -127,42 +126,74 @@ function dnrToIdentifier(dnr) {
             post["m_txtEmployeeNumber"] = dnr;
             post["m_btSend"] = "Anfage Senden";
 
-            console.log("show post " + post["__EVENTVALIDATION"]);
-
-
             $.ajax({
                 url: "https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx",
                 data: post,
                 type: "POST",
-                // PROBLEM hier bekomme ich einfach nicht den link auf die seiten zurück? möglich wg. falschen referer?
-                //                headers: {
-                //                    'Origin': "https://niu.wrk.at",
-                //                    'Referer': "https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx"
-                //                },
+
                 success: function(data, status) {
-                    console.log("rcv status " + status);
-                    console.log("rcv data " + data);
+                    var searchString = $(data).find("#m_lbtStatistik").attr("href");
+                    var regexpr = /EmployeeNumberID=(.*)/g;
+                    var foundIdent = regexpr.exec(searchString);
+                    resolve(foundIdent[1]);
 
-                    var response = $(data);
-
-                    var ids = {};
-
-                    var href = response.find("#m_lbtStatistik").attr("href");
-                    //console.log("found href: " + href);
-                    href = href.split("?")[1];
-                    //console.log("employe key: " + href);
-                    href = href.split("=");
-                    ids[href[0]] = href[1];
-
-                    href = response.find("#m_lbtLVStatistik").attr("href");
-                    href = href.split("?")[1];
-                    href = href.split("=");
-                    ids[href[0]] = href[1];
-
-                    //data.getElementById("m_lbtEmployeesummary");
-                    resolve(ids);
                 }
             });
         });
     });
 }
+
+
+function calculateStatistic(empID, reqtype) {
+    return new Promise(function(resolve, reject) {
+        var post = {};
+        console.log("statcalc --> start");
+
+        $.get("https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + empID, function(data) {
+            console.log("statcalc --> rcv from get EmployeeDutyStatistic.aspx" + data);
+            var jData = $(data);
+
+            var keyPostfix = jData.find("#__KeyPostfix").val();
+            var eventvalidation = jData.find("#__EVENTVALIDATION").val(); //jData.find("input[name=__EVENTVALIDATION]").val();
+
+            var reqDate = new Date();
+            reqDate.setMonth(reqDate.getMonth() - 6);
+            var reqDatePlus = reqDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
+            var reqDateString = reqDate.getDate() + "." + reqDatePlus + "." + reqDate.getFullYear();
+
+            var todaysDate = new Date();
+            var todaysDatePlus = todaysDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
+            var todaysDateString = todaysDate.getDate() + "." + todaysDatePlus + "." + todaysDate.getFullYear();
+
+            console.log("statcalc request dates --> FROM: " + reqDateString + " // TO: " + todaysDateString);
+
+            post["__KeyPostfix"] = keyPostfix;
+            post["__EVENTVALIDATION"] = eventvalidation;
+            post["__VIEWSTATE"] = "";
+            post["__EVENTARGUMENT"] = "";
+            post["__EVENTTARGET"] = "ctl00$main$m_Submit";
+            post["ctl00$main$m_From$m_Textbox"] = reqDateString;
+            post["ctl00$main$m_Until$m_Textbox"] = todaysDateString;
+            post["&ctl00$main$m_JoinBrokenDuties"] = "on";
+
+            $.ajax({
+                url: "https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + empID,
+                data: post,
+                type: "POST",
+                success: function(data, status) {
+                    console.log("statcalc --> rcv status " + status);
+                    console.log("statcalc --> rcv data " + data);
+
+                    // Weitere Schritte fuer die Berechnung
+                    // Statistikseite fuer die angeforderten Daten in der Variable 'data'
+
+                    if(reqtype === "dienste") {} // Berechnung der Dienste
+                    if(reqtype === "stunden") {} // Berechnung der Stunden
+
+                    resolve("incomplete") //Ausgabe des Ergebnisses
+
+                }
+            });
+        });
+        });
+    }
