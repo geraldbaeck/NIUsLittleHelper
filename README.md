@@ -2,7 +2,7 @@
 
 Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz ([NIU](https://niu.wrk.at/)).
 
-Derzeit werden drei Funktionen unterstützt:
+Derzeit werden folgende Funktionen unterstützt:
 
 ### Erweiterte Filter für den Dienstplan
 ![Erweiterte Filter für den Dienstplan](screenshots/dienstplan.png)
@@ -10,8 +10,25 @@ Derzeit werden drei Funktionen unterstützt:
 ### Erweiterte Filter für offene Positionen (Ambulanzen & KHD)
 ![Erweiterte Filter für offene Positionen](screenshots/offene_positionen.png)
 
-### Zusätzliche Daten zur Dienststatistik
+### Zusätzliche Daten zur Dienststatistik (Statistik, EmployeeDutyStatistic.aspx)
 ![Zusätzliche Daten zur Dienststatistik](screenshots/mitarbeiterbezogene_dienststatistik.png)
+
+### Zusätzliche Daten zur LV-Statistik (LVStatistik, LVStatistic.aspx)
+Eine zusätzliche Tabelle gruppiert die Anzahl der Dienste und Ausfahrten nach der
+Dienstart (KTW, RTW) und der Position (Fahrer, SAN1, SAN2). Damit ist es leichter möglich die
+benötigten Mindestausfahrten für Ausbildungen zu prüfen. Allerdings wird diese Statistik nur
+quartalsweise abgeschlossen!
+
+### Kurssuche
+
+* Bei der Kurssuche wird für das Suchergebnis eine Volltextsuche in der Tabelle mit den gefundenen Kursen ermöglicht.
+
+### Kursdetails
+
+* Es wird die zuletzt verwendete Kostenstelle gespeichert
+* Es wird automatisch ein Kürzel eingetragen, das über die Optionen des Browser Plugins gesetzt werden kann
+* Das Drop-Down select Menü unterstützt jetzt eine Volltextsuche nach den Mitarbeiternamen bzw. der Dienstnummer
+
 
 ## Getting Started
 
