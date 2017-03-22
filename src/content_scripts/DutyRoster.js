@@ -15,6 +15,8 @@ $(document).ready(function() {
       var isNKTW = false;
       var currentDateString;
       var isKurzdienst = false;
+      var isTagdienst = false;
+      var isNachtdienst = false;
       var dienstLaenge;
 
       $(this).find('td').each(function(key, val) {
@@ -29,9 +31,15 @@ $(document).ready(function() {
           case 2: // Uhrzeit
             dienstLaenge = getDurationFromTimeString(currentDateString, val);
             // $(this).after('<td>' + dienstLaenge + '</td>');  // Stunden einblenden nicht nötig
-            if (dienstLaenge < 8) {
+            var typeCode = $(this).attr('class');
+            if (typeCode.includes('Short')) {
               isKurzdienst = true;
               rtrn.Kurzdienst = true;
+            }
+            if (typeCode.includes('Day')) {
+              isTagdienst = true;
+            } else if (typeCode.includes('Night')) {
+              isNachtdienst = true;
             }
             break;
           case 3: // Ort
@@ -67,6 +75,8 @@ $(document).ready(function() {
       $('tr#' + dienstID).attr('isMeldable', !isNotMeldable);
       $('tr#' + dienstID).attr('isNKTW', isNKTW);
       $('tr#' + dienstID).attr('isKurzdienst', isKurzdienst);
+      $('tr#' + dienstID).attr('isTagdienst', isTagdienst);
+      $('tr#' + dienstID).attr('isNachtdienst', isNachtdienst);
       $('tr#' + dienstID).attr('dienstLaenge', dienstLaenge);
     });
 
