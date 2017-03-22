@@ -23,7 +23,8 @@
     "webRequestBlocking"
   ],
   "web_accessible_resources": [
-    "img/*"
+    "img/*",
+    "src/webcontent/*"
   ],
   "background": {
     "scripts": ["src/background/hot-reload.js"]
@@ -79,10 +80,11 @@
         "js/jquery/jquery.js",
         "js/jquery-ui/jquery-ui.js",
         "js/pouchdb/pouchdb-6.1.2.js",
+        "js/datatable/jquery.dataTables.min.js",
         "src/content_scripts/lib/lib.js",
         "src/content_scripts/tools.js",
         "src/content_scripts/EmployeeDump.js"],
-      "css" : ["src/css/style.css"],
+      "css" : ["src/css/style.css", "js/datatable/jquery.dataTables.min.css"],
       "all_frames": true,
       "run_at": "document_end"
     },
@@ -93,9 +95,6 @@
       "all_frames": true,
       "run_at": "document_end"
     }
-  ],
-  "web_accessible_resources" : [
-    "src/webcontent/*"
   ],
   "manifest_version": 2
 }

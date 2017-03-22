@@ -28,29 +28,64 @@ function addCalculationHandler(id, names, callback) {
     clicked[id] = true;
 
     var exportTable = $(".export");
-    for (n in names) {
-        console.log("addCalculationHandler --> names[n] " + names[n]);
+    names.forEach( function(name) {
+        console.log("addCalculationHandler --> names " + name.calcname + " mit ui "+ name.uiname);
 
-        exportTable.find("tr:gt(0)").append("<td class='" + names[n].calcname + "'>Berechnen...</td>");
-        exportTable.find("tr:first").append("<th>" + names[n].uiname + "</th>");
-
-        exportTable.find("tr:gt(0)").each(function(index, element) {
-          var dnr = $(element).find("td:first").text();
-          var td = $(element).find("td." + names[n].calcname);
-          callback(dnr, n).then(
-            function (value) {
-              console.log("addCalculationHandler --> promise then value:" + value);
-                td.text(value);
-            },
-            function (error) {
-                console.log("addCalculationHandler -> promise then mit error: " + error);
-                td.text(error);
-            });
-            //hier darauf warten, dass callback fertig! um niu von zu vielen Requests zu entlasten
-            //und diese hier seriell abzuarbeiten!
-
+        columns.push({
+          data: name.calcname,
+          title: name.uiname,
+          defaultContent: ""
         });
-    }
+
+        //TODO: solange das läuft kleines fenster anzeigen bzw. user informieren!
+        var ready = Promise.resolve();
+        for (index in dataSet) {
+          var row = dataSet[index];
+          //dataSet[index][name.calcname] = "eins";
+          console.log("addCalculationHandler --> lade für dnr: " + row.DNR);
+          ready = ready.then(function() {
+            return callback(row.DNR, name).then(function(value) {
+              dataSet[index][name.calcname] = value;
+              console.log("addCalculationHandler --> füge value " + value + " für spalte " + name.calcname + " hinzu");
+            } ).catch(function(error) {
+              console.log("addCalculationHandler -> promise then mit error: " + error);
+            });
+          });
+        }
+        ready.then(function() { //warte auf die promises...
+          console.log("addCalculationHandler --> promises should be resolved....refresh DataTable data");
+
+          // columns.push({
+          //   data: "testdata",
+          //   title: "Leere Daten",
+          //   defaultContent: "leer"
+          // });
+
+          initDataTable();  //erzeuge DataTable erneut!
+        });
+
+
+
+        //exportTable.find("tr:gt(0)").append("<td class='" + names[n].calcname + "'>Berechnen...</td>");
+        //exportTable.find("tr:first").append("<th>" + names[n].uiname + "</th>");
+
+        // exportTable.find("tr:gt(0)").each(function(index, element) {
+        //   var dnr = $(element).find("td:first").text();
+        //   var td = $(element).find("td." + names[n].calcname);
+        //   callback(dnr, n).then(
+        //     function (value) {
+        //       console.log("addCalculationHandler --> promise then value:" + value);
+        //         td.text(value);
+        //     },
+        //     function (error) {
+        //         console.log("addCalculationHandler -> promise then mit error: " + error);
+        //         td.text(error);
+        //     });
+        //     //hier darauf warten, dass callback fertig! um niu von zu vielen Requests zu entlasten
+        //     //und diese hier seriell abzuarbeiten!
+        //
+        // });
+    });
 
 
   });
@@ -66,12 +101,86 @@ function addCalculationHandler(id, names, callback) {
 
 */
 
+var dataSet = new Array;
+var columns = new Array;
+// var dataTableColumns = new Array;
+var datatable = undefined;
+function initDataTable() {
+  console.log("initDataTable --> dataSet lenght: " + dataSet.length );
+  console.log("initDataTable --> columns: " + columns.length);
+
+  if (!(datatable === undefined)) {
+      datatable.destroy();
+      console.log("initDataTable --> after destroy: dataSet lenght: " + dataSet.length + " columns: " + columns.length);
+      datatable = undefined;
+  }
+  // var exportTable = $(".export");
+  // columns = new Array;
+  // //var headers = [];
+  // //parse first column also die headers...
+  // exportTable.find("tr:first th").each( function(index) {
+  //   console.log("index " + index + " mit th " + $(this).text());
+  //     //headers.push($(this).text());
+  //     columns.push( {
+  //       data: $(this).text(),
+  //       title: $(this).text()
+  //     });
+  // });
+  // for (index in columns) {
+  //     dataTableColumns.push($.extend({}, columns[index]));
+  // }
+
+
+  console.log("initDataTable --> dataSet:" + JSON.stringify(dataSet));
+  console.log("initDataTable --> dataTableColumns:" + JSON.stringify(columns));
+
+  $('#datatablediv').empty();
+
+  datatable = $('<table id="datatable"></table>')
+  $('#datatablediv').append(datatable);
+
+  datatable = datatable.DataTable({
+    destroy: true,
+    data: dataSet,
+    columns: columns
+  });
+
+  //verändere css, damit die sorting images angezeigt werden!
+  $("#datatable").find(".sorting").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_both.png") + '")');
+  $("#datatable").find(".sorting_asc").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_asc.png")  + '")');
+  $("#datatable").find(".sorting_desc").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_desc.png")  + '")');
+
+}
+
 $(document).ready(function() {
 
   var exportTable = $(".export");
 
-//#ctl00_main_m_Panel > table > tbody > tr:nth-child(2) > td > table
-  //exportTable.hide();
+  var headers = [];
+  //parse first column also die headers...
+  exportTable.find("tr:first th").each( function(index) {
+    console.log("index " + index + " mit th " + $(this).text());
+      headers.push($(this).text());
+      columns.push( {
+        data: $(this).text(),
+        title: $(this).text()
+      });
+  });
+
+  //parse data
+  exportTable.find("tr:gt(0)").each( function(index) {
+      var row = {};
+      $(this).find("td").each(function(index) {
+        row[headers[index]] = $(this).text();
+      });
+      dataSet.push(row);
+  });
+
+  //exportTable.after("<p>Hallo Welt</p>");
+  exportTable.after("<div id='datatablediv'></div>");
+  exportTable.hide();
+  initDataTable();
+
 
   var header = $("#ctl00_m_Header");
 

@@ -66,7 +66,7 @@ function makeEmployeeSearchField(input) {
 
 //maximale cache zeit in millisekunden
 MAX_CACHE_TIME = 100 * 60 * 60 * 24; //24 Stunden cache zeit
-CACHE_ACTIVE = false;
+CACHE_ACTIVE = true;
 /**
   stellt verbindung zur pouchdb her
 */
@@ -84,14 +84,27 @@ function saveToCache(prefix, id, object) {
   dict['object'] = object;
   dict['lastchange'] = new Date().getTime();
   dict['_id'] = prefix + id;
-  return db.put(dict)
-    .then(function() {
-      console.log("saveToCache --> erfolgreich gespeichert: " + dict);
-      return object;
-  }).catch(function(error) {
-      console.log("saveToCache --> fehler beim speichern in pouchdb!: " + dict + " error: " +  error);
-      return object; //auch im fehlerfalle
-  });
+  var key = prefix + id;
+  return db.get(key)
+  .catch(function(error) {
+      if (error.name === 'not_found') {
+          return dict;
+      }
+  })
+  .then(function(olddoc) {
+      if (olddoc.hasOwnProperty('_rev')) {
+        dict['_rev'] = olddoc['_rev'];
+      }
+
+      return db.put(dict)
+        .then(function() {
+          console.log("saveToCache --> erfolgreich gespeichert: " + dict);
+          return object;
+      }).catch(function(error) {
+          console.log("saveToCache --> fehler beim speichern in pouchdb!: " + dict + " error: " +  error);
+          return object; //auch im fehlerfalle
+      });
+  })
 
 }
 
@@ -102,13 +115,13 @@ function getFromCache(prefix, id, args, callback) {
   return db.get(key)
     .then(function(doc){
       if (!CACHE_ACTIVE) {
-        return Promise.fail("cache ist ausgeschalten!");
+        return Promise.reject("cache ist ausgeschalten!");
       }
       console.log("getFromCache --> doc: " + doc);
       var now = new Date().getTime();
       if (now - doc.lastchange > MAX_CACHE_TIME) {
         console.log("getFromCache --> fail weil cache ablauf!");
-        return Promise.fail("maximale cache zeit " + MAX_CACHE_TIME + "ms abgelaufen!")
+        return Promise.reject("maximale cache zeit " + MAX_CACHE_TIME + "ms abgelaufen!");
       }
       return doc.object;
     })
