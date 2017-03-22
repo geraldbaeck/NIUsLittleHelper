@@ -69,38 +69,8 @@ function addCalculationHandler(id, names, callback) {
 
         }
         ready.then(function() { //warte auf die promises...
-          console.log("addCalculationHandler --> promises should be resolved....refresh DataTable data");
-
-          // columns.push({
-          //   data: "testdata",
-          //   title: "Leere Daten",
-          //   defaultContent: "leer"
-          // });
-
-          //initDataTable();  //erzeuge DataTable erneut!
+          console.log("addCalculationHandler --> promises abgearbeitet");
         });
-
-
-
-        //exportTable.find("tr:gt(0)").append("<td class='" + names[n].calcname + "'>Berechnen...</td>");
-        //exportTable.find("tr:first").append("<th>" + names[n].uiname + "</th>");
-
-        // exportTable.find("tr:gt(0)").each(function(index, element) {
-        //   var dnr = $(element).find("td:first").text();
-        //   var td = $(element).find("td." + names[n].calcname);
-        //   callback(dnr, n).then(
-        //     function (value) {
-        //       console.log("addCalculationHandler --> promise then value:" + value);
-        //         td.text(value);
-        //     },
-        //     function (error) {
-        //         console.log("addCalculationHandler -> promise then mit error: " + error);
-        //         td.text(error);
-        //     });
-        //     //hier darauf warten, dass callback fertig! um niu von zu vielen Requests zu entlasten
-        //     //und diese hier seriell abzuarbeiten!
-        //
-        // });
     });
 
 
@@ -122,33 +92,16 @@ var columns = new Array;
 // var dataTableColumns = new Array;
 var datatable = undefined;
 function initDataTable() {
-  console.log("initDataTable --> dataSet lenght: " + dataSet.length );
-  console.log("initDataTable --> columns: " + columns.length);
+  //console.log("initDataTable --> dataSet lenght: " + dataSet.length );
+  //console.log("initDataTable --> columns: " + columns.length);
 
   if (!(datatable === undefined)) {
       datatable.destroy();
       console.log("initDataTable --> after destroy: dataSet lenght: " + dataSet.length + " columns: " + columns.length);
       datatable = undefined;
   }
-  // var exportTable = $(".export");
-  // columns = new Array;
-  // //var headers = [];
-  // //parse first column also die headers...
-  // exportTable.find("tr:first th").each( function(index) {
-  //   console.log("index " + index + " mit th " + $(this).text());
-  //     //headers.push($(this).text());
-  //     columns.push( {
-  //       data: $(this).text(),
-  //       title: $(this).text()
-  //     });
-  // });
-  // for (index in columns) {
-  //     dataTableColumns.push($.extend({}, columns[index]));
-  // }
-
-
-  console.log("initDataTable --> dataSet:" + JSON.stringify(dataSet));
-  console.log("initDataTable --> dataTableColumns:" + JSON.stringify(columns));
+  //console.log("initDataTable --> dataSet:" + JSON.stringify(dataSet));
+  //console.log("initDataTable --> dataTableColumns:" + JSON.stringify(columns));
 
   $('#datatablediv').empty();
 
@@ -158,7 +111,13 @@ function initDataTable() {
   datatable = datatable.DataTable({
     destroy: true,
     data: dataSet,
-    columns: columns
+    columns: columns,
+    paging: false,
+    fixedHeader : {
+      header: true
+    }
+
+
   });
 
   //verändere css, damit die sorting images angezeigt werden!
@@ -213,13 +172,10 @@ $(document).ready(function() {
   $.get(path, function(data) {
 
     header.after(data);
-    //data.menu();
     $("#menu").menu();
 
 
 
-
-    //$("#rddienste").trigger("click");
 
     addCalculationHandler("#grundkurse", [{calcname : "grundkurse", uiname : "Grundkurse"}], function(dnr, name) {
        //verkettete Promises...
@@ -240,50 +196,6 @@ $(document).ready(function() {
 
      });
 
-    // $("#grundkurse").click(function() {
-    //   console.log("grundkurse gecklickt!");
-    //   if ("grundkurse" in clicked) {
-    //     return;
-    //   }
-    //   clicked["grundkurse"] = true;
-    //
-    //
-    //   var grundkurse = {
-    //                     kurs1 : { "Name" : "BAS - Ausbildung - Das Rote Kreuz - Auch du bist ein Teil davon! (QM)", "altName1" : "BAS - Ausbildung - Das Rote Kreuz - auch du bist ein Teil davon!", "altName2" : "", "absolved" : "?" },
-    //                     kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "absolved" : "?" },
-    //                     kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "absolved" : "?" }
-    //                   };
-    //
-    //   exportTable.find("tr:gt(0)").append("<td class='grundkurse'>Berechnen...</td>");
-    //   exportTable.find("tr:first").append("<th>Grundkurse</th>");
-    //
-    //   exportTable.find("tr:gt(0)").each(function(index, element) {
-    //       var dnr = $(element).find("td:first").text();
-    //
-    //         dnrToIdentifier(dnr).then(
-    //         function(result) {
-    //         console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
-    //
-    //         checkCourseAttendance(result.EID, grundkurse).then(
-    //         function(resultDict) {
-    //         $(element).find(".grundkurse").html("Das RK: " + resultDict.kurs1.absolved + "<br />AmbSem: " + resultDict.kurs2.absolved + "<br />KHD-SD: " + resultDict.kurs3.absolved);
-    //         },
-    //         function() {
-    //         console.log("grundkurse --> error checkCourseAttendance");
-    //         $(element).find(".grundkurse").text("error checkCourseAttendance");
-    //         });
-    //         },
-    //         function() {
-    //         console.log("grundkurse --> error dnrToIdentifier");
-    //         $(element).find(".grundkurse").text("error dnrToIdentifier");
-    //         });
-    //
-    //
-    //   });
-    //
-    // });
-
-
     addCalculationHandler("#sandienststunden", [{calcname : "dienststunden", uiname : "Dienststunden d. l. 6 Monate"}], function(dnr, name) {
        //verkettete Promises...
        return dnrToIdentifier(dnr).then(
@@ -297,7 +209,6 @@ $(document).ready(function() {
               );
       });
 
-
       addCalculationHandler("#rddienste", [{calcname : "rddienste", uiname : "Dienste d. l. 6 Monate"}], function(dnr, name){
         return dnrToIdentifier(dnr).then(
                function(result) {
@@ -310,6 +221,9 @@ $(document).ready(function() {
                );
       });
 
-  }); //close $.get(path, function(data) {
+      //zum testen
+      //$("#rddienste").trigger("click"); //aktiviert gleich nach laden der seite den click
+
+  });
 
 });
