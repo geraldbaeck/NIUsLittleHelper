@@ -1,9 +1,20 @@
 /*
 TODO: funktion schreiben, die eine spalte hinzufügen kann zur tabelle!
-und diese dann am besten über ein callback oder so befüllt
-
+und diese dann am besten über ein callback oder Promise?
+so befüllt
 */
+function addColumn() {
 
+}
+
+
+//TODO: die gesamte Tabelle irgendwie sortierbar machen
+/*
+  eventuell mit plugin wie
+  dynatable https://www.dynatable.com/#event-hooks
+  tablesorter http://tablesorter.com/docs/
+  
+*/
 
 $(document).ready(function() {
 
@@ -52,7 +63,7 @@ $(document).ready(function() {
 
             calculateDutyStatistic(result, "dienste").then(
             function(statresult) {
-            $(element).find(".rddienste").text(statresult['countDienste'] + "Dienste mit " + statresult['sumDuty'] + " Stunden");
+            $(element).find(".rddienste").text(statresult['countDienste'] + " Dienste mit " + statresult['sumDuty'] + " Stunden");
             },
             function() {
             console.log("calculateStatistic --> error");
@@ -70,7 +81,7 @@ $(document).ready(function() {
 
     });
 
-    $("#rddienste").trigger("click");
+    //$("#rddienste").trigger("click");
 
 
     $("#sandienststunden").click(function() {
@@ -92,7 +103,7 @@ $(document).ready(function() {
 
             calculateDutyStatistic(result, "stunden").then(
             function(statresult) {
-            $(element).find(".dienststunden").text(statresult);
+            $(element).find(".dienststunden").text(statresult['sumDuty']);
             },
             function() {
             console.log("calculateStatistic --> error");
