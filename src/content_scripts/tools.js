@@ -64,40 +64,63 @@ function makeEmployeeSearchField(input) {
 
 };
 
-
-/*
-erstellt dienste objekt für diesen MA
-dnr - die dienstnummer
-von - von diesem Datum (noch ohne Verwendung!)
-bis - zu diesem Datum (noch ohne Verwendung!)
+//maximale cache zeit in millisekunden
+MAX_CACHE_TIME = 100 * 60 * 60 * 24; //24 Stunden cache zeit
+CACHE_ACTIVE = false;
+/**
+  stellt verbindung zur pouchdb her
 */
-function diensteForMa(dnr, von, bis) {
-  // dienste[diensttyp][position][anzahl]
-  //                             [stunden]
-  if (von === undefined) {
+function getDB() {
+  var db = new PouchDB(POUCHDB_DB_NAME);
+  window.PouchDB = PouchDB;
+  return db;
+}
 
-  }
-  if (bis === undefined) {
+function saveToCache(prefix, id, object) {
+  console.log("saveToCache --> called");
+  var db = getDB();
 
-  }
-
-  return new Promise(function(resolve, reject) {
-
-    var dienste = {};
-
-    dnrToIdentifier(dnr).then(function(ids) {
-
-      $.get("https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + ids["EmployeeNumberID"], function(data){
-
-          //TODO: statistik
-
-          resolve(ids);
-      });
-
-
-    });
+  var dict = {};
+  dict['object'] = object;
+  dict['lastchange'] = new Date().getTime();
+  dict['_id'] = prefix + id;
+  return db.put(dict)
+    .then(function() {
+      console.log("saveToCache --> erfolgreich gespeichert: " + dict);
+      return object;
+  }).catch(function(error) {
+      console.log("saveToCache --> fehler beim speichern in pouchdb!: " + dict + " error: " +  error);
+      return object; //auch im fehlerfalle
   });
 
+}
+
+function getFromCache(prefix, id, args, callback) {
+  console.log("getFromCache --> lade vom cache: " + prefix + id);
+  var db = getDB();
+  var key = prefix + id;
+  return db.get(key)
+    .then(function(doc){
+      if (!CACHE_ACTIVE) {
+        return Promise.fail("cache ist ausgeschalten!");
+      }
+      console.log("getFromCache --> doc: " + doc);
+      var now = new Date().getTime();
+      if (now - doc.lastchange > MAX_CACHE_TIME) {
+        console.log("getFromCache --> fail weil cache ablauf!");
+        return Promise.fail("maximale cache zeit " + MAX_CACHE_TIME + "ms abgelaufen!")
+      }
+      return doc.object;
+    })
+    .catch(function(reason) {  //promise rejected, jetzt lade von niu!
+     console.log("getFromCache --> fail: " + reason);
+     return callback(args).then(function(object) {
+       saveToCache(prefix, id, object).then(function() {});
+       return object;
+    });
+
+     //return saveToCache(prefix, id, promise);
+    });
 }
 
 
@@ -105,54 +128,73 @@ function diensteForMa(dnr, von, bis) {
  * verwandelt die dienstnummer in die EmployeeId von NIU,
  * damit ist es dann möglich direkt auf die Employee Page zuzugreifen
  */
-function dnrToIdentifier(dnr) {
-    //TODO: hier kommt eine cache abfrage hinein, ob dnr schon bekannt?
+function dnrToIdentifierNotCached(args) {
 
-
+    var dnr = args.dnr;
     //verkettete promises:
     return $.get("https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx")
 
-    .then(function(data) {
-      console.log("dnrToIdentifier --> first get request promise data: " + data);
-            var jData = $(data);
+        .then(function(data) {
+          //console.log("dnrToIdentifier --> first get request promise data: " + data);
+          console.log("dnrToIdentifierNotCached --> parse get request data");
+          var jData = $(data);
 
-            var keyPostfix = jData.find("#__KeyPostfix").val();
-            var eventvalidation = jData.find("#__EVENTVALIDATION").val(); //jData.find("input[name=__EVENTVALIDATION]").val();
+          var keyPostfix = jData.find("#__KeyPostfix").val();
+          var eventvalidation = jData.find("#__EVENTVALIDATION").val(); //jData.find("input[name=__EVENTVALIDATION]").val();
 
-            var post = {};
-            post["__KeyPostfix"] = keyPostfix;
-            post["__EVENTVALIDATION"] = eventvalidation;
-            post["__VIEWSTATE"] = "";
-            post["__EVENTARGUMENT"] = "";
+          var post = {};
+          post["__KeyPostfix"] = keyPostfix;
+          post["__EVENTVALIDATION"] = eventvalidation;
+          post["__VIEWSTATE"] = "";
+          post["__EVENTARGUMENT"] = "";
 
-            post["m_txtEmployeeNumber"] = dnr;
-            post["m_btSend"] = "Anfage Senden";
+          post["m_txtEmployeeNumber"] = dnr;
+          post["m_btSend"] = "Anfage Senden";
+          return post;
+        })
+        .then( function(post) {
+          return $.ajax({
+            url: "https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx",
+            data: post,
+            type: "POST"
+          });
 
-            return $.ajax({
-                url: "https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx",
-                data: post,
-                type: "POST" });
+        })
+        .then( function(data) {
+          console.log("dnrToIdentifierNotCached --> parse post req result");
+          //console.log("dnrToIdentifier --> post request mit rcv data: " + data);
+          // success: function(data, status) {
+          var searchString = $(data).find("#m_lbtStatistik").attr("href"); // EmployeeNumberID
+          var searchString2 = $(data).find("#m_lbtEducation").attr("href"); // EmployeeId
 
-              })
-    .then( function(data) {
-      console.log("dnrToIdentifier --> post request mit rcv data: " + data);
-                // success: function(data, status) {
-                    var searchString = $(data).find("#m_lbtStatistik").attr("href");    // EmployeeNumberID
-                    var searchString2 = $(data).find("#m_lbtEducation").attr("href");   // EmployeeId
+          var regexpr = /EmployeeNumberID=(.*)/g;
+          var regexpr2 = /EmployeeId=(.*)/g;
 
-                    var regexpr = /EmployeeNumberID=(.*)/g;
-                    var regexpr2 = /EmployeeId=(.*)/g;
+          var foundIdentA = regexpr.exec(searchString);
+          var foundIdentB = regexpr2.exec(searchString2);
 
-                    var foundIdentA = regexpr.exec(searchString);
-                    var foundIdentB = regexpr2.exec(searchString2);
+          var dict = {};
+          dict["ENID"] = foundIdentA[1];
+          dict["EID"] = foundIdentB[1];
+          return dict;
+        });
+}
 
-                    var dict = {};
-                    dict["ENID"] = foundIdentA[1];
-                    dict["EID"] = foundIdentB[1];
+/*
+  dnr to identifier pouchdb cached
+*/
+function dnrToIdentifier(dnr) {
+  return getFromCache("empid_", dnr, { 'dnr' : dnr}, dnrToIdentifierNotCached);
+}
 
-                    return dict;
-      });
 
+function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
+
+
+    var dutyId = empID; //TODO: reqStart, reqEndDate einbauen!
+    return getFromCache("dutyid_", dutyId,
+      {'empID' : empID, 'reqtype' : reqtype, 'reqStartDate' : reqStartDate, 'reqEndDate' : reqEndDate},
+      calculateDutyStatisticNonCached);
 }
 
 /*
@@ -173,14 +215,19 @@ function dnrToIdentifier(dnr) {
    reqEndDate - Abfragezeitraum Ende (wird noch ignoriert!)
 
 */
-function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
+function calculateDutyStatisticNonCached(args) {
     // return new Promise(function(resolve, reject) {
+        var empID = args.empID;
+        var reqtype = args.reqtype;
+        var reqStartDate = args.reqStartDate;
+        var reqEndDate = args.reqEndDate;
+
         var post = {};
-        console.log("statcalc --> start");
+        console.log("calculateDutyStatisticNonCached --> start");
 
         return $.get("https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + empID)
         .then( function(data) {
-            console.log("calculateDutyStatistic --> rcv from get EmployeDutyStatistic.aspx");
+            console.log("calculateDutyStatisticNonCached --> rcv from get EmployeDutyStatistic.aspx");
             //console.log("statcalc --> rcv from get EmployeeDutyStatistic.aspx" + data);
             var jData = $(data);
 
@@ -196,7 +243,7 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
             var todaysDatePlus = todaysDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
             var todaysDateString = todaysDate.getDate() + "." + todaysDatePlus + "." + todaysDate.getFullYear();
 
-            console.log("statcalc request dates --> FROM: " + reqDateString + " // TO: " + todaysDateString);
+            console.log("calculateDutyStatisticNonCached --> request dates FROM: " + reqDateString + " // TO: " + todaysDateString);
 
             post["__KeyPostfix"] = keyPostfix;
             post["__EVENTVALIDATION"] = eventvalidation;
@@ -223,6 +270,7 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
             var dienstnummer = $(data).find('h3').first().text().substring($(data).find('h3').first().text().indexOf('(')).replace('(', '').replace(')', '').trim();
             console.log('Dienstnummer: ' + dienstnummer);
 
+            var dutyType = ["SEFNFR" , "NFR1", "NFR2", "SEFKTW", "SAN1", "SAN2"];
 
             // create statistical counters
             var rawWochentag = new Array();
@@ -233,12 +281,19 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
             var rawKollegen = new Array();
             var rawDutyAs = new Array();
             var hourDutyAs = {};
-            hourDutyAs['SEFNFR'] = 0;
-            hourDutyAs['NFR1'] = 0;
-            hourDutyAs['NFR2'] = 0;
-            hourDutyAs['SEFKTW'] = 0;
-            hourDutyAs['SAN1'] = 0;
-            hourDutyAs['SAN2'] = 0;
+            var countDutyAs = {};
+
+            dutyType.forEach( function(item) {
+              hourDutyAs[item] = 0;
+              countDutyAs[item] = 0;
+            });
+
+            // hourDutyAs['SEFNFR'] = 0;
+            // hourDutyAs['NFR1'] = 0;
+            // hourDutyAs['NFR2'] = 0;
+            // hourDutyAs['SEFKTW'] = 0;
+            // hourDutyAs['SAN1'] = 0;
+            // hourDutyAs['SAN2'] = 0;
 
 
             // iterate data of each row
@@ -274,11 +329,9 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
                                 currentDateString = val;
                                 break;
                             case 2: // Zeiten
-                                if (isKTW || isNFR) { //nur rd dienste
-                                    hours = getDurationFromTimeString(currentDateString, val);
-                                    $(this).after('<td>' + hours + '</td>');
-                                    sumDuty += hours;
-                                }
+                                hours = getDurationFromTimeString(currentDateString, val);
+                                $(this).after('<td>' + hours + '</td>');
+                                sumDuty += hours;
                                 break;
                             case 3: // Dienststellen
                                 rawDienststellen.push(val);
@@ -308,30 +361,36 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
                                         case 5: // SEF
                                             if (isNFR) {
                                                 rawDutyAs.push('SEFNFR');
+                                                countDutyAs['SEFNFR'] += 1;
                                                 hourDutyAs['SEFNFR'] += hours;
                                             }
                                             if (isKTW) {
                                                 rawDutyAs.push('SEFKTW');
+                                                countDutyAs['SEFKTW'] += 1;
                                                 hourDutyAs['SEFKTW'] += hours;
                                             }
                                             break;
                                         case 6: // SAN1
                                             if (isNFR) {
                                                 rawDutyAs.push('NFR1');
+                                                countDutyAs['NFR1'] += 1;
                                                 hourDutyAs['NFR1'] += hours;
                                             }
                                             if (isKTW) {
                                                 rawDutyAs.push('SAN1');
+                                                countDutyAs['SAN1'] += 1;
                                                 hourDutyAs['SAN1'] += hours;
                                             }
                                             break;
                                         case 7: // SAN2
                                             if (isNFR) {
                                                 rawDutyAs.push('NFR2');
+                                                countDutyAs['NFR2'] += 1;
                                                 hourDutyAs['NFR2'] += hours;
                                             }
                                             if (isKTW) {
                                                 rawDutyAs.push('SAN2');
+                                                countDutyAs['SAN2'] += 1;
                                                 hourDutyAs['SAN2'] += hours;
                                             }
                                             break;
@@ -358,18 +417,29 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
             //var rawKollegen = new Array();
             //var rawDutyAs = new Array();
             //var hourDutyAs = {};
+            //SEFNFR, NFR1, NFR2, SEFKTW, SAN1, SAN2, RS (SAN1 + SEFKTW + (?NFR2) + NFR1 + SEFNFR), NFS (SEFNFR + NFR1 + NFR2)
+
+            countDutyAs['NFS'] = countDutyAs.NFR1 + countDutyAs.SEFNFR + countDutyAs.NFR2;
+            countDutyAs['RS'] = countDutyAs.SAN1 + countDutyAs.SEFKTW + countDutyAs.NFR2 + countDutyAs.NFR1 + countDutyAs.SEFNFR;
+
+            hourDutyAs['NFS'] = hourDutyAs.NFR1 + hourDutyAs.SEFNFR + hourDutyAs.NFR2;
+            hourDutyAs['RS'] = hourDutyAs.SAN1 + hourDutyAs.SEFKTW + hourDutyAs.NFR2 + hourDutyAs.NFR1 + hourDutyAs.SEFNFR;
+
+            hourDutyAs['SAN_RD'] = hourDutyAs.NFR1 + hourDutyAs.SEFNFR + hourDutyAs.NFR2 + hourDutyAs.SAN1 + hourDutyAs.SEFKTW + hourDutyAs.SAN2;
+            countDutyAs['SAN_RD'] = countDutyAs.NFR1 + countDutyAs.SEFNFR + countDutyAs.NFR2 + countDutyAs.SAN1 + countDutyAs.SEFKTW + countDutyAs.SAN2;
 
             var duty = {};
             duty['sumDuty'] = sumDuty;
             duty['countDienste'] = countDienste;
+            duty['countDutyAs'] = countDutyAs;
             duty['hourDutyAs'] = hourDutyAs;
             duty['rawDutyAs'] = rawDutyAs;
 
-            console.log("duty: " + duty);
-            console.log("duty['sumDuty']: " + duty['sumDuty']);
-            console.log("duty['countDienste']: " + duty['countDienste']);
-            console.log("duty['hourDutyAs']: " + duty['hourDutyAs']);
-            console.log("duty['rawDutyAs']: " + duty['rawDutyAs']);
+            console.log("calculateDutyStatisticNonCached --> duty: " + duty);
+            console.log("calculateDutyStatisticNonCached --> duty['sumDuty']: " + duty['sumDuty']);
+            console.log("calculateDutyStatisticNonCached --> duty['countDienste']: " + duty['countDienste']);
+            console.log("calculateDutyStatisticNonCached --> duty['hourDutyAs']: " + duty['hourDutyAs']);
+            console.log("calculateDutyStatisticNonCached --> duty['rawDutyAs']: " + duty['rawDutyAs']);
 
             return (duty);
 

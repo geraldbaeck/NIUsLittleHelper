@@ -33,6 +33,7 @@ function addCalculationHandler(id, names, callback) {
 
         exportTable.find("tr:gt(0)").append("<td class='" + names[n].calcname + "'>Berechnen...</td>");
         exportTable.find("tr:first").append("<th>" + names[n].uiname + "</th>");
+
         exportTable.find("tr:gt(0)").each(function(index, element) {
           var dnr = $(element).find("td:first").text();
           var td = $(element).find("td." + names[n].calcname);
@@ -45,6 +46,9 @@ function addCalculationHandler(id, names, callback) {
                 console.log("addCalculationHandler -> promise then mit error: " + error);
                 td.text(error);
             });
+            //hier darauf warten, dass callback fertig! um niu von zu vielen Requests zu entlasten
+            //und diese hier seriell abzuarbeiten!
+
         });
     }
 
@@ -88,46 +92,9 @@ $(document).ready(function() {
     $("#menu").menu();
 
 
-    $("#rddienste").click(function() {
-      console.log("rddienste gecklickt!");
-      if ("rddienste" in clicked) {
-        return;
-      }
-      clicked["rddienste"] = true;
 
 
-      exportTable.find("tr:gt(0)").append("<td class='rddienste'>Berechnen...</td>");
-      exportTable.find("tr:first").append("<th>RD Dienste d. l. 6 Monate</th>");
-
-      exportTable.find("tr:gt(0)").each(function(index, element) {
-          var dnr = $(element).find("td:first").text();
-
-
-            dnrToIdentifier(dnr).then(
-            function(result) {
-            console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
-
-            calculateDutyStatistic(result.ENID, "dienste").then(
-            function(statresult) {
-            $(element).find(".rddienste").text(statresult['countDienste'] + " Dienste mit " + statresult['sumDuty'] + " Stunden");
-            },
-            function() {
-            console.log("calculateStatistic --> error");
-            $(element).find(".rddienste").text("statcalc error");
-            });
-            },
-            function() {
-            console.log("error");
-            $(element).find(".rddienste").text("dnrToIdentifier error");
-            });
-
-
-
-      });
-
-    });
-
-    $("#rddienste").trigger("click");
+    //$("#rddienste").trigger("click");
 
     $("#grundkurse").click(function() {
       console.log("grundkurse gecklickt!");
@@ -178,12 +145,25 @@ $(document).ready(function() {
        return dnrToIdentifier(dnr).then(
               function(result) {
                 console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
-                return calculateDutyStatistic(result.ENID, "stunden");
+                return calculateDutyStatistic(result.ENID, "");
               }).then(
                 function(statresult) {
-                  return statresult["sumDuty"];
+                  return statresult["hourDutyAs"]["SAN_RD"];
                 }
               );
+      });
+
+
+      addCalculationHandler("#rddienste", [{calcname : "rddienste", uiname : "Dienste d. l. 6 Monate"}], function(dnr, name){
+        return dnrToIdentifier(dnr).then(
+               function(result) {
+                 console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+                 return calculateDutyStatistic(result.ENID, "");
+               }).then(
+                 function(statresult) {
+                   return statresult["countDutyAs"]["SAN_RD"];
+                 }
+               );
       });
 
   }); //close $.get(path, function(data) {
