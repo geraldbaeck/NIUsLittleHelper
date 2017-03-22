@@ -79,12 +79,9 @@ function addCalculationHandler(id, names, callback) {
 }
 
 
-//TODO: die gesamte Tabelle irgendwie sortierbar machen
-/*
-  eventuell mit plugin wie
-  dynatable https://www.dynatable.com/#event-hooks
-  tablesorter http://tablesorter.com/docs/
 
+/*
+  tablesorter http://tablesorter.com/docs/
 */
 
 var dataSet = new Array;
