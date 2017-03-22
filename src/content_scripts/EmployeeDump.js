@@ -2,8 +2,54 @@
 TODO: funktion schreiben, die eine spalte hinzufügen kann zur tabelle!
 und diese dann am besten über ein callback oder Promise?
 so befüllt
+
+  id - id des divs im menü, bei on Click wird die Spalte hinzugefügt und
+    für jede zeile das callback mit der dnr aufgerufen
+  name - array von dict mit Maschinenname (wird für css klassen etc. verwendet)
+          und Menschennamen (wird angezeigt in der ui) der spalten:
+            [{calcname : "sandienststunden", uiname: "Dienststunden d. l. 6 Monate"}, ]
+
+
+  callback - callback, das (dnr, name, td)
+        dnr - Dienstnummer
+        name - Das DictObject mit classname und Name der Spalte, aus dem names array
+        td - die Tabellenzelle als jquery Object
+    der Spalte die berechnet werden soll übergeben bekommt,
+    der return des callback wird in die tabellenzelle geschrieben
+
 */
-function addColumn() {
+var clicked = {};
+function addCalculationHandler(id, names, callback) {
+
+  $(id).click(function() {
+    if (id in clicked) { //verhindern, das eine Spalte mehrmals hinzugefügt wird
+      return;
+    }
+    clicked[id] = true;
+
+    var exportTable = $(".export");
+    for (n in names) {
+        console.log("addCalculationHandler --> names[n] " + names[n]);
+
+        exportTable.find("tr:gt(0)").append("<td class='" + names[n].calcname + "'>Berechnen...</td>");
+        exportTable.find("tr:first").append("<th>" + names[n].uiname + "</th>");
+        exportTable.find("tr:gt(0)").each(function(index, element) {
+          var dnr = $(element).find("td:first").text();
+          var td = $(element).find("td." + names[n].calcname);
+          callback(dnr, n).then(
+            function (value) {
+              console.log("addCalculationHandler --> promise then value:" + value);
+                td.text(value);
+            },
+            function (error) {
+                console.log("addCalculationHandler -> promise then mit error: " + error);
+                td.text(error);
+            });
+        });
+    }
+
+
+  });
 
 }
 
@@ -13,7 +59,7 @@ function addColumn() {
   eventuell mit plugin wie
   dynatable https://www.dynatable.com/#event-hooks
   tablesorter http://tablesorter.com/docs/
-  
+
 */
 
 $(document).ready(function() {
@@ -25,7 +71,7 @@ $(document).ready(function() {
 
   var header = $("#ctl00_m_Header");
 
-  var clicked = {};
+
 
   /*
     lade das Menü, mit den möglichen Berechnungen
@@ -81,9 +127,9 @@ $(document).ready(function() {
 
     });
 
-    //$("#rddienste").trigger("click");
+    $("#rddienste").trigger("click");
 
-         $("#grundkurse").click(function() {
+    $("#grundkurse").click(function() {
       console.log("grundkurse gecklickt!");
       if ("grundkurse" in clicked) {
         return;
@@ -126,42 +172,20 @@ $(document).ready(function() {
 
     });
 
-    $("#sandienststunden").click(function() {
-      console.log("sandienststunden gecklickt");
-      if ("sandienststunden" in clicked) {
-        return;
-      }
-      clicked["sandienststunden"] = true;
 
-      exportTable.find("tr:gt(0)").append("<td class='dienststunden'>Berechnen...</td>");
-      exportTable.find("tr:first").append("<th>Dienststunden d. l. 6 Monate</th>");
-
-         exportTable.find("tr:gt(0)").each(function(index, element) {
-          var dnr = $(element).find("td:first").text();
-
-            dnrToIdentifier(dnr).then(
-            function(result) {
-            console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
-
-            calculateDutyStatistic(result.ENID, "stunden").then(
-            function(statresult) {
-            $(element).find(".dienststunden").text(statresult['sumDuty']);
-            },
-            function() {
-            console.log("calculateStatistic --> error");
-            $(element).find(".dienststunden").text("statcalc error");
-            });
-            },
-            function() {
-            console.log("error");
-            $(element).find(".dienststunden").text("dnrToIdentifier error");
-            });
-
-
+    addCalculationHandler("#sandienststunden", [{calcname : "dienststunden", uiname : "Dienststunden d. l. 6 Monate"}], function(dnr, name) {
+       //verkettete Promises...
+       return dnrToIdentifier(dnr).then(
+              function(result) {
+                console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+                return calculateDutyStatistic(result.ENID, "stunden");
+              }).then(
+                function(statresult) {
+                  return statresult["sumDuty"];
+                }
+              );
       });
 
-
-    });
-  });
+  }); //close $.get(path, function(data) {
 
 });

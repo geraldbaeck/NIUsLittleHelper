@@ -106,16 +106,20 @@ function diensteForMa(dnr, von, bis) {
  * damit ist es dann möglich direkt auf die Employee Page zuzugreifen
  */
 function dnrToIdentifier(dnr) {
-    return new Promise(function(resolve, reject) {
-        var post = {};
-        var dict = {};
+    //TODO: hier kommt eine cache abfrage hinein, ob dnr schon bekannt?
 
-        $.get("https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx", function(data) {
+
+    //verkettete promises:
+    return $.get("https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx")
+
+    .then(function(data) {
+      console.log("dnrToIdentifier --> first get request promise data: " + data);
             var jData = $(data);
 
             var keyPostfix = jData.find("#__KeyPostfix").val();
             var eventvalidation = jData.find("#__EVENTVALIDATION").val(); //jData.find("input[name=__EVENTVALIDATION]").val();
 
+            var post = {};
             post["__KeyPostfix"] = keyPostfix;
             post["__EVENTVALIDATION"] = eventvalidation;
             post["__VIEWSTATE"] = "";
@@ -124,11 +128,15 @@ function dnrToIdentifier(dnr) {
             post["m_txtEmployeeNumber"] = dnr;
             post["m_btSend"] = "Anfage Senden";
 
-            $.ajax({
+            return $.ajax({
                 url: "https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx",
                 data: post,
-                type: "POST",
-                success: function(data, status) {
+                type: "POST" });
+
+              })
+    .then( function(data) {
+      console.log("dnrToIdentifier --> post request mit rcv data: " + data);
+                // success: function(data, status) {
                     var searchString = $(data).find("#m_lbtStatistik").attr("href");    // EmployeeNumberID
                     var searchString2 = $(data).find("#m_lbtEducation").attr("href");   // EmployeeId
 
@@ -138,14 +146,13 @@ function dnrToIdentifier(dnr) {
                     var foundIdentA = regexpr.exec(searchString);
                     var foundIdentB = regexpr2.exec(searchString2);
 
+                    var dict = {};
                     dict["ENID"] = foundIdentA[1];
                     dict["EID"] = foundIdentB[1];
 
-                    resolve(dict);
-                }
-            });
-        });
-    });
+                    return dict;
+      });
+
 }
 
 /*
@@ -167,11 +174,12 @@ function dnrToIdentifier(dnr) {
 
 */
 function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
-    return new Promise(function(resolve, reject) {
+    // return new Promise(function(resolve, reject) {
         var post = {};
         console.log("statcalc --> start");
 
-        $.get("https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + empID, function(data) {
+        return $.get("https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + empID)
+        .then( function(data) {
             console.log("calculateDutyStatistic --> rcv from get EmployeDutyStatistic.aspx");
             //console.log("statcalc --> rcv from get EmployeeDutyStatistic.aspx" + data);
             var jData = $(data);
@@ -199,192 +207,177 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
             post["ctl00$main$m_Until$m_Textbox"] = todaysDateString;
             post["&ctl00$main$m_JoinBrokenDuties"] = "on";
 
-            $.ajax({
+            return $.ajax({
                 url: "https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + empID,
                 data: post,
                 type: "POST",
-                success: function(data, status) {
-                    console.log("statcalc --> rcv status " + status);
-                    console.log("statcalc --> rcv data " + data);
+            });
+        }).then( function(data) {
+                    //console.log("statcalc --> rcv status " + status);
+            //console.log("statcalc --> rcv data " + data);
 
-                    // Weitere Schritte fuer die Berechnung
-                    // Statistikseite fuer die angeforderten Daten in der Variable 'data'
-
-
-                    var dienstnummer = $(data).find('h3').first().text().substring($(data).find('h3').first().text().indexOf('(')).replace('(', '').replace(')', '').trim();
-                    console.log('Dienstnummer: ' + dienstnummer);
+            // Weitere Schritte fuer die Berechnung
+            // Statistikseite fuer die angeforderten Daten in der Variable 'data'
 
 
-                    // create statistical counters
-                    var rawWochentag = new Array();
-                    var rawDienststellen = new Array();
-                    var currentDateString;
-                    var sumDuty = 0; // Gesamtdauer aller Dienste
-                    var countDienste = 0;
-                    var rawKollegen = new Array();
-                    var rawDutyAs = new Array();
-                    var hourDutyAs = {};
-                    hourDutyAs['SEFNFR'] = 0;
-                    hourDutyAs['NFR1'] = 0;
-                    hourDutyAs['NFR2'] = 0;
-                    hourDutyAs['SEFKTW'] = 0;
-                    hourDutyAs['SAN1'] = 0;
-                    hourDutyAs['SAN2'] = 0;
+            var dienstnummer = $(data).find('h3').first().text().substring($(data).find('h3').first().text().indexOf('(')).replace('(', '').replace(')', '').trim();
+            console.log('Dienstnummer: ' + dienstnummer);
 
 
-                    // iterate data of each row
-                    var $tables = $(data).find('div.MultiDutyRoster');
-                    $tables.find('table.MessageTable').each(function(i) {
-
-                                // add placholder for statistics
-                                //$(this).find('tbody tr').first().after('<tr><td><table class="DutyRoster" cellspacing="0" cellpadding="3" rules="all" border="1"><tbody><tr><td id="charts' + i + '"></td></tr></tbody></table></td></tr>');
-
-                                // add header for duty duration
-                                //$(this).find('td.DRCTime').first().after('<td class="DRCDuration" width="50px">Dauer</td>');
-
-                                var tableType = $(this).find('td.MessageHeader').text();
-
-
-
-                                $(this).find('table#DutyRosterTable tbody tr').each(function() {
-                                    countDienste += 1;
-                                    $(this).find('td').each(function(i, val) {
-                                        val = val.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
-
-                                        //TODO: unterscheide zwischen NFR & KTW
-
-                                        var isKTW = tableType.includes('KTW');
-                                        var isNFR = tableType.includes('RKS') || tableType.includes('RKL') || tableType.includes('RKP');
+            // create statistical counters
+            var rawWochentag = new Array();
+            var rawDienststellen = new Array();
+            var currentDateString;
+            var sumDuty = 0; // Gesamtdauer aller Dienste
+            var countDienste = 0;
+            var rawKollegen = new Array();
+            var rawDutyAs = new Array();
+            var hourDutyAs = {};
+            hourDutyAs['SEFNFR'] = 0;
+            hourDutyAs['NFR1'] = 0;
+            hourDutyAs['NFR2'] = 0;
+            hourDutyAs['SEFKTW'] = 0;
+            hourDutyAs['SAN1'] = 0;
+            hourDutyAs['SAN2'] = 0;
 
 
-                                        switch (i) {
-                                            case 0: // Wochentag
-                                                rawWochentag.push(val);
-                                                break;
-                                            case 1: // Datum
-                                                currentDateString = val;
-                                                break;
-                                            case 2: // Zeiten
-                                                if (isKTW || isNFR) { //nur rd dienste
-                                                  hours = getDurationFromTimeString(currentDateString, val);
-                                                  $(this).after('<td>' + hours + '</td>');
-                                                  sumDuty += hours;
-                                                }
-                                                break;
-                                            case 3: // Dienststellen
-                                                rawDienststellen.push(val);
-                                                break;
-                                            default:
-                                                break;
-                                        }
-                                        //TODO: den doppelten Code reduzieren durch geschicktere Anordnung if else switch
+            // iterate data of each row
+            var $tables = $(data).find('div.MultiDutyRoster');
+            $tables.find('table.MessageTable').each(function(i) {
 
-                                        var offset = 0;
-                                        if (tableType.includes('geplant')) {
-                                          offset = 1; //weil die spalten um eines verschoben sind! bei den geplanten Diensten fehlt die Spalte KFZ!
-                                        }
-                                        if (tableType.includes('fixiert')) {
+                // add placholder for statistics
+                //$(this).find('tbody tr').first().after('<tr><td><table class="DutyRoster" cellspacing="0" cellpadding="3" rules="all" border="1"><tbody><tr><td id="charts' + i + '"></td></tr></tbody></table></td></tr>');
 
-                                        }
+                // add header for duty duration
+                //$(this).find('td.DRCTime').first().after('<td class="DRCDuration" width="50px">Dauer</td>');
 
-                                        switch (i + offset) {
-                                                case 5: // Fahrer
-                                                case 6: // SAN1
-                                                case 7: // SAN2
-                                                    if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
-                                                        var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
-                                                        rawKollegen.push(kollege);
-                                                    } else if ($(val).text() !== '') {
-                                                        switch (i + offset) {
-                                                            case 5: // SEF
-                                                                if (isNFR) {
-                                                                  rawDutyAs.push('SEFNFR');
-                                                                  hourDutyAs['SEFNFR'] += hours;
-                                                                }
-                                                                if (isKTW) {
-                                                                  rawDutyAs.push('SEFKTW');
-                                                                  hourDutyAs['SEFKTW'] += hours;
-                                                                }
-                                                                break;
-                                                            case 6: // SAN1
-                                                                if (isNFR) {
-                                                                  rawDutyAs.push('NFR1');
-                                                                  hourDutyAs['NFR1'] += hours;
-                                                                }
-                                                                if (isKTW) {
-                                                                  rawDutyAs.push('SAN1');
-                                                                  hourDutyAs['SAN1'] += hours;
-                                                                }
-                                                                break;
-                                                            case 7: // SAN2
-                                                                if (isNFR) {
-                                                                  rawDutyAs.push('NFR2');
-                                                                  hourDutyAs['NFR2'] += hours;
-                                                                }
-                                                                if (isKTW) {
-                                                                  rawDutyAs.push('SAN2');
-                                                                  hourDutyAs['SAN2'] += hours;
-                                                                }
-                                                                break;
-                                                            default:
-                                                                break;
-                                                        }
-                                                    }
-                                                    break;
-                                                default:
-                                                    break;
-                                        }
-
-                                    });
-                                });
-
-
-                    //console.log("rawWochentag: " + rawWochentag);
-                    //console.log("sumDuty: " + sumDuty);
-                    //console.log("countDienste: " + countDienste);
-                    //console.log("rawDutyAs: " + rawDutyAs);
-
-                    //if("dienste" in reqtype) {} // Berechnung der Dienste
-                    //if("stunden" in reqtype) {} // Berechnung der Stunden
-
-                    //resolve("incomplete") //Ausgabe des Ergebnisses
-
-                }); //ende der each schleife über die duty tabellen
-
-                //TODO: Ambulanzen auswerten!
+                var tableType = $(this).find('td.MessageHeader').text();
 
 
 
+                $(this).find('table#DutyRosterTable tbody tr').each(function() {
+                    countDienste += 1;
+                    $(this).find('td').each(function(i, val) {
+                        val = val.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
 
-                // create statistical counters
-                //var rawWochentag = new Array();
-                //var rawDienststellen = new Array();
-                //var currentDateString;
-                //var sumDuty = 0; // Gesamtdauer aller Dienste
-                //var countDienste = 0;
-                //var rawKollegen = new Array();
-                //var rawDutyAs = new Array();
-                //var hourDutyAs = {};
+                        //TODO: unterscheide zwischen NFR & KTW
 
-                var duty = {};
-                duty['sumDuty'] = sumDuty;
-                duty['countDienste'] = countDienste;
-                duty['hourDutyAs'] = hourDutyAs;
-                duty['rawDutyAs'] = rawDutyAs;
+                        var isKTW = tableType.includes('KTW');
+                        var isNFR = tableType.includes('RKS') || tableType.includes('RKL') || tableType.includes('RKP');
 
-                console.log("duty: " + duty);
-                console.log("duty['sumDuty']: " + duty['sumDuty']);
-                console.log("duty['countDienste']: " + duty['countDienste']);
-                console.log("duty['hourDutyAs']: " + duty['hourDutyAs']);
-                console.log("duty['rawDutyAs']: " + duty['rawDutyAs']);
 
-                resolve(duty);
-              }
-            }); // $.ajax
-        }); //$.get
-      }); //promise
-    }
+                        switch (i) {
+                            case 0: // Wochentag
+                                rawWochentag.push(val);
+                                break;
+                            case 1: // Datum
+                                currentDateString = val;
+                                break;
+                            case 2: // Zeiten
+                                if (isKTW || isNFR) { //nur rd dienste
+                                    hours = getDurationFromTimeString(currentDateString, val);
+                                    $(this).after('<td>' + hours + '</td>');
+                                    sumDuty += hours;
+                                }
+                                break;
+                            case 3: // Dienststellen
+                                rawDienststellen.push(val);
+                                break;
+                            default:
+                                break;
+                        }
+                        //TODO: den doppelten Code reduzieren durch geschicktere Anordnung if else switch
 
+                        var offset = 0;
+                        if (tableType.includes('geplant')) {
+                            offset = 1; //weil die spalten um eines verschoben sind! bei den geplanten Diensten fehlt die Spalte KFZ!
+                        }
+                        if (tableType.includes('fixiert')) {
+
+                        }
+
+                        switch (i + offset) {
+                            case 5: // Fahrer
+                            case 6: // SAN1
+                            case 7: // SAN2
+                                if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
+                                    var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
+                                    rawKollegen.push(kollege);
+                                } else if ($(val).text() !== '') {
+                                    switch (i + offset) {
+                                        case 5: // SEF
+                                            if (isNFR) {
+                                                rawDutyAs.push('SEFNFR');
+                                                hourDutyAs['SEFNFR'] += hours;
+                                            }
+                                            if (isKTW) {
+                                                rawDutyAs.push('SEFKTW');
+                                                hourDutyAs['SEFKTW'] += hours;
+                                            }
+                                            break;
+                                        case 6: // SAN1
+                                            if (isNFR) {
+                                                rawDutyAs.push('NFR1');
+                                                hourDutyAs['NFR1'] += hours;
+                                            }
+                                            if (isKTW) {
+                                                rawDutyAs.push('SAN1');
+                                                hourDutyAs['SAN1'] += hours;
+                                            }
+                                            break;
+                                        case 7: // SAN2
+                                            if (isNFR) {
+                                                rawDutyAs.push('NFR2');
+                                                hourDutyAs['NFR2'] += hours;
+                                            }
+                                            if (isKTW) {
+                                                rawDutyAs.push('SAN2');
+                                                hourDutyAs['SAN2'] += hours;
+                                            }
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                });
+            }); //ende der each schleife über die duty tabellen
+
+            //TODO: Ambulanzen auswerten!
+
+            // create statistical counters
+            //var rawWochentag = new Array();
+            //var rawDienststellen = new Array();
+            //var currentDateString;
+            //var sumDuty = 0; // Gesamtdauer aller Dienste
+            //var countDienste = 0;
+            //var rawKollegen = new Array();
+            //var rawDutyAs = new Array();
+            //var hourDutyAs = {};
+
+            var duty = {};
+            duty['sumDuty'] = sumDuty;
+            duty['countDienste'] = countDienste;
+            duty['hourDutyAs'] = hourDutyAs;
+            duty['rawDutyAs'] = rawDutyAs;
+
+            console.log("duty: " + duty);
+            console.log("duty['sumDuty']: " + duty['sumDuty']);
+            console.log("duty['countDienste']: " + duty['countDienste']);
+            console.log("duty['hourDutyAs']: " + duty['hourDutyAs']);
+            console.log("duty['rawDutyAs']: " + duty['rawDutyAs']);
+
+            return (duty);
+
+  }); // letzter .then block
+
+}
+
+//TODO: $.get liefert schon ein promise zurück, somit ist das new Promise unnötig
 function checkCourseAttendance(empID, courseDict) {
 
     // Function accepts courseDict in format of:
