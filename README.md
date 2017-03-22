@@ -56,6 +56,7 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 + *0.21* Kurzdienstselector wird nur mehr angezeigt, wenn es Kurzdienste gibt
 + *0.22* Die Kontakttabelle der Dienstführung wird jetzt standardmäßig ausgeblendet
 + *0.30* [NIU+ Features](#zusätzliche-daten-zur-lv-statistik-lvstatistik-lvstatisticaspx) eingebaut
++ *0.31* Zusätzliche Filter für geplante Dienste, Seite aufgeräumt
 
 ## Built With
 
