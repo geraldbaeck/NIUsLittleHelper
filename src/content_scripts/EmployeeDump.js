@@ -37,20 +37,36 @@ function addCalculationHandler(id, names, callback) {
           defaultContent: ""
         });
 
+        initDataTable();
+
+
         //TODO: solange das läuft kleines fenster anzeigen bzw. user informieren!
         var ready = Promise.resolve();
         for (index in dataSet) {
           var row = dataSet[index];
           //dataSet[index][name.calcname] = "eins";
           console.log("addCalculationHandler --> lade für dnr: " + row.DNR);
-          ready = ready.then(function() {
-            return callback(row.DNR, name).then(function(value) {
-              dataSet[index][name.calcname] = value;
-              console.log("addCalculationHandler --> füge value " + value + " für spalte " + name.calcname + " hinzu");
-            } ).catch(function(error) {
-              console.log("addCalculationHandler -> promise then mit error: " + error);
-            });
+
+
+          var p = new Promise(function(resolve, raise) {
+               var i = index;
+               var r = row;
+               var c = columns.length - 1;
+               resolve(callback(r.DNR, name)
+                .then(function(value) {
+                  r[name.calcname] = value;
+                  //console.log("get cell: " + i + "#" + c);
+                  datatable.cell(i, c).invalidate().draw();
+                  console.log("addCalculationHandler --> füge value " + value + " für spalte " + name.calcname + " in dataSet zeile " + i + " dnr: "+ r.DNR + "hinzu");
+                })
+                .catch(function(error) {
+                  console.log("addCalculationHandler -> promise then mit error: " + error);
+                }));
           });
+          ready = ready.then(function() {
+           return p;
+          });
+
         }
         ready.then(function() { //warte auf die promises...
           console.log("addCalculationHandler --> promises should be resolved....refresh DataTable data");
@@ -61,7 +77,7 @@ function addCalculationHandler(id, names, callback) {
           //   defaultContent: "leer"
           // });
 
-          initDataTable();  //erzeuge DataTable erneut!
+          //initDataTable();  //erzeuge DataTable erneut!
         });
 
 
@@ -205,48 +221,67 @@ $(document).ready(function() {
 
     //$("#rddienste").trigger("click");
 
-    $("#grundkurse").click(function() {
-      console.log("grundkurse gecklickt!");
-      if ("grundkurse" in clicked) {
-        return;
-      }
-      clicked["grundkurse"] = true;
+    addCalculationHandler("#grundkurse", [{calcname : "grundkurse", uiname : "Grundkurse"}], function(dnr, name) {
+       //verkettete Promises...
 
+       var grundkurse = {
+                           kurs1 : { "Name" : "BAS - Ausbildung - Das Rote Kreuz - Auch du bist ein Teil davon! (QM)", "altName1" : "BAS - Ausbildung - Das Rote Kreuz - auch du bist ein Teil davon!", "altName2" : "", "absolved" : "?" },
+                           kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "absolved" : "?" },
+                           kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "absolved" : "?" }
+                         };
 
-      var grundkurse = {
-                        kurs1 : { "Name" : "BAS - Ausbildung - Das Rote Kreuz - Auch du bist ein Teil davon! (QM)", "altName1" : "BAS - Ausbildung - Das Rote Kreuz - auch du bist ein Teil davon!", "altName2" : "", "absolved" : "?" },
-                        kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "absolved" : "?" },
-                        kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "absolved" : "?" }
-                      };
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return checkCourseAttendance(result.EID, grundkurse)
+        }).then( function(resultDict) {
+          return ("Das RK: " + resultDict.kurs1.absolved + "<br />AmbSem: " + resultDict.kurs2.absolved + "<br />KHD-SD: " + resultDict.kurs3.absolved);
+        });
 
-      exportTable.find("tr:gt(0)").append("<td class='grundkurse'>Berechnen...</td>");
-      exportTable.find("tr:first").append("<th>Grundkurse</th>");
+     });
 
-      exportTable.find("tr:gt(0)").each(function(index, element) {
-          var dnr = $(element).find("td:first").text();
-
-            dnrToIdentifier(dnr).then(
-            function(result) {
-            console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
-
-            checkCourseAttendance(result.EID, grundkurse).then(
-            function(resultDict) {
-            $(element).find(".grundkurse").html("Das RK: " + resultDict.kurs1.absolved + "<br />AmbSem: " + resultDict.kurs2.absolved + "<br />KHD-SD: " + resultDict.kurs3.absolved);
-            },
-            function() {
-            console.log("grundkurse --> error checkCourseAttendance");
-            $(element).find(".grundkurse").text("error checkCourseAttendance");
-            });
-            },
-            function() {
-            console.log("grundkurse --> error dnrToIdentifier");
-            $(element).find(".grundkurse").text("error dnrToIdentifier");
-            });
-
-
-      });
-
-    });
+    // $("#grundkurse").click(function() {
+    //   console.log("grundkurse gecklickt!");
+    //   if ("grundkurse" in clicked) {
+    //     return;
+    //   }
+    //   clicked["grundkurse"] = true;
+    //
+    //
+    //   var grundkurse = {
+    //                     kurs1 : { "Name" : "BAS - Ausbildung - Das Rote Kreuz - Auch du bist ein Teil davon! (QM)", "altName1" : "BAS - Ausbildung - Das Rote Kreuz - auch du bist ein Teil davon!", "altName2" : "", "absolved" : "?" },
+    //                     kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "absolved" : "?" },
+    //                     kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "absolved" : "?" }
+    //                   };
+    //
+    //   exportTable.find("tr:gt(0)").append("<td class='grundkurse'>Berechnen...</td>");
+    //   exportTable.find("tr:first").append("<th>Grundkurse</th>");
+    //
+    //   exportTable.find("tr:gt(0)").each(function(index, element) {
+    //       var dnr = $(element).find("td:first").text();
+    //
+    //         dnrToIdentifier(dnr).then(
+    //         function(result) {
+    //         console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+    //
+    //         checkCourseAttendance(result.EID, grundkurse).then(
+    //         function(resultDict) {
+    //         $(element).find(".grundkurse").html("Das RK: " + resultDict.kurs1.absolved + "<br />AmbSem: " + resultDict.kurs2.absolved + "<br />KHD-SD: " + resultDict.kurs3.absolved);
+    //         },
+    //         function() {
+    //         console.log("grundkurse --> error checkCourseAttendance");
+    //         $(element).find(".grundkurse").text("error checkCourseAttendance");
+    //         });
+    //         },
+    //         function() {
+    //         console.log("grundkurse --> error dnrToIdentifier");
+    //         $(element).find(".grundkurse").text("error dnrToIdentifier");
+    //         });
+    //
+    //
+    //   });
+    //
+    // });
 
 
     addCalculationHandler("#sandienststunden", [{calcname : "dienststunden", uiname : "Dienststunden d. l. 6 Monate"}], function(dnr, name) {
