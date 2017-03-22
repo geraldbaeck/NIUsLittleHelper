@@ -106,11 +106,9 @@ function diensteForMa(dnr, von, bis) {
  * damit ist es dann möglich direkt auf die Employee Page zuzugreifen
  */
 function dnrToIdentifier(dnr) {
-
-
     return new Promise(function(resolve, reject) {
         var post = {};
-
+        var dict = {};
 
         $.get("https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx", function(data) {
             var jData = $(data);
@@ -130,13 +128,20 @@ function dnrToIdentifier(dnr) {
                 url: "https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx",
                 data: post,
                 type: "POST",
-
                 success: function(data, status) {
-                    var searchString = $(data).find("#m_lbtStatistik").attr("href");
-                    var regexpr = /EmployeeNumberID=(.*)/g;
-                    var foundIdent = regexpr.exec(searchString);
-                    resolve(foundIdent[1]);
+                    var searchString = $(data).find("#m_lbtStatistik").attr("href");    // EmployeeNumberID
+                    var searchString2 = $(data).find("#m_lbtEducation").attr("href");   // EmployeeId
 
+                    var regexpr = /EmployeeNumberID=(.*)/g;
+                    var regexpr2 = /EmployeeId=(.*)/g;
+
+                    var foundIdentA = regexpr.exec(searchString);
+                    var foundIdentB = regexpr2.exec(searchString2);
+
+                    dict["ENID"] = foundIdentA[1];
+                    dict["EID"] = foundIdentB[1];
+
+                    resolve(dict);
                 }
             });
         });
@@ -377,3 +382,72 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
         }); //$.get
       }); //promise
     }
+
+function checkCourseAttendance(empID, courseDict) {
+
+    // Function accepts courseDict in format of:
+    //var courseDict = {
+    //                    kurs1 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" },
+    //                    kurs2 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" },
+    //                    kurs3 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" }
+    // [... unlimited additions to dictionary possible but format has to remain the same! ]
+    //                  };
+
+
+
+    return new Promise(function(resolve, reject) {
+    var post = {};
+
+        $.get("https://niu.wrk.at/Kripo/Kufer/SearchCourse.aspx?EmployeeId=" + empID, function(data) {
+            var jData = $(data);
+
+            var keyPostfix = jData.find("#__KeyPostfix").val();
+            var eventvalidation = jData.find("#__EVENTVALIDATION").val(); //jData.find("input[name=__EVENTVALIDATION]").val();
+
+            var todaysDate = new Date();
+            var todaysDatePlus = todaysDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
+            var todaysDateString = todaysDate.getDate() + "." + todaysDatePlus + "." + todaysDate.getFullYear();
+
+            post["__KeyPostfix"] = keyPostfix;
+            post["__EVENTVALIDATION"] = eventvalidation;
+            post["__VIEWSTATE"] = "";
+            post["__EVENTARGUMENT"] = "";
+            post["__EVENTTARGET"] = "ctl00$main$m_Search";
+            post["ctl00$main$m_From$m_Textbox"] = "01.01.1995";
+            post["ctl00$main$m_Until$m_Textbox"] = todaysDateString;
+            post["ctl00$main$m_Options$0"] = "on";
+            post["ctl00$main$m_Options$2"] = "on";
+            post["ctl00$main$m_Options$5"] = "on";
+            post["ctl00$main$m_CourseName"] = "";
+
+
+            $.ajax({
+                url: "https://niu.wrk.at/Kripo/Kufer/SearchCourse.aspx?EmployeeId=" + empID,
+                data: post,
+                type: "POST",
+                success: function(data, status) {
+
+                    var absolvedCourses = [];
+                    
+                    $(data).find(".CourseTitel").each(function(index, element) {
+                    absolvedCourses.push($(element).text());
+                    });
+
+                    for(var course in courseDict) {
+                    
+                    var found = false;
+
+                    if($.inArray(courseDict[course].Name, absolvedCourses) !== -1) { found = true; }
+                    if($.inArray(courseDict[course].altName1, absolvedCourses) !== -1) { found = true; }
+                    if($.inArray(courseDict[course].altName2, absolvedCourses) !== -1) { found = true; }
+
+                    if(found === true) { courseDict[course].absolved = "ja"; } else { courseDict[course].absolved = "nein"; }
+
+                    }
+                    resolve(courseDict) //Ausgabe des Ergebnisses
+
+                }
+            });
+      });
+    });
+}

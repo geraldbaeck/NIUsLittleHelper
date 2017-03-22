@@ -26,7 +26,7 @@
     "img/*"
   ],
   "background": {
-    "scripts": ["src/background/hot-reload.js", "src/background/referer-change.js"]
+    "scripts": ["src/background/hot-reload.js"]
   },
   "content_scripts": [
     {
