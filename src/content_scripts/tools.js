@@ -265,9 +265,11 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
                                                 currentDateString = val;
                                                 break;
                                             case 2: // Zeiten
-                                                hours = getDurationFromTimeString(currentDateString, val);
-                                                $(this).after('<td>' + hours + '</td>');
-                                                sumDuty += hours;
+                                                if (isKTW || isNFR) { //nur rd dienste
+                                                  hours = getDurationFromTimeString(currentDateString, val);
+                                                  $(this).after('<td>' + hours + '</td>');
+                                                  sumDuty += hours;
+                                                }
                                                 break;
                                             case 3: // Dienststellen
                                                 rawDienststellen.push(val);
@@ -428,13 +430,13 @@ function checkCourseAttendance(empID, courseDict) {
                 success: function(data, status) {
 
                     var absolvedCourses = [];
-                    
+
                     $(data).find(".CourseTitel").each(function(index, element) {
                     absolvedCourses.push($(element).text());
                     });
 
                     for(var course in courseDict) {
-                    
+
                     var found = false;
 
                     if($.inArray(courseDict[course].Name, absolvedCourses) !== -1) { found = true; }
