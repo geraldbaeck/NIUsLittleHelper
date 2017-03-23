@@ -32,6 +32,16 @@ quartalsweise abgeschlossen!
 ### Download von Kontaktdaten als VCF file
 ![VCF Download](screenshots/vcf_download.png)
 
+### Liste/Ausdruck
+Die Funktion Mitarbeiter Liste/Ausdruck öffnet normal ein neues Fenster, in dem alle gefundenen Mitarbeiter angezeigt werden. Diese Liste wurde erweitert:
+
+* Es gibt jetzt eine sortierbare Tabelle mit Volltextsuche
+* Berechnung der Dienste und Stunden der letzten 6 Monate im Bereich RD (noch ohne Ambulanzen!)
+* Abfrage der Grundausbildung der Mitarbeiter
+
+Diese Abfragen werden in einer DB lokal zwischengespeichert um nicht unnötige Requests an den Server zu erzeugen.
+
+
 ## Getting Started
 
 Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu testen, bevor sie im [Google Store](https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de) erscheint. Der empfohlene Weg ist, die Extension über den [Google Store](https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de) zu installieren.
@@ -63,6 +73,10 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 * [Atom](https://github.com/atom/atom) - Code Editor
 * [Javascript](https://en.wikipedia.org/wiki/JavaScript) - I love you, but I hate you too
 * [JQuery](https://jquery.com/) - I most definitely hate you
+* jQueryUI
+* PouchDB
+* jQuery DataTable
+
 
 ## Contributing
 
@@ -71,6 +85,8 @@ Always welcome just fork and commit.
 ## Authors
 
 * **Gerald Bäck** - *Coinomentum* - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
+* **Stephan Spindler**
+* **Daniel Steiner**
 
 ## License
 
