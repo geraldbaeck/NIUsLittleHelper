@@ -108,7 +108,7 @@ function saveToCache(prefix, id, object) {
 
 }
 
-function getFromCache(prefix, id, args, callback) {
+function getFromCache(prefix, id, args, callback, classobject) {
   console.log("getFromCache --> lade vom cache: " + prefix + id);
   var db = getDB();
   var key = prefix + id;
@@ -123,11 +123,19 @@ function getFromCache(prefix, id, args, callback) {
         console.log("getFromCache --> fail weil cache ablauf!");
         return Promise.reject("maximale cache zeit " + MAX_CACHE_TIME + "ms abgelaufen!");
       }
-      return doc.object;
+      if (classobject === undefined) {
+        return doc.object;
+      } else {
+        classobject.fromJson(doc.object);
+      }
     })
     .catch(function(reason) {  //promise rejected, jetzt lade von niu!
      console.log("getFromCache --> fail: " + reason);
      return callback(args).then(function(object) {
+       if (classobject != undefined) {
+         console.log("getFromCache --> deserialize...");
+         object = object.toJson();
+       }
        saveToCache(prefix, id, object).then(function() {});
        return object;
     });
@@ -202,13 +210,122 @@ function dnrToIdentifier(dnr) {
 
 
 function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
-
+    //return calculateDutyStatisticNonCached({'empID' : empID, 'reqtype' : reqtype, 'reqStartDate' : reqStartDate, 'reqEndDate' : reqEndDate});
 
     var dutyId = empID; //TODO: reqStart, reqEndDate einbauen!
     return getFromCache("dutyid_", dutyId,
       {'empID' : empID, 'reqtype' : reqtype, 'reqStartDate' : reqStartDate, 'reqEndDate' : reqEndDate},
-      calculateDutyStatisticNonCached);
+      calculateDutyStatisticNonCached, DutyCount);
 }
+
+
+
+var DUTY_TYPES = {
+  "SEFNFR" : {description : "Alle Dienste als Fahrer auf RKL, RKP, RKS"},
+  "NFR1" : {description: "Alle Dienste als NFR1 (NFS) auf RKL, RKP, RKS"},
+  "NFR2" : {description: "Alle Dienste als NFR2 auf RKL, RKP, RKS"},
+  "SEFKTW" : {description: "Alle Dienste als Fahrer auf einem KTW"},
+  "SAN1" : {description: "Alle Dienste als SAN1 auf einem KTW"},
+  "SAN2" : {description: "Alle Dienste als SAN2 auf einem KTW"},
+  "SUM_NFR" : {description: "Alle Dienste auf NFR", aggregate : ["SEFNFR", "NFR1", "NFR2"]},
+  "SUM_KTW" : {description: "Alle Dienste auf KTW", aggregate : ["SEFKTW", "SAN1", "SAN2"]},
+  "SUM_RD" : {description: "Alle Dienste im RD als RS oder RSiA am KTW + RTW", aggregate : ["SUM_NFR", "SUM_KTW"]},
+  "SUM_SAN" : {description: "Alle Dienste als RSiA oder höher", aggregate: ["SUM_RD", "SUM_AMB"]},
+  "SUM_AMB" : {descirption: "Alle Dienste als RSiA oder höher auf Ambulanzen"}
+};
+
+class DutyCount {
+
+  // create statistical counters
+  // var rawWochentag = new Array();
+  // var rawDienststellen = new Array();
+  // var currentDateString;
+  constructor() {
+    this.sumDuty = 0; // Gesamtdauer aller Dienste
+    this.countDienste = 0;
+    // var rawKollegen = new Array();
+    // var rawDutyAs = new Array();
+    this.hourDutyAs = {};
+    this.countDutyAs = {};
+  }
+
+  static fromJson(json) {
+    var dict = JSON.parse(json);
+    var d = new DutyCount();
+    d.hourDutyAs = dict.hourDutyAs;
+    d.countDutyAs = dict.countDutyAs;
+  }
+
+  toJson() {
+    return JSON.stringify({
+      hourDutyAs : this.hourDutyAs,
+      countDutyAs : this.countDutyAs
+    });
+  }
+
+  /*
+    fügt die Dienststunden hinzu und erhöht den Dienstzähler um 1,
+    für die jeweilige Position
+  */
+  addHourDutyAs(position, hours) {
+      if (position in this.hourDutyAs) {
+        this.hourDutyAs[position] += hours;
+        this.countDutyAs[position] += 1;
+      } else {
+          this.hourDutyAs[position] = hours;
+          this.countDutyAs[position] = 1;
+      }
+      this.sumDuty += hours;
+      this.countDienste += 1;
+  }
+
+  aggregateDuty(position, visited, duty) {
+    //TODO: calculate aggregations
+    //console.log("DutyCount#aggregateDuty --> aggregateDuty start with position: " + position);
+    if (duty == null) {
+        duty = {};
+        duty['hours'] = 0;
+        duty['count'] = 0;
+    }
+    if (visited.includes(position)) {
+      throw "DutyCount#aggregateDuty --> Error Aggregate loop detected!";
+    }
+    visited.push(position);
+    if (position in DUTY_TYPES) {
+      if ("aggregate" in DUTY_TYPES[position]) {
+          //console.log("DutyCount#aggregateDuty --> need to aggregate! position " + position + " duty.count ist " + duty.count + " duty.hours " + duty.hours);
+          for (let val of DUTY_TYPES[position].aggregate) {
+            var d = this.aggregateDuty(val, visited, duty);
+            //console.log("duty.count ist " + duty.count);
+            //console.log("Füge zu position " + position + " von position " + val + " count " + d.count + " hours " + d.hours + " hinzu " );
+            //duty.hours += d.hours;
+            //duty.count += d.count;
+            //console.log("Somit ist count " + duty.count + " hours " + duty.hours);
+          }
+      } else if (position in this.hourDutyAs) {
+        //console.log("DutyCount#aggregateDuty --> simple add! postion: " + position + " count: " + this.countDutyAs[position] + " hours: " + this.hourDutyAs[position]);
+        duty.hours += this.hourDutyAs[position];
+        duty.count += this.countDutyAs[position];
+      } else {
+        //
+      }
+      console.log("DutyCount#aggregateDuty --> return duty for " + position + " is: duty.count " + duty.count + " duty.hours " + duty.hours);
+      return duty;
+    } else {
+      throw "Unbekannte position/Diensttyp!!";
+    }
+  }
+
+  getDutyCount(position) {
+      return this.aggregateDuty(position, [], null).count;
+  }
+
+  getDutyHours(position) {
+    return this.aggregateDuty(position, [], null).hours;
+  }
+
+}
+
 
 /*
   berechnet diverse statistiken wie
@@ -283,7 +400,9 @@ function calculateDutyStatisticNonCached(args) {
             var dienstnummer = $(data).find('h3').first().text().substring($(data).find('h3').first().text().indexOf('(')).replace('(', '').replace(')', '').trim();
             console.log('Dienstnummer: ' + dienstnummer);
 
-            var dutyType = ["SEFNFR" , "NFR1", "NFR2", "SEFKTW", "SAN1", "SAN2"];
+            var duty = new DutyCount();
+
+            var dutyType = ["SEFNFR", "NFR1", "NFR2", "SEFKTW", "SAN1", "SAN2"];
 
             // create statistical counters
             var rawWochentag = new Array();
@@ -333,6 +452,10 @@ function calculateDutyStatisticNonCached(args) {
                         var isKTW = tableType.includes('KTW');
                         var isNFR = tableType.includes('RKS') || tableType.includes('RKL') || tableType.includes('RKP');
 
+                        if (! (isKTW || isNFR)) {
+                          return; //nicht rd streichen!
+                        }
+                        //console.log("duty roster parse: index " + i + " val " + val);
 
                         switch (i) {
                             case 0: // Wochentag
@@ -356,7 +479,7 @@ function calculateDutyStatisticNonCached(args) {
 
                         var offset = 0;
                         if (tableType.includes('geplant')) {
-                            offset = 1; //weil die spalten um eines verschoben sind! bei den geplanten Diensten fehlt die Spalte KFZ!
+                          offset = 1; //weil die spalten um eines verschoben sind! bei den geplanten Diensten fehlt die Spalte KFZ!
                         }
                         if (tableType.includes('fixiert')) {
 
@@ -372,39 +495,48 @@ function calculateDutyStatisticNonCached(args) {
                                 } else if ($(val).text() !== '') {
                                     switch (i + offset) {
                                         case 5: // SEF
+                                          //console.log("add as fahrer! offset is " + offset + " index is " + i);
                                             if (isNFR) {
                                                 rawDutyAs.push('SEFNFR');
                                                 countDutyAs['SEFNFR'] += 1;
                                                 hourDutyAs['SEFNFR'] += hours;
+                                                duty.addHourDutyAs('SEFNFR', hours);
                                             }
                                             if (isKTW) {
                                                 rawDutyAs.push('SEFKTW');
                                                 countDutyAs['SEFKTW'] += 1;
                                                 hourDutyAs['SEFKTW'] += hours;
+                                                duty.addHourDutyAs('SEFKTW', hours);
                                             }
                                             break;
                                         case 6: // SAN1
+                                          //console.log("add as san1!");
                                             if (isNFR) {
                                                 rawDutyAs.push('NFR1');
                                                 countDutyAs['NFR1'] += 1;
                                                 hourDutyAs['NFR1'] += hours;
+                                                duty.addHourDutyAs('NFR1', hours);
                                             }
                                             if (isKTW) {
                                                 rawDutyAs.push('SAN1');
                                                 countDutyAs['SAN1'] += 1;
                                                 hourDutyAs['SAN1'] += hours;
+                                                duty.addHourDutyAs('SAN1', hours);
                                             }
                                             break;
                                         case 7: // SAN2
+                                        //console.log("add as SAN2");
                                             if (isNFR) {
                                                 rawDutyAs.push('NFR2');
                                                 countDutyAs['NFR2'] += 1;
                                                 hourDutyAs['NFR2'] += hours;
+                                                duty.addHourDutyAs('NFR2', hours);
                                             }
                                             if (isKTW) {
                                                 rawDutyAs.push('SAN2');
                                                 countDutyAs['SAN2'] += 1;
                                                 hourDutyAs['SAN2'] += hours;
+                                                duty.addHourDutyAs('SAN2', hours);
                                             }
                                             break;
                                         default:
@@ -420,6 +552,23 @@ function calculateDutyStatisticNonCached(args) {
             }); //ende der each schleife über die duty tabellen
 
             //TODO: Ambulanzen auswerten!
+            $(".AmbulanceTable tr:gt(0)").each(function(index) {
+              switch(index) {
+                case 0: //amb-nummer
+                  break;
+                case 1: //subnr
+                  break;
+                case 2: //Beschreibung
+                  break;
+                case 3: //Funktion
+                  break;
+                case 4: //DNR
+                  break;
+                case 10: //Stunden
+                  break;
+              }
+            });
+
 
             // create statistical counters
             //var rawWochentag = new Array();
@@ -432,29 +581,33 @@ function calculateDutyStatisticNonCached(args) {
             //var hourDutyAs = {};
             //SEFNFR, NFR1, NFR2, SEFKTW, SAN1, SAN2, RS (SAN1 + SEFKTW + (?NFR2) + NFR1 + SEFNFR), NFS (SEFNFR + NFR1 + NFR2)
 
-            countDutyAs['NFS'] = countDutyAs.NFR1 + countDutyAs.SEFNFR + countDutyAs.NFR2;
-            countDutyAs['RS'] = countDutyAs.SAN1 + countDutyAs.SEFKTW + countDutyAs.NFR2 + countDutyAs.NFR1 + countDutyAs.SEFNFR;
+            // countDutyAs['NFS'] = countDutyAs.NFR1 + countDutyAs.SEFNFR + countDutyAs.NFR2;
+            // countDutyAs['RS'] = countDutyAs.SAN1 + countDutyAs.SEFKTW + countDutyAs.NFR2 + countDutyAs.NFR1 + countDutyAs.SEFNFR;
+            //
+            // hourDutyAs['NFS'] = hourDutyAs.NFR1 + hourDutyAs.SEFNFR + hourDutyAs.NFR2;
+            // hourDutyAs['RS'] = hourDutyAs.SAN1 + hourDutyAs.SEFKTW + hourDutyAs.NFR2 + hourDutyAs.NFR1 + hourDutyAs.SEFNFR;
+            //
+            // hourDutyAs['SAN_RD'] = hourDutyAs.NFR1 + hourDutyAs.SEFNFR + hourDutyAs.NFR2 + hourDutyAs.SAN1 + hourDutyAs.SEFKTW + hourDutyAs.SAN2;
+            // countDutyAs['SAN_RD'] = countDutyAs.NFR1 + countDutyAs.SEFNFR + countDutyAs.NFR2 + countDutyAs.SAN1 + countDutyAs.SEFKTW + countDutyAs.SAN2;
 
-            hourDutyAs['NFS'] = hourDutyAs.NFR1 + hourDutyAs.SEFNFR + hourDutyAs.NFR2;
-            hourDutyAs['RS'] = hourDutyAs.SAN1 + hourDutyAs.SEFKTW + hourDutyAs.NFR2 + hourDutyAs.NFR1 + hourDutyAs.SEFNFR;
+            // var duty = {};
+            // duty['sumDuty'] = sumDuty;
+            // duty['countDienste'] = countDienste;
+            // duty['countDutyAs'] = countDutyAs;
+            // duty['hourDutyAs'] = hourDutyAs;
+            // duty['rawDutyAs'] = rawDutyAs;
 
-            hourDutyAs['SAN_RD'] = hourDutyAs.NFR1 + hourDutyAs.SEFNFR + hourDutyAs.NFR2 + hourDutyAs.SAN1 + hourDutyAs.SEFKTW + hourDutyAs.SAN2;
-            countDutyAs['SAN_RD'] = countDutyAs.NFR1 + countDutyAs.SEFNFR + countDutyAs.NFR2 + countDutyAs.SAN1 + countDutyAs.SEFKTW + countDutyAs.SAN2;
+            // console.log("calculateDutyStatisticNonCached --> duty: " + duty);
+            // console.log("calculateDutyStatisticNonCached --> duty['sumDuty']: " + duty['sumDuty']);
+            // console.log("calculateDutyStatisticNonCached --> duty['countDienste']: " + duty['countDienste']);
+            // console.log("calculateDutyStatisticNonCached --> duty['hourDutyAs']: " + duty['hourDutyAs']);
+            // console.log("calculateDutyStatisticNonCached --> duty['rawDutyAs']: " + duty['rawDutyAs']);
 
-            var duty = {};
-            duty['sumDuty'] = sumDuty;
-            duty['countDienste'] = countDienste;
-            duty['countDutyAs'] = countDutyAs;
-            duty['hourDutyAs'] = hourDutyAs;
-            duty['rawDutyAs'] = rawDutyAs;
+            console.log("calculateDutyStatisticNonCached --> return duty.getDutyCount: " + duty.getDutyCount['NFR1']);
 
-            console.log("calculateDutyStatisticNonCached --> duty: " + duty);
-            console.log("calculateDutyStatisticNonCached --> duty['sumDuty']: " + duty['sumDuty']);
-            console.log("calculateDutyStatisticNonCached --> duty['countDienste']: " + duty['countDienste']);
-            console.log("calculateDutyStatisticNonCached --> duty['hourDutyAs']: " + duty['hourDutyAs']);
-            console.log("calculateDutyStatisticNonCached --> duty['rawDutyAs']: " + duty['rawDutyAs']);
 
-            return (duty);
+
+            return duty;
 
   }); // letzter .then block
 

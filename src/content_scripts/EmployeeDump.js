@@ -219,7 +219,7 @@ $(document).ready(function() {
 
 
 
-    //$("#rddienste").trigger("click");
+
 
     addCalculationHandler("#grundkurse", [{calcname : "grundkurse", uiname : "Grundkurse"}], function(dnr, name) {
        //verkettete Promises...
@@ -240,50 +240,6 @@ $(document).ready(function() {
 
      });
 
-    // $("#grundkurse").click(function() {
-    //   console.log("grundkurse gecklickt!");
-    //   if ("grundkurse" in clicked) {
-    //     return;
-    //   }
-    //   clicked["grundkurse"] = true;
-    //
-    //
-    //   var grundkurse = {
-    //                     kurs1 : { "Name" : "BAS - Ausbildung - Das Rote Kreuz - Auch du bist ein Teil davon! (QM)", "altName1" : "BAS - Ausbildung - Das Rote Kreuz - auch du bist ein Teil davon!", "altName2" : "", "absolved" : "?" },
-    //                     kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "absolved" : "?" },
-    //                     kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "absolved" : "?" }
-    //                   };
-    //
-    //   exportTable.find("tr:gt(0)").append("<td class='grundkurse'>Berechnen...</td>");
-    //   exportTable.find("tr:first").append("<th>Grundkurse</th>");
-    //
-    //   exportTable.find("tr:gt(0)").each(function(index, element) {
-    //       var dnr = $(element).find("td:first").text();
-    //
-    //         dnrToIdentifier(dnr).then(
-    //         function(result) {
-    //         console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
-    //
-    //         checkCourseAttendance(result.EID, grundkurse).then(
-    //         function(resultDict) {
-    //         $(element).find(".grundkurse").html("Das RK: " + resultDict.kurs1.absolved + "<br />AmbSem: " + resultDict.kurs2.absolved + "<br />KHD-SD: " + resultDict.kurs3.absolved);
-    //         },
-    //         function() {
-    //         console.log("grundkurse --> error checkCourseAttendance");
-    //         $(element).find(".grundkurse").text("error checkCourseAttendance");
-    //         });
-    //         },
-    //         function() {
-    //         console.log("grundkurse --> error dnrToIdentifier");
-    //         $(element).find(".grundkurse").text("error dnrToIdentifier");
-    //         });
-    //
-    //
-    //   });
-    //
-    // });
-
-
     addCalculationHandler("#sandienststunden", [{calcname : "dienststunden", uiname : "Dienststunden d. l. 6 Monate"}], function(dnr, name) {
        //verkettete Promises...
        return dnrToIdentifier(dnr).then(
@@ -292,7 +248,8 @@ $(document).ready(function() {
                 return calculateDutyStatistic(result.ENID, "");
               }).then(
                 function(statresult) {
-                  return statresult["hourDutyAs"]["SAN_RD"];
+                  
+                  return statresult.getDutyHours("SUM_RD");
                 }
               );
       });
@@ -305,10 +262,11 @@ $(document).ready(function() {
                  return calculateDutyStatistic(result.ENID, "");
                }).then(
                  function(statresult) {
-                   return statresult["countDutyAs"]["SAN_RD"];
+                   return statresult.getDutyCount("SUM_RD");
                  }
                );
       });
+      $("#rddienste").trigger("click");
 
   }); //close $.get(path, function(data) {
 
