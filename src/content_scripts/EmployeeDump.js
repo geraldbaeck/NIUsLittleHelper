@@ -220,7 +220,24 @@ $(document).ready(function() {
 
       //zum testen
       //$("#rddienste").trigger("click"); //aktiviert gleich nach laden der seite den click
-
   });
-
+(function(){
+        var searchParams = $("#ctl00_main_m_SearchParams");
+        var dnrStart = searchParams.html().substr(15,4);
+        console.log(dnrStart);
+        var dienstnummern = [];
+        var freieDnr = [];
+        $('.sorting_1').each(function(key, value){
+          dienstnummern.push($(value).html());
+        });
+        $(dienstnummern).each(function(key, value){
+          var exp = parseInt(dnrStart) + parseInt(key);
+          if(exp != value)
+          {
+            freieDnr.push(exp);
+          }
+        exp="";
+      });
+      searchParams.append("<br><b>Die nächste Freie Dienstnummer lautet \""+freieDnr[0]+"\"");
+    })();  
 });
