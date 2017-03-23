@@ -22,6 +22,16 @@ quartalsweise abgeschlossen!
 ### Kurssuche
 
 * Bei der Kurssuche wird für das Suchergebnis eine Volltextsuche in der Tabelle mit den gefundenen Kursen ermöglicht.
+* Bei der Kurssuche werden jetzt automatisch alle Kurse des nächsten Jahres gesucht. Indem die Suche beim Besuch der Seite automatisch ausgeführt wird. (Dieses Verhalten kann über die Einstellungen des Addons deaktiviert werden)
+* Es wird das Formular Kurssuche ausgeblendet
+* Es wird das Formular Kursauswahl ausgeblendet
+* Die Tabelle mit den angezeigten Kursen ist sortierbar
+* Der Link um die Kursdetails zu öffnen ganz links öffnet einen neuen Kurs per standard in einem neuen BrowserFenster/BrowserTab
+
+## Kurssuche TODO bzw. in Arbeit:
+
+* Anmeldebutton für Benutzer, der ein EMail erzeugt per mailto in dem alle relevanten Daten für die Kursanmeldung bereits ausgefüllt sind. Wie zuständige Ausbildung, Kursnummer, Kursname, Dienstnummer, und Name.
+* Vordefinierte Filter um nur bestimmte Kurse anzeigen zu lassen, geplant sind zumindest alle §50 Kurse, FK-Kurse, etc.
 
 ### Kursdetails
 
@@ -31,6 +41,16 @@ quartalsweise abgeschlossen!
 
 ### Download von Kontaktdaten als VCF file
 ![VCF Download](screenshots/vcf_download.png)
+
+### Liste/Ausdruck
+Die Funktion Mitarbeiter Liste/Ausdruck öffnet normal ein neues Fenster, in dem alle gefundenen Mitarbeiter angezeigt werden. Diese Liste wurde erweitert:
+
+* Es gibt jetzt eine sortierbare Tabelle mit Volltextsuche
+* Berechnung der Dienste und Stunden der letzten 6 Monate im Bereich RD (noch ohne Ambulanzen!)
+* Abfrage der Grundausbildung der Mitarbeiter
+
+Diese Abfragen werden in einer DB lokal zwischengespeichert um nicht unnötige Requests an den Server zu erzeugen.
+
 
 ## Getting Started
 
@@ -56,12 +76,17 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 + *0.21* Kurzdienstselector wird nur mehr angezeigt, wenn es Kurzdienste gibt
 + *0.22* Die Kontakttabelle der Dienstführung wird jetzt standardmäßig ausgeblendet
 + *0.30* [NIU+ Features](#zusätzliche-daten-zur-lv-statistik-lvstatistik-lvstatisticaspx) eingebaut
++ *0.31* Zusätzliche Filter für geplante Dienste, Seite aufgeräumt
 
 ## Built With
 
 * [Atom](https://github.com/atom/atom) - Code Editor
 * [Javascript](https://en.wikipedia.org/wiki/JavaScript) - I love you, but I hate you too
 * [JQuery](https://jquery.com/) - I most definitely hate you
+* jQueryUI
+* PouchDB
+* jQuery DataTable
+
 
 ## Contributing
 
@@ -70,6 +95,8 @@ Always welcome just fork and commit.
 ## Authors
 
 * **Gerald Bäck** - *Coinomentum* - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
+* **Stephan Spindler**
+* **Daniel Steiner**
 
 ## License
 

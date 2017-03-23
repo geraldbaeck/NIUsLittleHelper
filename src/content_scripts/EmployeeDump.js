@@ -69,38 +69,8 @@ function addCalculationHandler(id, names, callback) {
 
         }
         ready.then(function() { //warte auf die promises...
-          console.log("addCalculationHandler --> promises should be resolved....refresh DataTable data");
-
-          // columns.push({
-          //   data: "testdata",
-          //   title: "Leere Daten",
-          //   defaultContent: "leer"
-          // });
-
-          //initDataTable();  //erzeuge DataTable erneut!
+          console.log("addCalculationHandler --> promises abgearbeitet");
         });
-
-
-
-        //exportTable.find("tr:gt(0)").append("<td class='" + names[n].calcname + "'>Berechnen...</td>");
-        //exportTable.find("tr:first").append("<th>" + names[n].uiname + "</th>");
-
-        // exportTable.find("tr:gt(0)").each(function(index, element) {
-        //   var dnr = $(element).find("td:first").text();
-        //   var td = $(element).find("td." + names[n].calcname);
-        //   callback(dnr, n).then(
-        //     function (value) {
-        //       console.log("addCalculationHandler --> promise then value:" + value);
-        //         td.text(value);
-        //     },
-        //     function (error) {
-        //         console.log("addCalculationHandler -> promise then mit error: " + error);
-        //         td.text(error);
-        //     });
-        //     //hier darauf warten, dass callback fertig! um niu von zu vielen Requests zu entlasten
-        //     //und diese hier seriell abzuarbeiten!
-        //
-        // });
     });
 
 
@@ -109,12 +79,9 @@ function addCalculationHandler(id, names, callback) {
 }
 
 
-//TODO: die gesamte Tabelle irgendwie sortierbar machen
-/*
-  eventuell mit plugin wie
-  dynatable https://www.dynatable.com/#event-hooks
-  tablesorter http://tablesorter.com/docs/
 
+/*
+  tablesorter http://tablesorter.com/docs/
 */
 
 var dataSet = new Array;
@@ -122,33 +89,16 @@ var columns = new Array;
 // var dataTableColumns = new Array;
 var datatable = undefined;
 function initDataTable() {
-  console.log("initDataTable --> dataSet lenght: " + dataSet.length );
-  console.log("initDataTable --> columns: " + columns.length);
+  //console.log("initDataTable --> dataSet lenght: " + dataSet.length );
+  //console.log("initDataTable --> columns: " + columns.length);
 
   if (!(datatable === undefined)) {
       datatable.destroy();
       console.log("initDataTable --> after destroy: dataSet lenght: " + dataSet.length + " columns: " + columns.length);
       datatable = undefined;
   }
-  // var exportTable = $(".export");
-  // columns = new Array;
-  // //var headers = [];
-  // //parse first column also die headers...
-  // exportTable.find("tr:first th").each( function(index) {
-  //   console.log("index " + index + " mit th " + $(this).text());
-  //     //headers.push($(this).text());
-  //     columns.push( {
-  //       data: $(this).text(),
-  //       title: $(this).text()
-  //     });
-  // });
-  // for (index in columns) {
-  //     dataTableColumns.push($.extend({}, columns[index]));
-  // }
-
-
-  console.log("initDataTable --> dataSet:" + JSON.stringify(dataSet));
-  console.log("initDataTable --> dataTableColumns:" + JSON.stringify(columns));
+  //console.log("initDataTable --> dataSet:" + JSON.stringify(dataSet));
+  //console.log("initDataTable --> dataTableColumns:" + JSON.stringify(columns));
 
   $('#datatablediv').empty();
 
@@ -158,7 +108,13 @@ function initDataTable() {
   datatable = datatable.DataTable({
     destroy: true,
     data: dataSet,
-    columns: columns
+    columns: columns,
+    paging: false,
+    fixedHeader : {
+      header: true
+    }
+
+
   });
 
   //verändere css, damit die sorting images angezeigt werden!
@@ -213,12 +169,7 @@ $(document).ready(function() {
   $.get(path, function(data) {
 
     header.after(data);
-    //data.menu();
     $("#menu").menu();
-
-
-
-
 
 
     addCalculationHandler("#grundkurse", [{calcname : "grundkurse", uiname : "Grundkurse"}], function(dnr, name) {
@@ -248,12 +199,11 @@ $(document).ready(function() {
                 return calculateDutyStatistic(result.ENID, "");
               }).then(
                 function(statresult) {
-                  
+
                   return statresult.getDutyHours("SUM_RD");
                 }
               );
       });
-
 
       addCalculationHandler("#rddienste", [{calcname : "rddienste", uiname : "Dienste d. l. 6 Monate"}], function(dnr, name){
         return dnrToIdentifier(dnr).then(
@@ -268,6 +218,9 @@ $(document).ready(function() {
       });
       $("#rddienste").trigger("click");
 
-  }); //close $.get(path, function(data) {
+      //zum testen
+      //$("#rddienste").trigger("click"); //aktiviert gleich nach laden der seite den click
+
+  });
 
 });
