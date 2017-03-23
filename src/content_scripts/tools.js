@@ -16,6 +16,23 @@ function getKuerzel() {
     });
 }
 
+function experimentalActivated() {
+  var load = {};
+  load[STORAGE_KEY_EXPERIMENTAL] = DEFAULT_EXPERIMENTAL;
+  chrome.storage.sync.get(STORAGE_KEY_EXPERIMENTAL, function(item) {
+    return item[STORAGE_KEY_EXPERIMENTAL];
+  });
+}
+
+function funktionaerActivated() {
+  var load = {};
+  load[STORAGE_KEY_FUNKTIONAERS_FEATURES_ON] = DEFAULT_FUNKTIONAERS_FEATURES_ON;
+  chrome.storage.sync.get(STORAGE_KEY_FUNKTIONAERS_FEATURES_ON, function(item) {
+    return item[STORAGE_KEY_FUNKTIONAERS_FEATURES_ON];
+  });
+}
+
+
 /*
   verwandelt eine select input feld
   in ein autocomplete feld, wenn overlay true

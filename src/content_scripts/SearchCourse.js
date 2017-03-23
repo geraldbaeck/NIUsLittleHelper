@@ -114,23 +114,26 @@ $(document).ready(function() {
   }
 
 
-  // /*
-  // suchfeld für suche in der tabelle:
-  // */
-  // tabelle.before("<div><span>Suche</span><input name='tabellensuche' id='tabellensuche' type='text' maxlength='40'></div>");
-  //
-  // $("#tabellensuche").on('input', function() {
-  //     tabelle.find("tr:even").css("background-color", "#ffffff");
-  //     var text = $("#tabellensuche").val();
-  //     console.log("on event: text " + text);
-  //     var trs = tabelle.find("tr");
-  //     trs.show();
-  //     trs.not(":contains(" + text + ")").hide();
-  //
-  //     trs.css("background-color", "white");
-  //     trs.filter(":visible").filter(":even").css("background-color", "#dddddd");
-  //
-  // });
+  var mail = "stephan@spindler.priv.at";
+  function generateMailLink(data, type, full, meta) {
+    //TODO: hole korrekte mailadresse!
+
+      //TODO: wer bin ich?
+      //TODO: welche ausbildung brauche ich?
+
+    var mailto = "mailto:" + mail + "?" + $.param({
+      subject : "Anmeldung Kurs " + data,
+      body: "Bitte um Anmeldung zu " + data
+    });
+
+    if (experimentalActivated()) {
+      return "<a href='" + mailto + "'>anmelden</a>";
+    } else {
+      return "";
+    }
+
+  }
+
 
   //DATATABLE
   var headers = new Array;
@@ -156,6 +159,16 @@ $(document).ready(function() {
   columns = [
     {
       data: "abznr",
+      targets : -1,
+      render: function(data, type, full, meta) {
+        return '<a class="open_course_link" href="/Kripo/Kufer/CourseDetail.aspx?CourseID=' + data + '">open</a>';
+      }
+    },{
+      data: "abznr",
+      render: generateMailLink,
+    },
+    {
+      data: "abznr",
       title: "ABZ Nr",
       defaultContent: "LEER"
     },{
@@ -164,11 +177,12 @@ $(document).ready(function() {
 
     },{
       data: "von",
-      title: "Von",
-
+      title: "Von"
+      //orderDataType: "niudatestring"
     },{
       data: "bis",
-      title: "Bis",
+      title: "Bis"
+      //orderDataType: "niudatestring"
     },{
       data: "ort",
       title: "Ort"
@@ -195,52 +209,79 @@ $(document).ready(function() {
         var val = $(this).text();
         console.log("adding data: " + val + " als " + headers[index]);
         switch(index) {
-            case 0:
+            case 0: //ABZNR
               if (!(new RegExp("^[0-9]+$").test(val))) {
                 return;
               }
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-              row[headers[index]] = val;
+            case 1: //KURS
+              break;
+            case 2: //VON
+            case 3: //BIS
+              //val = val.substr(3, val.length);
+              break;
+            case 4: //ORT
+            case 5: //Kursstatus
+            case 6: //Qualifikation
+            case 7: //Fortbildungsstunden
               break;
         }
+        row[headers[index]] = val;
 
       });
+      dataSet.push(row);
     }
-    dataSet.push(row);
+
   });
 
   tabelle.after("<table id='datatable'></table>");
   tabelle.hide();
+
+ //füge date format String für die Spalten Von und Bis hinzu siehe auch: https://datatables.net/blog/2014-12-18
+  $.fn.dataTable.moment('dd, D.MM.YYYY HH:mm');
 
   var datatable = $("#datatable").DataTable({
     data: dataSet,
     columns: columns,
     paging: false
   });
-
+  var table = $("#datatable");
   //verändere css, damit die sorting images angezeigt werden!
-  $("#datatable").find(".sorting").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_both.png") + '")');
-  $("#datatable").find(".sorting_asc").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_asc.png")  + '")');
-  $("#datatable").find(".sorting_desc").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_desc.png")  + '")');
+  table.find(".sorting").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_both.png") + '")');
+  table.find(".sorting_asc").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_asc.png")  + '")');
+  table.find(".sorting_desc").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_desc.png")  + '")');
 
 
-  // datatable = $('<table id="datatable"></table>')
-  // $('#datatablediv').append(datatable);
+  table.find("tr").on("click", "a.open_course_link", function(event) {
+      //open in new dialoged window...
+    window.open($(this).attr("href"), '_blank');
+
+
+
+    return false;
+  })
+
+  $("#datatable tbody tr").contextmenu(function() {
+      return false;
+  });
+
+  $("#datatable tbody").on("click", "tr", function() {
+    if ($(this).hasClass('selected')) {
+      $(this).removeClass("selected");
+    } else {
+      //table.find('tr.selected').removeClass('selected');
+      
+      //$(this).addClass('selected');
+    }
+  });
+
+
+  // $.get(chrome.extension.getURL("/src/webcontent/search_course_course_context_menu.html"))
+  // .then(function(data){
   //
-  // datatable = datatable.DataTable({
-  //   destroy: true,
-  //   data: dataSet,
-  //   columns: columns,
-  //   paging: false,
-  //   fixedHeader : {
-  //     header: true
-  //   }
+  //
   // });
+
+
+
 
 });
