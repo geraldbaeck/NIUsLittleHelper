@@ -5,3 +5,7 @@
 .empDumpHeadRow {
   background-color: black;
 }
+
+span.ausblenden {
+  margin-left: 20px;
+}

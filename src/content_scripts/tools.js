@@ -211,6 +211,19 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
 }
 
 /*
+  verwandelt ein javascript Datum: Date in
+  den üblicherweise vom Niu verwendeten Datumstring: dd.MM.YYYY
+  date - das datum als Date object
+  return - der DatumsString
+*/
+function getNiuDateString(date) {
+  var todaysDate = date;
+  var todaysDatePlus = todaysDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
+  var todaysDateString = todaysDate.getDate() + "." + todaysDatePlus + "." + todaysDate.getFullYear();
+  return todaysDateString;
+}
+
+/*
   berechnet diverse statistiken wie
   Dienststunden, Dienste, Dienste auf der jeweiligen positione
   aus der EmployeeDutyStatistic
@@ -249,12 +262,14 @@ function calculateDutyStatisticNonCached(args) {
 
             var reqDate = new Date();
             reqDate.setMonth(reqDate.getMonth() - 6);
-            var reqDatePlus = reqDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
-            var reqDateString = reqDate.getDate() + "." + reqDatePlus + "." + reqDate.getFullYear();
+            // var reqDatePlus = reqDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
+            // var reqDateString = reqDate.getDate() + "." + reqDatePlus + "." + reqDate.getFullYear();
+            var reqDateString = getNiuDateString(reqDate);
 
-            var todaysDate = new Date();
-            var todaysDatePlus = todaysDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
-            var todaysDateString = todaysDate.getDate() + "." + todaysDatePlus + "." + todaysDate.getFullYear();
+            var todaysDateString = getNiuDateString(new Date());
+            // var todaysDate = new Date();
+            // var todaysDatePlus = todaysDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
+            // var todaysDateString = todaysDate.getDate() + "." + todaysDatePlus + "." + todaysDate.getFullYear();
 
             console.log("calculateDutyStatisticNonCached --> request dates FROM: " + reqDateString + " // TO: " + todaysDateString);
 

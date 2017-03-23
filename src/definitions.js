@@ -3,6 +3,9 @@
 var STORAGE_KEY_KUERZEL = "niu_kuerzel";
 
 var STORAGE_KEY_SEARCH_COURSE_ALWAYS_SEARCH = "niu_search_course_always_search";
+var STORAGE_KEY_SEARCH_COURSE_HIDE_SEARCH = "niu_search_course_hide_search";
+var STORAGE_KEY_SEARCH_COURSE_HIDE_CHOOSE = "niu_search_course_hide_choose";
+
 
 var STORAGE_KEY_CACHE_ACTIVE = "addon_cache_active";
 var STORAGE_KEY_MAX_CACHE_TIME = "addon_cache_max_cache_time";
