@@ -67,6 +67,7 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 + *0.22* Die Kontakttabelle der Dienstführung wird jetzt standardmäßig ausgeblendet
 + *0.30* [NIU+ Features](#zusätzliche-daten-zur-lv-statistik-lvstatistik-lvstatisticaspx) eingebaut
 + *0.31* Zusätzliche Filter für geplante Dienste, Seite aufgeräumt
++ *0.32* Überarbeitete [FunktionärInnenfeatures](https://github.com/geraldbaeck/NIUsLittleHelper/pull/2)
 
 ## Built With
 
@@ -82,10 +83,10 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 
 Always welcome just fork and commit.
 
-## Authors
+## [Authors](https://github.com/geraldbaeck/NIUsLittleHelper/graphs/contributors)
 
-* **Gerald Bäck** - *Coinomentum* - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
-* **Stephan Spindler**
+* **Gerald Bäck** - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
+* **Stephan Spindler** - [github](https://github.com/spind42)
 * **Daniel Steiner**
 
 ## License
