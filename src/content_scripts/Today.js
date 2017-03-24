@@ -74,49 +74,6 @@ $(document).ready(function() {
     return dienste;
   }
 
-  function filterTable() {
-    $('tr[isEmpty]').show();
-    if ($('#DutyRosterFilterEmpty').is(':checked')) {
-      $('tr[isEmpty=true]').hide();
-    }
-
-    if ($('#DutyRosterFilterMeldable').is(':checked')) {
-      $('tr[isMeldable=false]').hide();
-    }
-
-    if ($('#DutyRosterFilterNKTW').is(':checked')) {
-      $('tr[isNKTW=false]').hide();
-    }
-
-    if ($('#DutyRosterFilterKurzdienst').is(':checked')) {
-      $('tr[isKurzdienst=false]').hide();
-    }
-
-    if ($('#DutyRosterFilterPermanenz').is(':checked')) {
-      $('tr[isPermanenz=false]').hide();
-    }
-
-    $('tr[' + $('input[name=dienstTyp]:checked').val() + '=false]').hide();
-  }
-
-  function dfToggle() {
-    $('.DFTable').parent().parent().toggle();
-    if ($('.DFTable').parent().parent().is(':visible')) {
-      $('#DFToggle').text('DF ausblenden');
-    } else {
-      $('#DFToggle').text('DF einblenden');
-    }
-  }
-
-  function selectorToggle() {
-    $('div.whitebox:not([id])').toggle();
-    if ($('div.whitebox:not([id])').is(':visible')) {
-      $('#SelToggle').hide();
-    } else {
-      $('#SelToggle').show();
-    }
-  }
-
   tbl = scrapeTables();
 
 });
