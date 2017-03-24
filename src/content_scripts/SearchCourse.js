@@ -24,7 +24,7 @@ function hideKursauswahl() {
       set[STORAGE_KEY_SEARCH_COURSE_HIDE_CHOOSE] = false;
       chrome.storage.sync.set(set, function() {
         kursauswahl.show();
-        $(this).remove();
+        einblenden.remove();
       });
     });
   });
@@ -43,7 +43,7 @@ function hideKurssuche() {
       set[STORAGE_KEY_SEARCH_COURSE_HIDE_SEARCH] = false;
       chrome.storage.sync.set(set, function() {
         kurssuche.show();
-        $(this).remove();
+        einblenden.remove();
       });
     });
   });
@@ -269,7 +269,7 @@ $(document).ready(function() {
       $(this).removeClass("selected");
     } else {
       //table.find('tr.selected').removeClass('selected');
-      
+
       //$(this).addClass('selected');
     }
   });
