@@ -174,8 +174,8 @@ $(document).ready(function() {
 
         $("#dienstcount").append("<li><div id='dienstcount_" + key +"'>" + key + "<span class='menu_description'>" + DUTY_TYPES[key].description + "</span></div></li>");
         var col = [
-          {calcname : "hourduty$" + key, uiname : key + "Stunden" },
-          {calcname : "countduty$" + key, uiname : key + "Dienste"}
+          {calcname : "hourduty$" + key, uiname : key + " Stunden" },
+          {calcname : "countduty$" + key, uiname : key + " Dienste"}
         ];
         addCalculationHandler("#dienstcount_" + key, col, function(dnr, name) {
            //verkettete Promises...

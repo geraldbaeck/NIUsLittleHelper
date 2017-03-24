@@ -266,7 +266,7 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
 
 var DUTY_TYPES = {
   "AMB_SONSTIGE" : {description: "sonstige Ambulanzdienste..."},
-  "AMB_ALL" : {descriptoin: "alle Dienste auf Ambulanzen egal welche Position"},
+  "AMB_ALL" : {description: "alle Dienste auf Ambulanzen egal welche Position"},
   "SEFNFR" : {description : "Alle Dienste als Fahrer auf RKL, RKP, RKS"},
   "NFR1" : {description: "Alle Dienste als NFR1 (NFS) auf RKL, RKP, RKS"},
   "NFR2" : {description: "Alle Dienste als NFR2 auf RKL, RKP, RKS"},
@@ -277,7 +277,7 @@ var DUTY_TYPES = {
   "SUM_KTW" : {description: "Alle Dienste auf KTW", aggregate : ["SEFKTW", "SAN1", "SAN2"]},
   "SUM_RD" : {description: "Alle Dienste im RD als RS oder RSiA am KTW + RTW", aggregate : ["SUM_NFR", "SUM_KTW"]},
   "SUM_SAN" : {description: "Alle Dienste als RSiA oder höher", aggregate: ["SUM_RD", "SUM_AMB"]},
-  "SUM_SANAMB" : {descirption: "Alle Dienste als RSiA oder höher auf Ambulanzen", aggregate: ["AMB_RSIA", "AMB_RS", "AMB_NFS"]},
+  "SUM_SANAMB" : {description: "Alle Dienste als RSiA oder höher auf Ambulanzen", aggregate: ["AMB_RSIA", "AMB_RS", "AMB_NFS"]},
   "AMB_RSIA" : {description: "RS in Ausbildung"},
   "AMB_RS" : {description: "Als RS auf der Ambulanz"},
   "AMB_NFS" : {description: "Als NFS auf der Ambulanz"}
@@ -665,17 +665,21 @@ function calculateDutyStatisticNonCached(args) {
                       //mal egal
 
                       break;
-                    case 4: //DNR
+                    case 4:
+                      if (!$(this).text().includes(dienstnummer)) {
+                        return; //lasse andere Dienstnummern als die unter dienstnummer erkannte aus!
+                      }
                       break;
-                    case 10: //Stunden
+                    case 8: //Stunden
                       hours = parseFloat($(this).text().replace(",","."));
-
                       break;
                   }
                 });
                 if (hours > 0) {
                   duty.addHourDutyAs(position, hours);
                   duty.addHourDutyAs("AMB_ALL", hours);
+                } else {
+                  console.log("hours <= 0!");
                 }
               });
             });
