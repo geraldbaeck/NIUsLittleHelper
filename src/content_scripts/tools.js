@@ -130,7 +130,7 @@ function saveToCache(prefix, id, object) {
 
       return db.put(dict)
         .then(function() {
-          console.log("saveToCache --> erfolgreich gespeichert: " + Json.stringify(dict));
+          console.log("saveToCache --> erfolgreich gespeichert: " + JSON.stringify(dict));
           return object;
       }).catch(function(error) {
           console.log("saveToCache --> fehler beim speichern in pouchdb!: " + dict + " error: " +  error);
@@ -276,7 +276,7 @@ var DUTY_TYPES = {
   "SUM_NFR" : {description: "Alle Dienste auf NFR", aggregate : ["SEFNFR", "NFR1", "NFR2"]},
   "SUM_KTW" : {description: "Alle Dienste auf KTW", aggregate : ["SEFKTW", "SAN1", "SAN2"]},
   "SUM_RD" : {description: "Alle Dienste im RD als RS oder RSiA am KTW + RTW", aggregate : ["SUM_NFR", "SUM_KTW"]},
-  "SUM_SAN" : {description: "Alle Dienste als RSiA oder höher", aggregate: ["SUM_RD", "SUM_AMB"]},
+  "SUM_SAN" : {description: "Alle Dienste als RSiA oder höher", aggregate: ["SUM_RD", "SUM_SANAMB"]},
   "SUM_SANAMB" : {description: "Alle Dienste als RSiA oder höher auf Ambulanzen", aggregate: ["AMB_RSIA", "AMB_RS", "AMB_NFS"]},
   "AMB_RSIA" : {description: "RS in Ausbildung"},
   "AMB_RS" : {description: "Als RS auf der Ambulanz"},
