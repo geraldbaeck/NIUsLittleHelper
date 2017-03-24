@@ -27,8 +27,23 @@ function experimentalActivated() {
 function funktionaerActivated() {
   var load = {};
   load[STORAGE_KEY_FUNKTIONAERS_FEATURES_ON] = DEFAULT_FUNKTIONAERS_FEATURES_ON;
-  chrome.storage.sync.get(STORAGE_KEY_FUNKTIONAERS_FEATURES_ON, function(item) {
-    return item[STORAGE_KEY_FUNKTIONAERS_FEATURES_ON];
+  return new Promise(function(resolve, reject) {
+    chrome.storage.sync.get(STORAGE_KEY_FUNKTIONAERS_FEATURES_ON, function(item) {
+      resolve(item[STORAGE_KEY_FUNKTIONAERS_FEATURES_ON]);
+    });
+  });
+}
+
+var isCacheActive = function isCacheActive() {
+  console.log("isCacheActive --> called");
+  var load = {};
+  load[STORAGE_KEY_CACHE_ACTIVE] = DEFAULT_CACHE_ACTIVE;
+  return new Promise(function(resolve, reject) {
+    chrome.storage.sync.get(STORAGE_KEY_CACHE_ACTIVE, function(item) {
+      console.log("isCacheActive --> cache is " + item[STORAGE_KEY_CACHE_ACTIVE]);
+      //console.log(!item[STORAGE_KEY_CACHE_ACTIVE]);
+      resolve(item[STORAGE_KEY_CACHE_ACTIVE]);
+    });
   });
 }
 
@@ -82,8 +97,8 @@ function makeEmployeeSearchField(input) {
 };
 
 //maximale cache zeit in millisekunden
-MAX_CACHE_TIME = 100 * 60 * 60 * 24; //24 Stunden cache zeit
-CACHE_ACTIVE = true;
+MAX_CACHE_TIME = 1000 * 60 * 60 * 24; //24 Stunden cache zeit
+//CACHE_ACTIVE = true;
 /**
   stellt verbindung zur pouchdb her
 */
@@ -115,7 +130,7 @@ function saveToCache(prefix, id, object) {
 
       return db.put(dict)
         .then(function() {
-          console.log("saveToCache --> erfolgreich gespeichert: " + dict);
+          console.log("saveToCache --> erfolgreich gespeichert: " + Json.stringify(dict));
           return object;
       }).catch(function(error) {
           console.log("saveToCache --> fehler beim speichern in pouchdb!: " + dict + " error: " +  error);
@@ -129,31 +144,43 @@ function getFromCache(prefix, id, args, callback, classobject) {
   console.log("getFromCache --> lade vom cache: " + prefix + id);
   var db = getDB();
   var key = prefix + id;
-  return db.get(key)
+
+  //promise verkettet
+  return isCacheActive()
+    .then(function(cache) {
+      if (!cache) { return Promise.reject("cache ist ausgeschalten!"); }
+    })
+    .then(function() {
+      return db.get(key);
+    })
     .then(function(doc){
-      if (!CACHE_ACTIVE) {
-        return Promise.reject("cache ist ausgeschalten!");
-      }
-      console.log("getFromCache --> doc: " + doc);
+
+      console.log("getFromCache --> doc: " + JSON.stringify(doc));
       var now = new Date().getTime();
       if (now - doc.lastchange > MAX_CACHE_TIME) {
         console.log("getFromCache --> fail weil cache ablauf!");
         return Promise.reject("maximale cache zeit " + MAX_CACHE_TIME + "ms abgelaufen!");
       }
       if (classobject === undefined) {
+        //console.log("just as it is....");
         return doc.object;
       } else {
-        classobject.fromJson(doc.object);
+        //console.log("parse from json string...: " + doc.object);
+        return classobject.fromJson(doc.object);
       }
     })
     .catch(function(reason) {  //promise rejected, jetzt lade von niu!
      console.log("getFromCache --> fail: " + reason);
      return callback(args).then(function(object) {
+       console.log("getFromCache --> lade von niu: " + JSON.stringify(object));
+       var save = object;
        if (classobject != undefined) {
-         console.log("getFromCache --> deserialize...");
-         object = object.toJson();
+         save = object.toJson();
        }
-       saveToCache(prefix, id, object).then(function() {});
+       isCacheActive().then(function(active) {
+         active && saveToCache(prefix, id, save).then(function() {});
+       });
+
        return object;
     });
 
@@ -238,6 +265,8 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
 
 
 var DUTY_TYPES = {
+  "AMB_SONSTIGE" : {description: "sonstige Ambulanzdienste..."},
+  "AMB_ALL" : {descriptoin: "alle Dienste auf Ambulanzen egal welche Position"},
   "SEFNFR" : {description : "Alle Dienste als Fahrer auf RKL, RKP, RKS"},
   "NFR1" : {description: "Alle Dienste als NFR1 (NFS) auf RKL, RKP, RKS"},
   "NFR2" : {description: "Alle Dienste als NFR2 auf RKL, RKP, RKS"},
@@ -248,7 +277,10 @@ var DUTY_TYPES = {
   "SUM_KTW" : {description: "Alle Dienste auf KTW", aggregate : ["SEFKTW", "SAN1", "SAN2"]},
   "SUM_RD" : {description: "Alle Dienste im RD als RS oder RSiA am KTW + RTW", aggregate : ["SUM_NFR", "SUM_KTW"]},
   "SUM_SAN" : {description: "Alle Dienste als RSiA oder höher", aggregate: ["SUM_RD", "SUM_AMB"]},
-  "SUM_AMB" : {descirption: "Alle Dienste als RSiA oder höher auf Ambulanzen"}
+  "SUM_SANAMB" : {descirption: "Alle Dienste als RSiA oder höher auf Ambulanzen", aggregate: ["AMB_RSIA", "AMB_RS", "AMB_NFS"]},
+  "AMB_RSIA" : {description: "RS in Ausbildung"},
+  "AMB_RS" : {description: "Als RS auf der Ambulanz"},
+  "AMB_NFS" : {description: "Als NFS auf der Ambulanz"}
 };
 
 class DutyCount {
@@ -271,6 +303,7 @@ class DutyCount {
     var d = new DutyCount();
     d.hourDutyAs = dict.hourDutyAs;
     d.countDutyAs = dict.countDutyAs;
+    return d;
   }
 
   toJson() {
@@ -339,6 +372,15 @@ class DutyCount {
 
   getDutyHours(position) {
     return this.aggregateDuty(position, [], null).hours;
+  }
+
+  getDuty(type$position) {
+    var position = type$position.split("$")[1];
+    if (type$position.includes("hourduty")) {
+        return this.getDutyHours(position);
+    } else if(type$position.includes("countduty")) {
+        return this.getDutyCount(position);
+    }
   }
 
 }
@@ -584,61 +626,61 @@ function calculateDutyStatisticNonCached(args) {
             }); //ende der each schleife über die duty tabellen
 
             //TODO: Ambulanzen auswerten!
-            $(".AmbulanceTable tr:gt(0)").each(function(index) {
-              switch(index) {
-                case 0: //amb-nummer
-                  break;
-                case 1: //subnr
-                  break;
-                case 2: //Beschreibung
-                  break;
-                case 3: //Funktion
-                  break;
-                case 4: //DNR
-                  break;
-                case 10: //Stunden
-                  break;
-              }
+            //table.AmbulanceTable:nth-child(26)
+
+
+            ///$tables.find('table.MessageTable').each(function(i) {
+
+            console.log("calculateDutyStatisticNonCached --> Ambulanzen auswerten!");
+            //console.log("show data: " +  data);
+            var ambTables = $(data).find('table.AmbulanceTable');
+            ambTables.each(function(index) {
+              $(this).find("tr:gt(0)").each(function(index) {
+                console.log("calculateDutyStatisticNonCached --> iterate over ambulanz rows index: " + index + " inhalt: " + $(this).text());
+                var position = "AMB_SONSTIGE";
+                var hours = 0;
+                $(this).find("td").each(function(index) {
+                  console.log("calculateDutyStatisticNonCached --> iterate over ambulanz spalten index: " + index + " inhalt: " + $(this).text());
+                  switch(index) {
+                    case 0: //amb-nummer
+                      break;
+                    case 1: //subnr
+                      break;
+                    case 2: //Beschreibung
+                      break;
+                    case 3: //Funktion
+                    // "AMB_RSIA" : {description: "RS in Ausbildung"},
+                    // "AMB_RS" : {description: "Als RS auf der Ambulanz"},
+                    // "AMB_NFS" : {description: "Als NFS auf der Ambulanz"}
+
+                      var f = $(this).text();
+                      if (f == "009 H" || f == "004 KTWF") {
+                          position = "AMB_RS";
+                      } else if (f.includes("NFS")) {
+                          position = "AMB_NFS";
+                      } else if (f == "011 PH" || f == "051 AZU") {
+                        position = "AMB_RSIA";
+                      }
+
+                      //mal egal
+
+                      break;
+                    case 4: //DNR
+                      break;
+                    case 10: //Stunden
+                      hours = parseFloat($(this).text().replace(",","."));
+
+                      break;
+                  }
+                });
+                if (hours > 0) {
+                  duty.addHourDutyAs(position, hours);
+                  duty.addHourDutyAs("AMB_ALL", hours);
+                }
+              });
             });
-
-
-            // create statistical counters
-            //var rawWochentag = new Array();
-            //var rawDienststellen = new Array();
-            //var currentDateString;
-            //var sumDuty = 0; // Gesamtdauer aller Dienste
-            //var countDienste = 0;
-            //var rawKollegen = new Array();
-            //var rawDutyAs = new Array();
-            //var hourDutyAs = {};
-            //SEFNFR, NFR1, NFR2, SEFKTW, SAN1, SAN2, RS (SAN1 + SEFKTW + (?NFR2) + NFR1 + SEFNFR), NFS (SEFNFR + NFR1 + NFR2)
-
-            // countDutyAs['NFS'] = countDutyAs.NFR1 + countDutyAs.SEFNFR + countDutyAs.NFR2;
-            // countDutyAs['RS'] = countDutyAs.SAN1 + countDutyAs.SEFKTW + countDutyAs.NFR2 + countDutyAs.NFR1 + countDutyAs.SEFNFR;
-            //
-            // hourDutyAs['NFS'] = hourDutyAs.NFR1 + hourDutyAs.SEFNFR + hourDutyAs.NFR2;
-            // hourDutyAs['RS'] = hourDutyAs.SAN1 + hourDutyAs.SEFKTW + hourDutyAs.NFR2 + hourDutyAs.NFR1 + hourDutyAs.SEFNFR;
-            //
-            // hourDutyAs['SAN_RD'] = hourDutyAs.NFR1 + hourDutyAs.SEFNFR + hourDutyAs.NFR2 + hourDutyAs.SAN1 + hourDutyAs.SEFKTW + hourDutyAs.SAN2;
-            // countDutyAs['SAN_RD'] = countDutyAs.NFR1 + countDutyAs.SEFNFR + countDutyAs.NFR2 + countDutyAs.SAN1 + countDutyAs.SEFKTW + countDutyAs.SAN2;
-
-            // var duty = {};
-            // duty['sumDuty'] = sumDuty;
-            // duty['countDienste'] = countDienste;
-            // duty['countDutyAs'] = countDutyAs;
-            // duty['hourDutyAs'] = hourDutyAs;
-            // duty['rawDutyAs'] = rawDutyAs;
-
-            // console.log("calculateDutyStatisticNonCached --> duty: " + duty);
-            // console.log("calculateDutyStatisticNonCached --> duty['sumDuty']: " + duty['sumDuty']);
-            // console.log("calculateDutyStatisticNonCached --> duty['countDienste']: " + duty['countDienste']);
-            // console.log("calculateDutyStatisticNonCached --> duty['hourDutyAs']: " + duty['hourDutyAs']);
-            // console.log("calculateDutyStatisticNonCached --> duty['rawDutyAs']: " + duty['rawDutyAs']);
-
-            console.log("calculateDutyStatisticNonCached --> return duty.getDutyCount: " + duty.getDutyCount['NFR1']);
-
-
-
+            //console.log("calculateDutyStatisticNonCached --> return duty.getDutyCount: " + duty.getDutyCount('NFR1'));
+            //console.log("calculateDutyStatisticNonCached --> return duty.getDutyCount: " + duty.getDutyCount('AMB'));
             return duty;
 
   }); // letzter .then block

@@ -169,8 +169,34 @@ $(document).ready(function() {
   $.get(path, function(data) {
 
     header.after(data);
+
+    for (key in DUTY_TYPES) {
+
+        $("#dienstcount").append("<li><div id='dienstcount_" + key +"'>" + key + "<span class='menu_description'>" + DUTY_TYPES[key].description + "</span></div></li>");
+        var col = [
+          {calcname : "hourduty$" + key, uiname : key + "Stunden" },
+          {calcname : "countduty$" + key, uiname : key + "Dienste"}
+        ];
+        addCalculationHandler("#dienstcount_" + key, col, function(dnr, name) {
+           //verkettete Promises...
+           return dnrToIdentifier(dnr).then(
+                  function(result) {
+                    console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+                    return calculateDutyStatistic(result.ENID, "");
+                  }).then(
+                    function(statresult) {
+                      console.log("key: " + key + "name" + JSON.stringify(name) + "statresult: " + statresult);
+                      return statresult.getDuty(name.calcname);
+                    }
+                  );
+        });
+    }
+
     $("#menu").menu();
 
+
+
+    DUTY_TYPES
 
     addCalculationHandler("#grundkurse", [{calcname : "grundkurse", uiname : "Grundkurse"}], function(dnr, name) {
        //verkettete Promises...
@@ -216,7 +242,7 @@ $(document).ready(function() {
                  }
                );
       });
-      $("#rddienste").trigger("click");
+      //$("#rddienste").trigger("click");
 
       //zum testen
       //$("#rddienste").trigger("click"); //aktiviert gleich nach laden der seite den click
