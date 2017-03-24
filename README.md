@@ -42,10 +42,10 @@ Die Funktion Mitarbeiter Liste/Ausdruck öffnet normal ein neues Fenster, in dem
 Diese Abfragen werden in einer DB lokal zwischengespeichert um nicht unnötige Requests an den Server zu erzeugen.
 
 ### Mitarbeiter / Neu
-Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich neue Mitarbeiter anlegen lassen knötnnen. Dieses Formular wurde erweitert:
+Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich neue Mitarbeiter anlegen lassen können. Dieses Formular wurde erweitert:
 
-* Es l�sst sich nun automatisch eine freie Dienstnummer dem neuen Mitarbeiter zuordnen.
-* Es l�sst sich nun eine Liste aller freien Dienstnummern anzeigen.
+* Es lässt sich nun automatisch eine freie Dienstnummer dem neuen Mitarbeiter zuordnen.
+* Es lässt sich nun eine Liste aller freien Dienstnummern anzeigen.
 
 ## Getting Started
 
