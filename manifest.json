@@ -24,8 +24,12 @@
   ],
   "web_accessible_resources": [
     "img/*",
-    "/src/webcontent/*"
+    "/src/webcontent/*",
+    "backgrounds/*"
   ],
+  "chrome_url_overrides" : {
+    "newtab": "src/dashboard.html"
+  },
   "background": {
     "scripts": ["src/background/hot-reload.js"]
   },
@@ -92,6 +96,12 @@
       "matches": ["https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx"],
       "js": ["src/definitions.js",  "js/jquery/jquery.js", "js/jquery-ui/jquery-ui.js", "src/content_scripts/tools.js", "src/content_scripts/ControlCenter.js"],
       "css" : ["src/css/style.css"],
+      "all_frames": true,
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://niu.wrk.at/Kripo/Today/Today.aspx"],
+      "js": ["js/jquery/jquery-3.1.1.slim.min.js",  "src/content_scripts/Today.js"],
       "all_frames": true,
       "run_at": "document_end"
     }
