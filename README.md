@@ -88,6 +88,7 @@ Always welcome just fork and commit.
 * **Gerald Bäck** - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
 * **Stephan Spindler** - [github](https://github.com/spind42)
 * **Daniel Steiner**
+* **Sebastian Kuttnig** - [github](https://github.com/daseppl)
 
 ## License
 
