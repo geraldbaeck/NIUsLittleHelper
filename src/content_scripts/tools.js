@@ -760,3 +760,63 @@ function checkCourseAttendance(empID, courseDict) {
       });
     });
 }
+
+function getFreeEmployeeDNRs() {
+return new Promise(function(resolve, reject) {
+       $.get("https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx", function(data) {
+          console.log("getFreeEmployeeDNRs --> parse get request data");
+
+          var numArray = [];
+          var mia= [];
+          var regexpr = /\((.*?)\)/;
+
+          $(data).find('#m_ddlEmployee option').each(function(index,element) {
+             var searchString = encodeURI($(element).text());
+             var foundDNR = regexpr.exec(searchString);
+             numArray.push(parseInt(foundDNR[1]));
+          });
+
+          numArray.sort();
+          
+          // Hier wird der Mittelwert aller Dienstnummern in der Liste ermittelt
+          // wodurch der hauefigst vorkommende DNr-Bereich ermittelt wird.
+          // Dies soll verhindern das Dienstnummern fuer andere BezSt ausgegeben werden.
+
+          // TODO: Erkennen anderer DNr Bereiche, Dialog zur Auswahl des DNr Bereichs wenn
+          // mehrere Bereiche erkannt wurden.
+
+           var total = 0;
+           for(var i = 0; i < numArray.length; i++) {
+           total += numArray[i];
+           }
+           var avg = total / numArray.length;
+
+           var thresholdLOW = Math.floor(avg/1000)*1000;
+           var thresholdUP = Math.ceil(avg/1000)*1000;
+
+           // Thanks to
+           // http://stackoverflow.com/questions/7317993/arrays-find-missing-numbers-in-a-sequence
+           // for the (modified) function below:
+
+           for(var i = 1; i < numArray.length; i++)
+           {
+           if(numArray[i] - numArray[i-1] != 1)
+           {
+            var x = numArray[i] - numArray[i-1];
+            var j = 1;
+            while (j<x)
+            {
+                var proposedNumber = numArray[i-1]+j;
+                if((proposedNumber > thresholdLOW && proposedNumber < thresholdUP)) {
+                mia.push(proposedNumber);
+                }
+                j++;
+            }
+            }
+            }
+           resolve(mia);
+          });
+
+          });
+       }
+

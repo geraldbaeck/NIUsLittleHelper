@@ -51,6 +51,11 @@ Die Funktion Mitarbeiter Liste/Ausdruck öffnet normal ein neues Fenster, in dem
 
 Diese Abfragen werden in einer DB lokal zwischengespeichert um nicht unnötige Requests an den Server zu erzeugen.
 
+### Mitarbeiter / Neu
+Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich neue Mitarbeiter anlegen lassen können. Dieses Formular wurde erweitert:
+
+* Es lässt sich nun automatisch eine freie Dienstnummer dem neuen Mitarbeiter zuordnen.
+* Es lässt sich nun eine Liste aller freien Dienstnummern anzeigen.
 
 ## Getting Started
 
@@ -99,6 +104,7 @@ Always welcome just fork and commit.
 * **Gerald Bäck** - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
 * **Stephan Spindler** - [github](https://github.com/spind42)
 * **Daniel Steiner**
+* **Sebastian Kuttnig** - [github](https://github.com/daseppl)
 
 ## License
 
