@@ -215,6 +215,32 @@ $(document).ready(function() {
         });
 
      });
+     
+     addCalculationHandler("#gaststatus", [{calcname : "gaststatus", uiname : "Gaststatus"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeGuestStatus(result.ENID)
+        }).then( function(result) {
+          if(result.istGast) { return ("ja"); } else { return ("nein"); }
+        });
+
+     }); 
+     
+     addCalculationHandler("#dienstgrade", [{calcname : "dienstgrade", uiname : "Dienstgrad"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeRank(result.ENID)
+        }).then( function(result) {
+          return(result.rank);
+        });
+
+     });
 
     addCalculationHandler("#sandienststunden", [{calcname : "dienststunden", uiname : "Dienststunden d. l. 6 Monate"}], function(dnr, name) {
        //verkettete Promises...
