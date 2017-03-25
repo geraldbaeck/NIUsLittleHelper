@@ -47,7 +47,7 @@ Die Funktion Mitarbeiter Liste/Ausdruck öffnet normal ein neues Fenster, in dem
 
 * Es gibt jetzt eine sortierbare Tabelle mit Volltextsuche
 * Berechnung der Dienste und Stunden der letzten 6 Monate im Bereich RD (noch ohne Ambulanzen!)
-* Abfrage der Grundausbildung der Mitarbeiter
+* Abfrage der Grundausbildung, des Dienstgrades und des Gaststatus der Mitarbeiter
 
 Diese Abfragen werden in einer DB lokal zwischengespeichert um nicht unnötige Requests an den Server zu erzeugen.
 
@@ -104,7 +104,7 @@ Always welcome just fork and commit.
 * **Gerald Bäck** - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
 * **Stephan Spindler** - [github](https://github.com/spind42)
 * **Daniel Steiner**
-* **Sebastian Kuttnig** - [github](https://github.com/daseppl)
+* **Sebastian Kuttnig** - [github](https://github.com/dersebbel)
 
 ## License
 
