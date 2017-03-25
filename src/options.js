@@ -7,7 +7,8 @@ function save_options() {
 
   var kuerzel = document.getElementById('kuerzel').value;
   save[STORAGE_KEY_KUERZEL] = kuerzel;
-
+  save[STORAGE_KEY_SEARCH_COURSE_ALWAYS_SEARCH] = document.getElementById('STORAGE_KEY_SEARCH_COURSE_ALWAYS_SEARCH').checked;
+  save[STORAGE_KEY_CACHE_ACTIVE] = document.getElementById('STORAGE_KEY_CACHE_ACTIVE').checked;
   chrome.storage.sync.set(save, function(){
     var status = document.getElementById('status');
     status.textContent = 'Einstellungen gespeichert...';
@@ -24,8 +25,12 @@ function restore_options() {
   // Use default value color = 'red' and likesColor = true.
   var load = {};
   load[STORAGE_KEY_KUERZEL] = "";
+  load[STORAGE_KEY_SEARCH_COURSE_ALWAYS_SEARCH] = DEFAULT_SEARCH_COURSE_ALWAYS_SEARCH;
+  load[STORAGE_KEY_CACHE_ACTIVE] = DEFAULT_CACHE_ACTIVE;
   chrome.storage.sync.get(load, function(items) {
     document.getElementById('kuerzel').value = items[STORAGE_KEY_KUERZEL];
+    document.getElementById('STORAGE_KEY_SEARCH_COURSE_ALWAYS_SEARCH').checked = items[STORAGE_KEY_SEARCH_COURSE_ALWAYS_SEARCH];
+    document.getElementById('STORAGE_KEY_CACHE_ACTIVE').checked = items[STORAGE_KEY_CACHE_ACTIVE];
   });
 }
 document.addEventListener('DOMContentLoaded', restore_options);

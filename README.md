@@ -22,6 +22,16 @@ quartalsweise abgeschlossen!
 ### Kurssuche
 
 * Bei der Kurssuche wird für das Suchergebnis eine Volltextsuche in der Tabelle mit den gefundenen Kursen ermöglicht.
+* Bei der Kurssuche werden jetzt automatisch alle Kurse des nächsten Jahres gesucht. Indem die Suche beim Besuch der Seite automatisch ausgeführt wird. (Dieses Verhalten kann über die Einstellungen des Addons deaktiviert werden)
+* Es wird das Formular Kurssuche ausgeblendet
+* Es wird das Formular Kursauswahl ausgeblendet
+* Die Tabelle mit den angezeigten Kursen ist sortierbar
+* Der Link um die Kursdetails zu öffnen ganz links öffnet einen neuen Kurs per standard in einem neuen BrowserFenster/BrowserTab
+
+## Kurssuche TODO bzw. in Arbeit:
+
+* Anmeldebutton für Benutzer, der ein EMail erzeugt per mailto in dem alle relevanten Daten für die Kursanmeldung bereits ausgefüllt sind. Wie zuständige Ausbildung, Kursnummer, Kursname, Dienstnummer, und Name.
+* Vordefinierte Filter um nur bestimmte Kurse anzeigen zu lassen, geplant sind zumindest alle §50 Kurse, FK-Kurse, etc.
 
 ### Kursdetails
 
@@ -73,6 +83,7 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 + *0.30* [NIU+ Features](#zusätzliche-daten-zur-lv-statistik-lvstatistik-lvstatisticaspx) eingebaut
 + *0.31* Zusätzliche Filter für geplante Dienste, Seite aufgeräumt
 + *0.32* Überarbeitete [FunktionärInnenfeatures](https://github.com/geraldbaeck/NIUsLittleHelper/pull/2)
++ *0.33* FunktionärInnenfeatures: Funktion zur Anzeige von freien Dienstnummern, Ambulanzen in Dienststatistik erfasst
 
 ## Built With
 
