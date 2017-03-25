@@ -196,7 +196,6 @@ $(document).ready(function() {
 
 
 
-    DUTY_TYPES
 
     addCalculationHandler("#grundkurse", [{calcname : "grundkurse", uiname : "Grundkurse"}], function(dnr, name) {
        //verkettete Promises...
