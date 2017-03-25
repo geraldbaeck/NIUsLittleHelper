@@ -13,6 +13,10 @@ $(document).ready(function() {
       person.id = $(p).attr('href').replace("javascript:SEmpFNRID('", '').replace("');", '');
       person.dienstnummer = nameStr.substring(nameStr.indexOf('(') + 1, nameStr.indexOf(')'));
       person.name = nameStr.replace('(' + person.dienstnummer + ')', '').trim();
+      $.get('https://niu.wrk.at/Kripo/Employee/shortemployee.aspx?EmployeeNumberID=' + person.id, function(data) {
+        console.log('User loaded.');
+        console.log(data);
+      });
       return person;
     }
   }
@@ -74,6 +78,9 @@ $(document).ready(function() {
     return dienste;
   }
 
-  tbl = scrapeTables();
+  dienste = scrapeTables();
+  chrome.storage.sync.set({NIUDienste: dienste}, function() {
+    console.log('Dienste saved.');
+  });
 
 });
