@@ -26,6 +26,9 @@
     "img/*",
     "/src/webcontent/*"
   ],
+  "chrome_url_overrides" : {
+    "newtab": "src/dashboard.html"
+  },
   "background": {
     "scripts": ["src/background/hot-reload.js"]
   },
