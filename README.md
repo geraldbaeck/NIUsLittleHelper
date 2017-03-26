@@ -84,16 +84,16 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 + *0.31* Zusätzliche Filter für geplante Dienste, Seite aufgeräumt
 + *0.32* Überarbeitete [FunktionärInnenfeatures](https://github.com/geraldbaeck/NIUsLittleHelper/pull/2)
 + *0.33* FunktionärInnenfeatures: Funktion zur Anzeige von freien Dienstnummern, Ambulanzen in Dienststatistik erfasst
++ *0.34* FunktionärInnenfeatures: Gaststatus und Dienstgrad lassen sich nun in Liste/Ausdruck auswerten um Beförderungen zu erleichtern.
 
 ## Built With
 
-* [Atom](https://github.com/atom/atom) - Code Editor
-* [Javascript](https://en.wikipedia.org/wiki/JavaScript) - I love you, but I hate you too
-* [JQuery](https://jquery.com/) - I most definitely hate you
+* [Atom](https://github.com/atom/atom)
+* [Javascript](https://en.wikipedia.org/wiki/JavaScript)
+* [JQuery](https://jquery.com/)u
 * jQueryUI
 * PouchDB
 * jQuery DataTable
-
 
 ## Contributing
 
@@ -102,9 +102,10 @@ Always welcome just fork and commit.
 ## [Authors](https://github.com/geraldbaeck/NIUsLittleHelper/graphs/contributors)
 
 * **Gerald Bäck** - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
+* **Sebastian Kuttnig** - [github](https://github.com/dersebbel)
 * **Stephan Spindler** - [github](https://github.com/spind42)
 * **Daniel Steiner**
-* **Sebastian Kuttnig** - [github](https://github.com/dersebbel)
+
 
 ## License
 
