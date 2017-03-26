@@ -200,6 +200,7 @@ $(document).ready(function() {
     }
   ];
 
+  //TODO: Unterscheidung, wenn EmployeeId gesetzt! einbauen!
   tabelle.find("tr").slice(1).each(function(index) {
     var row = {};
     if ($(this).find("td").length == 1) {
@@ -210,7 +211,7 @@ $(document).ready(function() {
         console.log("adding data: " + val + " als " + headers[index]);
         switch(index) {
             case 0: //ABZNR
-              if (!(new RegExp("^[0-9]+$").test(val))) {
+              if (!(new RegExp("^.[0-9]+$").test(val))) {
                 return;
               }
             case 1: //KURS

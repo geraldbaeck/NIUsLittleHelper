@@ -196,7 +196,6 @@ $(document).ready(function() {
 
 
 
-    DUTY_TYPES
 
     addCalculationHandler("#grundkurse", [{calcname : "grundkurse", uiname : "Grundkurse"}], function(dnr, name) {
        //verkettete Promises...
@@ -213,6 +212,32 @@ $(document).ready(function() {
           return checkCourseAttendance(result.EID, grundkurse)
         }).then( function(resultDict) {
           return ("Das RK: " + resultDict.kurs1.absolved + "<br />AmbSem: " + resultDict.kurs2.absolved + "<br />KHD-SD: " + resultDict.kurs3.absolved);
+        });
+
+     });
+     
+     addCalculationHandler("#gaststatus", [{calcname : "gaststatus", uiname : "Gaststatus"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeGuestStatus(result.ENID)
+        }).then( function(result) {
+          if(result.istGast) { return ("ja"); } else { return ("nein"); }
+        });
+
+     }); 
+     
+     addCalculationHandler("#dienstgrade", [{calcname : "dienstgrade", uiname : "Dienstgrad"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeRank(result.ENID)
+        }).then( function(result) {
+          return(result.rank);
         });
 
      });

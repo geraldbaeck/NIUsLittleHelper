@@ -252,6 +252,49 @@ function dnrToIdentifier(dnr) {
   return getFromCache("empid_", dnr, { 'dnr' : dnr}, dnrToIdentifierNotCached);
 }
 
+function getEmployeeGuestStatus(empNID) {
+return getFromCache("guestid_", empNID, { 'empNID' : empNID}, getEmployeeGuestStatusNotCached);
+}
+
+function getEmployeeGuestStatusNotCached(args)
+{
+  var dict = {};
+  var empNID = args.empNID;
+
+         return $.get("https://niu.wrk.at/Kripo/Employee/detailEmployee.aspx?EmployeeNumberID=" + empNID)
+
+        .then(function(data) {
+
+         var gueststatus = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__type_3").prop("checked");
+         
+         dict["istGast"] = gueststatus;
+         
+         return dict;
+
+        });
+}
+
+function getEmployeeRank(empNID) {
+return getFromCache("rankid_", empNID, { 'empNID' : empNID}, getEmployeeRankNotCached);
+}
+
+function getEmployeeRankNotCached(args)
+{
+  var dict = {};
+  var empNID = args.empNID;
+
+         return $.get("https://niu.wrk.at/Kripo/Employee/detailEmployee.aspx?EmployeeNumberID=" + empNID)
+
+        .then(function(data) {
+
+         var rank = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__rank option:selected").text();
+         
+         dict["rank"] = rank;
+         
+         return dict;
+
+        });
+}
 
 function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
     //return calculateDutyStatisticNonCached({'empID' : empID, 'reqtype' : reqtype, 'reqStartDate' : reqStartDate, 'reqEndDate' : reqEndDate});
