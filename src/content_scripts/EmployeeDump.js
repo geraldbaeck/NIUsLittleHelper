@@ -169,6 +169,29 @@ $(document).ready(function() {
   $.get(path, function(data) {
 
     header.after(data);
+
+    for (key in DUTY_TYPES) {
+
+        $("#dienstcount").append("<li><div id='dienstcount_" + key +"'>" + key + "<span class='menu_description'>" + DUTY_TYPES[key].description + "</span></div></li>");
+        var col = [
+          {calcname : "hourduty$" + key, uiname : key + " Stunden" },
+          {calcname : "countduty$" + key, uiname : key + " Dienste"}
+        ];
+        addCalculationHandler("#dienstcount_" + key, col, function(dnr, name) {
+           //verkettete Promises...
+           return dnrToIdentifier(dnr).then(
+                  function(result) {
+                    console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+                    return calculateDutyStatistic(result.ENID, "");
+                  }).then(
+                    function(statresult) {
+                      console.log("key: " + key + "name" + JSON.stringify(name) + "statresult: " + statresult);
+                      return statresult.getDuty(name.calcname);
+                    }
+                  );
+        });
+    }
+
     $("#menu").menu();
 
 
@@ -192,6 +215,32 @@ $(document).ready(function() {
         });
 
      });
+     
+     addCalculationHandler("#gaststatus", [{calcname : "gaststatus", uiname : "Gaststatus"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeGuestStatus(result.ENID)
+        }).then( function(result) {
+          if(result.istGast) { return ("ja"); } else { return ("nein"); }
+        });
+
+     }); 
+     
+     addCalculationHandler("#dienstgrade", [{calcname : "dienstgrade", uiname : "Dienstgrad"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeRank(result.ENID)
+        }).then( function(result) {
+          return(result.rank);
+        });
+
+     });
 
     addCalculationHandler("#sandienststunden", [{calcname : "dienststunden", uiname : "Dienststunden d. l. 6 Monate"}], function(dnr, name) {
        //verkettete Promises...
@@ -201,7 +250,8 @@ $(document).ready(function() {
                 return calculateDutyStatistic(result.ENID, "");
               }).then(
                 function(statresult) {
-                  return statresult["hourDutyAs"]["SAN_RD"];
+
+                  return statresult.getDutyHours("SUM_RD");
                 }
               );
       });
@@ -213,14 +263,32 @@ $(document).ready(function() {
                  return calculateDutyStatistic(result.ENID, "");
                }).then(
                  function(statresult) {
-                   return statresult["countDutyAs"]["SAN_RD"];
+                   return statresult.getDutyCount("SUM_RD");
                  }
                );
       });
+      //$("#rddienste").trigger("click");
 
       //zum testen
       //$("#rddienste").trigger("click"); //aktiviert gleich nach laden der seite den click
-
   });
-
+(function(){
+        var searchParams = $("#ctl00_main_m_SearchParams");
+        var dnrStart = searchParams.html().substr(15,4);
+        console.log(dnrStart);
+        var dienstnummern = [];
+        var freieDnr = [];
+        $('.sorting_1').each(function(key, value){
+          dienstnummern.push($(value).html());
+        });
+        $(dienstnummern).each(function(key, value){
+          var exp = parseInt(dnrStart) + parseInt(key);
+          if(exp != value)
+          {
+            freieDnr.push(exp);
+          }
+        exp="";
+      });
+      searchParams.append("<br><b>Die nächste Freie Dienstnummer lautet \""+freieDnr[0]+"\"");
+    })();  
 });
