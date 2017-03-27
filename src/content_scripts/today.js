@@ -58,6 +58,7 @@ var getAmbulanceDuty = function(){
 
 
 var getRDDuty = function(){
+
     $(".MultiDutyRoster").prepend(icsDLButton);
    
     $(".MultiDutyRoster table").each(function(key, dutyTable){
@@ -131,3 +132,4 @@ var getRDDuty = function(){
         });
     });
 }
+});
