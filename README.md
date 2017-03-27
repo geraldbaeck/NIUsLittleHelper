@@ -86,12 +86,12 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 + *0.33* FunktionärInnenfeatures: Funktion zur Anzeige von freien Dienstnummern, Ambulanzen in Dienststatistik erfasst
 + *0.34* FunktionärInnenfeatures: Gaststatus und Dienstgrad lassen sich nun in Liste/Ausdruck auswerten um Beförderungen zu erleichtern.
 + *0.35* Funktion zum herunterladen einer Kalenderdatei mit den RD-Diensten der nächsten 14 Tage. 
+
 ## Built With
 
 * [Atom](https://github.com/atom/atom)
-* [VSCode](https://github.com/Microsoft/vscode)
 * [Javascript](https://en.wikipedia.org/wiki/JavaScript)
-* [JQuery](https://jquery.com/)
+* [JQuery](https://jquery.com/)u
 * jQueryUI
 * PouchDB
 * jQuery DataTable
@@ -106,7 +106,6 @@ Always welcome just fork and commit.
 * **Sebastian Kuttnig** - [github](https://github.com/dersebbel)
 * **Stephan Spindler** - [github](https://github.com/spind42)
 * **Daniel Steiner** - [github](https://github.com/danielsteiner) - [web](https://danielsteiner.net)
-
 
 ## License
 
