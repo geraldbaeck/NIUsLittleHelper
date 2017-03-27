@@ -54,7 +54,7 @@ $(document).ready(function() {
     var employee = {
       FN: nameFull,
       N: nameLast + ';' + nameFirst + ';;;',
-      ORG: 'Österreichisches Rotes Kreuz - Landesgruppe Wien',
+      ORG: 'Österreichisches Rotes Kreuz - Landesverband Wien',
       PROFILE: 'VCARD',
       TZ: '+0100',
       URL: window.location.href,
