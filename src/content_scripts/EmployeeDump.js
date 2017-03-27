@@ -41,6 +41,7 @@ function addCalculationHandler(id, names, callback) {
 
 
         //TODO: solange das läuft kleines fenster anzeigen bzw. user informieren!
+        //TODO: um das NIU zu schonen sollten die Abfragen hier seriell abgearbeitet werden
         var ready = Promise.resolve();
         for (index in dataSet) {
           var row = dataSet[index];
@@ -52,7 +53,7 @@ function addCalculationHandler(id, names, callback) {
                var i = index;
                var r = row;
                var c = columns.length - 1;
-               resolve(callback(r.DNR, name)
+               var res = callback(r.DNR, name)
                 .then(function(value) {
                   r[name.calcname] = value;
                   //console.log("get cell: " + i + "#" + c);
@@ -61,7 +62,8 @@ function addCalculationHandler(id, names, callback) {
                 })
                 .catch(function(error) {
                   console.log("addCalculationHandler -> promise then mit error: " + error);
-                }));
+                });
+                resolve(res);
           });
           ready = ready.then(function() {
            return p;
@@ -215,7 +217,7 @@ $(document).ready(function() {
         });
 
      });
-     
+
      addCalculationHandler("#gaststatus", [{calcname : "gaststatus", uiname : "Gaststatus"}], function(dnr, name) {
        //verkettete Promises...
 
@@ -227,8 +229,8 @@ $(document).ready(function() {
           if(result.istGast) { return ("ja"); } else { return ("nein"); }
         });
 
-     }); 
-     
+     });
+
      addCalculationHandler("#dienstgrade", [{calcname : "dienstgrade", uiname : "Dienstgrad"}], function(dnr, name) {
        //verkettete Promises...
 
@@ -290,5 +292,5 @@ $(document).ready(function() {
         exp="";
       });
       searchParams.append("<br><b>Die nächste Freie Dienstnummer lautet \""+freieDnr[0]+"\"");
-    })();  
+    })();
 });
