@@ -552,7 +552,7 @@ function calculateDutyStatisticNonCached(args) {
 
 
                 $(this).find('table#DutyRosterTable tbody tr').each(function() {
-                    countDienste += 1;
+
                     $(this).find('td').each(function(i, val) {
                         val = val.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
 
@@ -576,7 +576,7 @@ function calculateDutyStatisticNonCached(args) {
                             case 2: // Zeiten
                                 hours = getDurationFromTimeString(currentDateString, val);
                                 $(this).after('<td>' + hours + '</td>');
-                                sumDuty += hours;
+                                //sumDuty += hours;
                                 break;
                             case 3: // Dienststellen
 
@@ -649,7 +649,7 @@ function calculateDutyStatisticNonCached(args) {
             var ambTables = $(data).find('table.AmbulanceTable');
             ambTables.each(function(index) {
               $(this).find("tr:gt(0)").each(function(index) {
-                console.log("calculateDutyStatisticNonCached --> iterate over ambulanz rows index: " + index + " inhalt: " + $(this).text());
+                //console.log("calculateDutyStatisticNonCached --> iterate over ambulanz rows index: " + index + " inhalt: " + $(this).text());
                 var position = "AMB_SONSTIGE";
                 var hours = 0;
                 $(this).find("td").each(function(index) {
