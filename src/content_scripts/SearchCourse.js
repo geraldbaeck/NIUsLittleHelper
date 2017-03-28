@@ -5,14 +5,20 @@
 
 var kursauswahl;
 var kurssuche;
-var suchfilter; //ul menüleiste, die wählbare suchfilter enthält
+var activeFilters = {}; //ul menüleiste, die wählbare suchfilter enthält
 
 
-function addSuchfilter(key, uiname, callback) {
+function addSuchfilter(table, key, uiname, column_names, callback) {
   suchfilter.append('<li><input  id="suchfilter_' + key + '" type="checkbox" value="value"><label for="suchfilter_' + key + '">' + uiname + '</label></li>');
   suchfilter.find('#suchfilter_' + key).change(function() {
       console.log("addSuchfilter --> click calling callback with checked: " + $(this).is(':checked'));
-      callback( $(this).is(':checked') );
+      //callback( $(this).is(':checked') );
+      if ($(this).is(':checked')) {
+        activeFilters[key] = { "column_names" : column_names, "filter" : callback };
+      } else {
+        activeFilters[key] = undefined;
+      }
+      table.draw(); //redraw um suche erneut auszuführen!
   });
 
 
@@ -134,11 +140,13 @@ $(document).ready(function() {
       body: "Bitte um Anmeldung zu " + data
     });
 
-    if (experimentalActivated()) {
-      return "<a href='" + mailto + "'>anmelden</a>";
-    } else {
-      return "";
-    }
+    experimentalActivated().then(function(activated){
+      if (activated) {
+        return "<a href='" + mailto + "'>anmelden</a>";
+      } else {
+        return "";
+      }
+    });
 
   }
 
@@ -163,6 +171,12 @@ $(document).ready(function() {
     title: "Anmeldestatus"
   }
 
+ //stellt einen mailto Link zur Anmeldung zur Verfügung, siehe Funktion generateMailLink
+  col_anmeldelink = {
+      data: "abznr",
+      render: generateMailLink,
+  }
+
   columns = [
     {
       data: "abznr",
@@ -170,17 +184,17 @@ $(document).ready(function() {
       render: function(data, type, full, meta) {
         return '<a class="open_course_link" href="/Kripo/Kufer/CourseDetail.aspx?CourseID=' + data + '">open</a>';
       }
-    },{
-      data: "abznr",
-      render: generateMailLink,
     },
+
     {
       data: "abznr",
       title: "ABZ Nr",
+      name: "abznr",
       defaultContent: "LEER"
     },{
       data: "kurs",
-      title: "Kurs"
+      title: "Kurs",
+      name: "kurs"
 
     },{
       data: "von",
@@ -236,11 +250,11 @@ $(document).ready(function() {
     } else {
 
 
-      console.log("tds length: " + tds.length);
+      //console.log("tds length: " + tds.length);
       $(this).find("td").each(function (index) {
 
         var val = $(this).text();
-        console.log("adding data: " + val + " als " + headers[index]);
+        //console.log("adding data: " + val + " als " + headers[index]);
         switch(index) {
             case 0: //ABZNR
               if (!(new RegExp("^.[0-9]+$").test(val))) {
@@ -307,36 +321,58 @@ $(document).ready(function() {
     }
   });
 
-
-  addSuchfilter("frei", "Nur Kurse mit freien Plätzen", function(enable) {
-      //https://datatables.net/reference/api/column().search() todo: verwende regexpr
-      if (enable) {
-        datatable.columns("kursstatus:name").search("Offen \([0-9]*[1-9]/[0-9]+\)", true).draw();
-      } else {
-          datatable.columns("kursstatus:name").search(".*", true).draw();
+  $.fn.dataTable.ext.search.push(
+    function( settings, searchData, index, rowData, counter ) {
+      var show = true;
+      for (let key in activeFilters) {
+        var f = activeFilters[key];
+        if (f === undefined) {
+          continue;
+        }
+        var data = {};
+        for (let c of f.column_names) {
+            var index = datatable.column(c + ":name").index("visible");
+            //console.log("$.fn.dataTable.ext.search --> set data[c] to " + searchData[index] + " c: " + c + " index: " + index);
+            data[c] = searchData[index];
+        }
+        //console.log("$.fn.dataTable.ext.search --> calling filter: data:" + data + "index:" + index + "rowData:" + rowData + "counter: " + counter);
+        show = show && f.filter(data, index, rowData, counter); //UND verknüpfung der suchfilter
       }
+      return show;
+    }
+);
+
+
+  addSuchfilter(datatable, "frei", "Nur Kurse mit freien Plätzen", ["kursstatus"], function(searchData, index, rowData, counter) {
+      //https://datatables.net/reference/api/column().search() todo: verwende regexpr
+      //console.log("calling suchfilter function freie plätze --> searchData: " + searchData.kursstatus);
+      var re = new RegExp("Offen \\([0-9]*[1-9]/[0-9]+\\)");
+      //console.log("addSuchfilter --> suchfilter function freie plätze --> matches: [" + searchData.kursstatus + "] regex: " + re.toString() + " result: " + re.test(searchData.kursstatus));
+      if (re.test(searchData.kursstatus)) {
+        return true;
+      }
+      return false;
   });
 
-  addSuchfilter("qualifikation_par_50", "Nur §50 Kurse", function(enable) {
+  addSuchfilter(datatable, "qualifikation_par_50", "Nur §50 Kurse", ["qualifikation"], function(searchData, index, rowData, counter) {
       //https://datatables.net/reference/api/column().search() todo: verwende regexpr
-      var col = datatable.columns("qualifikation:name");
-      if (enable) {
-        col.search("§50").draw();
-      } else {
-        col.search(".*", true).draw();
-      }
+      return searchData.qualifikation.includes("§50");
   });
 
-  addSuchfilter("qualifikation_rea", "Nur §50 Reanimationstraining", function(enable) {
-      //https://datatables.net/reference/api/column().search() todo: verwende regexpr
-      var col = datatable.columns("qualifikation:name");
-      if (enable) {
-        col.search("Reanimationstraining").draw();
-      } else {
-        col.search(".*", true).draw();
-      }
+
+  addSuchfilter(datatable, "qualifikation_rea", "Nur §50 Reanimationstraining", ["qualifikation"], function(searchData, index, rowData, counter) {
+      return searchData.qualifikation.includes("Reanimationstraining");
   });
 
+  addSuchfilter(datatable, "abznr_anrechnung", "Nur Anrechnungskurse", ["abznr"], function(searchData, index, rowData, counter) {
+      return searchData.abznr.includes("A");
+  });
+
+  addSuchfilter(datatable, "kurs_san_basis", "Nur SAN Basiskurse", ["kurs"], function(searchData, index, rowData, counter) {
+      return  searchData.kurs.includes("BAS - Ausbildung - Das Rote Kreuz") ||
+              searchData.kurs.includes("KHD-Praxistag") ||
+              searchData.kurs.includes("RS-Startmodul");
+  });
 
 
 });
