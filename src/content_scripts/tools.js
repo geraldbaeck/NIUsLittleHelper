@@ -266,9 +266,9 @@ function getEmployeeGuestStatusNotCached(args)
         .then(function(data) {
 
          var gueststatus = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__type_3").prop("checked");
-         
+
          dict["istGast"] = gueststatus;
-         
+
          return dict;
 
         });
@@ -278,6 +278,11 @@ function getEmployeeRank(empNID) {
 return getFromCache("rankid_", empNID, { 'empNID' : empNID}, getEmployeeRankNotCached);
 }
 
+/*
+eventuell könnte man sich überlegen hier mehr Informationen von detailEmployee auszulesen, um diese in das
+dict zu speichern, damit sie dann auch gecached werden.
+somit wäre dann der Name getEmployeeDetails auch besser für diese Funktion
+*/
 function getEmployeeRankNotCached(args)
 {
   var dict = {};
@@ -288,9 +293,9 @@ function getEmployeeRankNotCached(args)
         .then(function(data) {
 
          var rank = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__rank option:selected").text();
-         
+
          dict["rank"] = rank;
-         
+
          return dict;
 
         });
@@ -307,6 +312,9 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
 
 
 
+/*
+Liste an möglichen Statistiken, die berechnet werden können
+*/
 var DUTY_TYPES = {
   "AMB_SONSTIGE" : {description: "sonstige Ambulanzdienste..."},
   "AMB_ALL" : {description: "alle Dienste auf Ambulanzen egal welche Position"},
@@ -318,7 +326,7 @@ var DUTY_TYPES = {
   "SAN2" : {description: "Alle Dienste als SAN2 auf einem KTW"},
   "SUM_NFR" : {description: "Alle Dienste auf NFR", aggregate : ["SEFNFR", "NFR1", "NFR2"]},
   "SUM_KTW" : {description: "Alle Dienste auf KTW", aggregate : ["SEFKTW", "SAN1", "SAN2"]},
-  "SUM_RD" : {description: "Alle Dienste im RD als RS oder RSiA am KTW + RTW", aggregate : ["SUM_NFR", "SUM_KTW"]},
+  "SUM_RD" : {description: "Alle Dienste im RD als RSiA oder höher am KTW + RTW", aggregate : ["SUM_NFR", "SUM_KTW"]},
   "SUM_SAN" : {description: "Alle Dienste als RSiA oder höher", aggregate: ["SUM_RD", "SUM_SANAMB"]},
   "SUM_SANAMB" : {description: "Alle Dienste als RSiA oder höher auf Ambulanzen", aggregate: ["AMB_RSIA", "AMB_RS", "AMB_NFS"]},
   "AMB_RSIA" : {description: "RS in Ausbildung"},
@@ -326,6 +334,9 @@ var DUTY_TYPES = {
   "AMB_NFS" : {description: "Als NFS auf der Ambulanz"}
 };
 
+/*
+Klasse um Dienststatistiken zu berechnen
+*/
 class DutyCount {
 
   // create statistical counters
@@ -372,22 +383,30 @@ class DutyCount {
       this.countDienste += 1;
   }
 
-  aggregateDuty(position, visited, duty) {
-    //TODO: calculate aggregations
-    //console.log("DutyCount#aggregateDuty --> aggregateDuty start with position: " + position);
+ /*
+ Verwendet die aggregate Liste der DutyTypes um
+ die aggregierte Summe an Diensten und Stunden
+ für diesen DutyType (dutyType) zu erstellen
+ dutyType - der dutyType für den diese aggregation
+ gemacht werden soll
+ visited - eine liste an bereits aggregierten dutytypes, damit
+ sollen loops vermieden werden
+ duty - das dict, dass die duty aufsummiert und zwar stunden (duty.hours) und dienste (duty.count)
+ */
+  aggregateDuty(dutyType, visited, duty) {
     if (duty == null) {
         duty = {};
         duty['hours'] = 0;
         duty['count'] = 0;
     }
-    if (visited.includes(position)) {
+    if (visited.includes(dutyType)) {
       throw "DutyCount#aggregateDuty --> Error Aggregate loop detected!";
     }
-    visited.push(position);
-    if (position in DUTY_TYPES) {
-      if ("aggregate" in DUTY_TYPES[position]) {
+    visited.push(dutyType);
+    if (dutyType in DUTY_TYPES) {
+      if ("aggregate" in DUTY_TYPES[dutyType]) {
           //console.log("DutyCount#aggregateDuty --> need to aggregate! position " + position + " duty.count ist " + duty.count + " duty.hours " + duty.hours);
-          for (let val of DUTY_TYPES[position].aggregate) {
+          for (let val of DUTY_TYPES[dutyType].aggregate) {
             var d = this.aggregateDuty(val, visited, duty);
             //console.log("duty.count ist " + duty.count);
             //console.log("Füge zu position " + position + " von position " + val + " count " + d.count + " hours " + d.hours + " hinzu " );
@@ -395,14 +414,14 @@ class DutyCount {
             //duty.count += d.count;
             //console.log("Somit ist count " + duty.count + " hours " + duty.hours);
           }
-      } else if (position in this.hourDutyAs) {
+      } else if (dutyType in this.hourDutyAs) {
         //console.log("DutyCount#aggregateDuty --> simple add! postion: " + position + " count: " + this.countDutyAs[position] + " hours: " + this.hourDutyAs[position]);
-        duty.hours += this.hourDutyAs[position];
-        duty.count += this.countDutyAs[position];
+        duty.hours += this.hourDutyAs[dutyType];
+        duty.count += this.countDutyAs[dutyType];
       } else {
         //
       }
-      console.log("DutyCount#aggregateDuty --> return duty for " + position + " is: duty.count " + duty.count + " duty.hours " + duty.hours);
+      console.log("DutyCount#aggregateDuty --> return duty for " + dutyType + " is: duty.count " + duty.count + " duty.hours " + duty.hours);
       return duty;
     } else {
       throw "Unbekannte position/Diensttyp!!";
@@ -448,8 +467,6 @@ function getNiuDateString(date) {
   aus der EmployeeDutyStatistic
 
   Position können sein: SEFNFR, NFR1, NFR2, SEFKTW, SAN1, SAN2, RS (SAN1 + SEFKTW + (?NFR2) + NFR1 + SEFNFR), NFS (SEFNFR + NFR1)
-  //TODO: ambulanzpositionen wie H, NFS, Azubi, etc. sind noch unberücksichtigt
-
 
   empID : String - die NIU EmployeeNumberID des Mitarbeiters
   reqtype : String[] - welche Statistik soll erstellt werden
@@ -458,6 +475,7 @@ function getNiuDateString(date) {
       * dienste (Anzahl der Dienste gruppiert nach Position)
    reqStartDate - Abfragezeitraum Beginn (wird noch ignoriert!)
    reqEndDate - Abfragezeitraum Ende (wird noch ignoriert!)
+   return: eine Instanz von DutyType
 
 */
 function calculateDutyStatisticNonCached(args) {
@@ -519,32 +537,6 @@ function calculateDutyStatisticNonCached(args) {
 
             var duty = new DutyCount();
 
-            var dutyType = ["SEFNFR", "NFR1", "NFR2", "SEFKTW", "SAN1", "SAN2"];
-
-            // create statistical counters
-            var rawWochentag = new Array();
-            var rawDienststellen = new Array();
-            var currentDateString;
-            var sumDuty = 0; // Gesamtdauer aller Dienste
-            var countDienste = 0;
-            var rawKollegen = new Array();
-            var rawDutyAs = new Array();
-            var hourDutyAs = {};
-            var countDutyAs = {};
-
-            dutyType.forEach( function(item) {
-              hourDutyAs[item] = 0;
-              countDutyAs[item] = 0;
-            });
-
-            // hourDutyAs['SEFNFR'] = 0;
-            // hourDutyAs['NFR1'] = 0;
-            // hourDutyAs['NFR2'] = 0;
-            // hourDutyAs['SEFKTW'] = 0;
-            // hourDutyAs['SAN1'] = 0;
-            // hourDutyAs['SAN2'] = 0;
-
-
             // iterate data of each row
             var $tables = $(data).find('div.MultiDutyRoster');
             $tables.find('table.MessageTable').each(function(i) {
@@ -560,7 +552,7 @@ function calculateDutyStatisticNonCached(args) {
 
 
                 $(this).find('table#DutyRosterTable tbody tr').each(function() {
-                    countDienste += 1;
+
                     $(this).find('td').each(function(i, val) {
                         val = val.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
 
@@ -576,7 +568,7 @@ function calculateDutyStatisticNonCached(args) {
 
                         switch (i) {
                             case 0: // Wochentag
-                                rawWochentag.push(val);
+
                                 break;
                             case 1: // Datum
                                 currentDateString = val;
@@ -584,10 +576,10 @@ function calculateDutyStatisticNonCached(args) {
                             case 2: // Zeiten
                                 hours = getDurationFromTimeString(currentDateString, val);
                                 $(this).after('<td>' + hours + '</td>');
-                                sumDuty += hours;
+                                //sumDuty += hours;
                                 break;
                             case 3: // Dienststellen
-                                rawDienststellen.push(val);
+
                                 break;
                             default:
                                 break;
@@ -607,52 +599,34 @@ function calculateDutyStatisticNonCached(args) {
                             case 6: // SAN1
                             case 7: // SAN2
                                 if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
-                                    var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
-                                    rawKollegen.push(kollege);
+                                    //var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
+
                                 } else if ($(val).text() !== '') {
                                     switch (i + offset) {
                                         case 5: // SEF
                                           //console.log("add as fahrer! offset is " + offset + " index is " + i);
                                             if (isNFR) {
-                                                rawDutyAs.push('SEFNFR');
-                                                countDutyAs['SEFNFR'] += 1;
-                                                hourDutyAs['SEFNFR'] += hours;
                                                 duty.addHourDutyAs('SEFNFR', hours);
                                             }
                                             if (isKTW) {
-                                                rawDutyAs.push('SEFKTW');
-                                                countDutyAs['SEFKTW'] += 1;
-                                                hourDutyAs['SEFKTW'] += hours;
                                                 duty.addHourDutyAs('SEFKTW', hours);
                                             }
                                             break;
                                         case 6: // SAN1
                                           //console.log("add as san1!");
                                             if (isNFR) {
-                                                rawDutyAs.push('NFR1');
-                                                countDutyAs['NFR1'] += 1;
-                                                hourDutyAs['NFR1'] += hours;
                                                 duty.addHourDutyAs('NFR1', hours);
                                             }
                                             if (isKTW) {
-                                                rawDutyAs.push('SAN1');
-                                                countDutyAs['SAN1'] += 1;
-                                                hourDutyAs['SAN1'] += hours;
                                                 duty.addHourDutyAs('SAN1', hours);
                                             }
                                             break;
                                         case 7: // SAN2
-                                        //console.log("add as SAN2");
+                                          //console.log("add as SAN2");
                                             if (isNFR) {
-                                                rawDutyAs.push('NFR2');
-                                                countDutyAs['NFR2'] += 1;
-                                                hourDutyAs['NFR2'] += hours;
                                                 duty.addHourDutyAs('NFR2', hours);
                                             }
                                             if (isKTW) {
-                                                rawDutyAs.push('SAN2');
-                                                countDutyAs['SAN2'] += 1;
-                                                hourDutyAs['SAN2'] += hours;
                                                 duty.addHourDutyAs('SAN2', hours);
                                             }
                                             break;
@@ -668,22 +642,18 @@ function calculateDutyStatisticNonCached(args) {
                 });
             }); //ende der each schleife über die duty tabellen
 
-            //TODO: Ambulanzen auswerten!
-            //table.AmbulanceTable:nth-child(26)
-
-
-            ///$tables.find('table.MessageTable').each(function(i) {
+            //Ambulanzen auswerten!
 
             console.log("calculateDutyStatisticNonCached --> Ambulanzen auswerten!");
             //console.log("show data: " +  data);
             var ambTables = $(data).find('table.AmbulanceTable');
             ambTables.each(function(index) {
               $(this).find("tr:gt(0)").each(function(index) {
-                console.log("calculateDutyStatisticNonCached --> iterate over ambulanz rows index: " + index + " inhalt: " + $(this).text());
+                //console.log("calculateDutyStatisticNonCached --> iterate over ambulanz rows index: " + index + " inhalt: " + $(this).text());
                 var position = "AMB_SONSTIGE";
                 var hours = 0;
                 $(this).find("td").each(function(index) {
-                  console.log("calculateDutyStatisticNonCached --> iterate over ambulanz spalten index: " + index + " inhalt: " + $(this).text());
+                  //console.log("calculateDutyStatisticNonCached --> iterate over ambulanz spalten index: " + index + " inhalt: " + $(this).text());
                   switch(index) {
                     case 0: //amb-nummer
                       break;
@@ -692,10 +662,6 @@ function calculateDutyStatisticNonCached(args) {
                     case 2: //Beschreibung
                       break;
                     case 3: //Funktion
-                    // "AMB_RSIA" : {description: "RS in Ausbildung"},
-                    // "AMB_RS" : {description: "Als RS auf der Ambulanz"},
-                    // "AMB_NFS" : {description: "Als NFS auf der Ambulanz"}
-
                       var f = $(this).text();
                       if (f == "009 H" || f == "004 KTWF") {
                           position = "AMB_RS";
@@ -820,7 +786,7 @@ return new Promise(function(resolve, reject) {
           });
 
           numArray.sort();
-          
+
           // Hier wird der Mittelwert aller Dienstnummern in der Liste ermittelt
           // wodurch der hauefigst vorkommende DNr-Bereich ermittelt wird.
           // Dies soll verhindern das Dienstnummern fuer andere BezSt ausgegeben werden.
@@ -862,4 +828,3 @@ return new Promise(function(resolve, reject) {
 
           });
        }
-

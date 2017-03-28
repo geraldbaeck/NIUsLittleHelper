@@ -153,8 +153,17 @@ $(document).ready(function() {
   //     }
   // });
 
-  headers = ["abznr", "kurs", "von", "bis", "ort",
+  //Unterscheidung, wenn Ausbildungstabelle für User abgefragt wird, gibt es eine
+  //Spalte mehr, den Anmeldestatus!
+  maausbheaders = ["abznr", "kurs", "von", "bis", "ort",
+  "kursstatus", "anmeldestatus", "qualifikation", "fortbildungsstunden"];
+  ausbheaders = ["abznr", "kurs", "von", "bis", "ort",
   "kursstatus", "qualifikation", "fortbildungsstunden"];
+
+  col_anmeldestatus = {
+    data: "anmeldestatus",
+    title: "Anmeldestatus"
+  }
 
   columns = [
     {
@@ -201,12 +210,35 @@ $(document).ready(function() {
   ];
 
   //TODO: Unterscheidung, wenn EmployeeId gesetzt! einbauen!
+
+
+  var tds = tabelle.find("tr:first").find("td");
+
+  var headers;
+  if (tds.length == 10) {
+    //es handelt sich um die Ausbildungen eines Users
+    //TODO: zusätzlich noch die Bemerkungen des Kurses für diesen User anzeigen
+    //diese Bemerkungen müssen aus den CourseDetails.aspx geladen werden!
+
+    headers = maausbheaders;
+    columns.push(col_anmeldestatus);
+  } else if (tds.length == 9){
+    //Ausbildungen ganz normal als Suche nach Ausbildungen
+    headers = ausbheaders;
+  } else {
+    throw "ungültige anzahl an spalten!";
+  }
+
   tabelle.find("tr").slice(1).each(function(index) {
     var row = {};
     if ($(this).find("td").length == 1) {
 
     } else {
+
+
+      console.log("tds length: " + tds.length);
       $(this).find("td").each(function (index) {
+
         var val = $(this).text();
         console.log("adding data: " + val + " als " + headers[index]);
         switch(index) {
