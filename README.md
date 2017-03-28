@@ -75,7 +75,7 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 ## Built With
 * [Atom](https://github.com/atom/atom)
 * [Javascript](https://en.wikipedia.org/wiki/JavaScript)
-* [JQuery](https://jquery.com/)u
+* [JQuery](https://jquery.com/)
 * jQueryUI
 * PouchDB
 * jQuery DataTable
@@ -90,4 +90,4 @@ Always welcome just fork and request. Join us on [Slack](https://niuslittlehelpe
 * **Daniel Steiner** - [github](https://github.com/danielsteiner) - [web](https://danielsteiner.net)
 
 ## License
-This is free and unencumbered software released into the public domain - see the [UNLICENSE.md](UNLICENSE.md) file for details. NIU is probably intellectual property of the Austrian Red Cross, but that's not relevant at all.
+This is free and unencumbered software released into the public domain - see the [UNLICENSE.md](UNLICENSE.md) file for details. NIU is probably intellectual property of the Austrian Red Cross.
