@@ -368,10 +368,30 @@ $(document).ready(function() {
       return searchData.abznr.includes("A");
   });
 
+  addSuchfilter(datatable, "abznr_keine_anrechnung", "Keine Anrechnungskurse", ["abznr"], function(searchData, index, rowData, counter) {
+      return !(searchData.abznr.includes("A"));
+  });
+
   addSuchfilter(datatable, "kurs_san_basis", "Nur SAN Basiskurse", ["kurs"], function(searchData, index, rowData, counter) {
       return  searchData.kurs.includes("BAS - Ausbildung - Das Rote Kreuz") ||
               searchData.kurs.includes("KHD-Praxistag") ||
               searchData.kurs.includes("RS-Startmodul");
+  });
+
+  addSuchfilter(datatable, "kurs_kein_san", "Keine SAN Kurse", ["kurs", "qualifikation"], function(searchData, index, rowData, counter) {
+      return !(searchData.qualifikation.includes("§50") || searchData.kurs.includes("SAN")); //eher mehr ein Beispiel für mehrere spalten filter
+  });
+
+  addSuchfilter(datatable, "kurs_nur_gsd", "Nur GSD", ["kurs"], function(searchData, index, rowData, counter) {
+      return searchData.kurs.includes("GSD");
+  });
+
+  addSuchfilter(datatable, "kurs_nur_khd", "Nur KHD", ["kurs"], function(searchData, index, rowData, counter) {
+      return searchData.kurs.includes("KHD");
+  });
+
+  addSuchfilter(datatable, "kurs_nur_fkr", "Nur FKR", ["kurs"], function(searchData, index, rowData, counter) {
+      return searchData.kurs.includes("FKR");
   });
 
 
