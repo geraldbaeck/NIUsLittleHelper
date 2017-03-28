@@ -700,18 +700,24 @@ function calculateDutyStatisticNonCached(args) {
 
 }
 
-//TODO: $.get liefert schon ein promise zurück, somit ist das new Promise unnötig
 function checkCourseAttendance(empID, courseDict) {
+return getFromCache("courseattend_", empID + courseDict.UID, { 'empID' : empID, 'courseDict' : courseDict}, checkCourseAttendanceNotCached);
+}
+
+//TODO: $.get liefert schon ein promise zurück, somit ist das new Promise unnötig
+function checkCourseAttendanceNotCached(args) {
 
     // Function accepts courseDict in format of:
     //var courseDict = {
+    //                    UID : "Unique ID for Cache"
     //                    kurs1 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" },
     //                    kurs2 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" },
     //                    kurs3 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" }
     // [... unlimited additions to dictionary possible but format has to remain the same! ]
     //                  };
 
-
+    var courseDict = args.courseDict;
+    var empID = args.empID;
 
     return new Promise(function(resolve, reject) {
     var post = {};
