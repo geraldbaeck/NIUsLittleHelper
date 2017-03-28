@@ -5,10 +5,18 @@
 
 var kursauswahl;
 var kurssuche;
+var suchfilter; //ul menüleiste, die wählbare suchfilter enthält
 
 
-//var STORAGE_KEY_SEARCH_COURSE_HIDE_SEARCH = "niu_search_course_hide_search";
-//var STORAGE_KEY_SEARCH_COURSE_HIDE_CHOOSE = "niu_search_course_hide_choose";
+function addSuchfilter(key, uiname, callback) {
+  suchfilter.append('<li><input  id="suchfilter_' + key + '" type="checkbox" value="value"><label for="suchfilter_' + key + '">' + uiname + '</label></li>');
+  suchfilter.find('#suchfilter_' + key).change(function() {
+      console.log("addSuchfilter --> click calling callback with checked: " + $(this).is(':checked'));
+      callback( $(this).is(':checked') );
+  });
+
+
+}
 
 
 //verstecke Kursauswahl und speichere status
@@ -134,24 +142,14 @@ $(document).ready(function() {
 
   }
 
+  //suchfilterleiste erzeugen
+  tabelle.before("<div class='Whitebox suchfilter'><ul id='suchfilter'></ul></div>");
+  suchfilter = $('#suchfilter');
 
   //DATATABLE
   var headers = new Array;
   var dataSet = new Array;
   var columns = new Array;
-
-  // tabelle.find("tr:first .MessageHeaderCenter").each(function(index) {
-  //     console.log("init dataset --> index " + index + " mit th " + $(this).text());
-  //
-  //     headers.push($(this).text());
-  //     if ($(this).text().length > 2) {
-  //       columns.push({
-  //         data: $(this).text(),
-  //         title: $(this).text(),
-  //         defaultContent: ""
-  //       });
-  //     }
-  // });
 
   //Unterscheidung, wenn Ausbildungstabelle für User abgefragt wird, gibt es eine
   //Spalte mehr, den Anmeldestatus!
@@ -197,10 +195,12 @@ $(document).ready(function() {
       title: "Ort"
     },{
       data: "kursstatus",
-      title: "Kursstatus (freie Plätze)"
+      title: "Kursstatus (freie Plätze)",
+      name: "kursstatus"
     },{
       data: "qualifikation",
       title: "Qualifikation",
+      name: "qualifikation",
       defaultContent: ""
     },{
       data: "fortbildungsstunden",
@@ -308,12 +308,34 @@ $(document).ready(function() {
   });
 
 
-  // $.get(chrome.extension.getURL("/src/webcontent/search_course_course_context_menu.html"))
-  // .then(function(data){
-  //
-  //
-  // });
+  addSuchfilter("frei", "Nur Kurse mit freien Plätzen", function(enable) {
+      //https://datatables.net/reference/api/column().search() todo: verwende regexpr
+      if (enable) {
+        datatable.columns("kursstatus:name").search("Offen \([0-9]*[1-9]/[0-9]+\)", true).draw();
+      } else {
+          datatable.columns("kursstatus:name").search(".*", true).draw();
+      }
+  });
 
+  addSuchfilter("qualifikation_par_50", "Nur §50 Kurse", function(enable) {
+      //https://datatables.net/reference/api/column().search() todo: verwende regexpr
+      var col = datatable.columns("qualifikation:name");
+      if (enable) {
+        col.search("§50").draw();
+      } else {
+        col.search(".*", true).draw();
+      }
+  });
+
+  addSuchfilter("qualifikation_rea", "Nur §50 Reanimationstraining", function(enable) {
+      //https://datatables.net/reference/api/column().search() todo: verwende regexpr
+      var col = datatable.columns("qualifikation:name");
+      if (enable) {
+        col.search("Reanimationstraining").draw();
+      } else {
+        col.search(".*", true).draw();
+      }
+  });
 
 
 
