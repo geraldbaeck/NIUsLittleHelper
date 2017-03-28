@@ -1,7 +1,10 @@
 # NIU's little helper
-
 Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz ([NIU](https://niu.wrk.at/)).
 
+## Installation
+Einfach über den [Google Store](https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de) installieren.
+
+## Funktionen
 Derzeit werden folgende Funktionen unterstützt:
 
 ### Erweiterte Filter für den Dienstplan
@@ -57,25 +60,7 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 * Es lässt sich nun automatisch eine freie Dienstnummer dem neuen Mitarbeiter zuordnen.
 * Es lässt sich nun eine Liste aller freien Dienstnummern anzeigen.
 
-## Getting Started
-
-Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu testen, bevor sie im [Google Store](https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de) erscheint. Der empfohlene Weg ist, die Extension über den [Google Store](https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de) zu installieren.
-
-### Prerequisites
-
-[Google Chrome Browser](https://www.google.com/chrome/browser/desktop/)
-
-### Installing
-
-1. [Gepackte Extension herunterladen](https://github.com/geraldbaeck/NIUsLittleHelper/archive/master.zip)
-2. Zip file in beliebiges Verzeichnis entpacken
-3. Gehe zu [chrome://extensions/](chrome://extensions/) und Developer mode oben rechts einschalten.
-4. Klick auf den Load unpacked extension button und wähle das vorher entpackte Verzeichnis aus.
-
-![Extension Setup im Developer Mode](screenshots/extension_setup.png)
-
 ## Version History
-
 + *0.1* initial commit
 + *0.2* VCF Download
 + *0.21* Kurzdienstselector wird nur mehr angezeigt, wenn es Kurzdienste gibt
@@ -85,28 +70,24 @@ Diese Anleitung ermöglicht Dir, die Erweiterung direkt in Google Chrome zu test
 + *0.32* Überarbeitete [FunktionärInnenfeatures](https://github.com/geraldbaeck/NIUsLittleHelper/pull/2)
 + *0.33* FunktionärInnenfeatures: Funktion zur Anzeige von freien Dienstnummern, Ambulanzen in Dienststatistik erfasst
 + *0.34* FunktionärInnenfeatures: Gaststatus und Dienstgrad lassen sich nun in Liste/Ausdruck auswerten um Beförderungen zu erleichtern.
-+ *0.35* Funktion zum herunterladen einer Kalenderdatei mit den RD-Diensten der nächsten 14 Tage. 
++ *0.35* Funktion zum herunterladen einer Kalenderdatei mit den RD-Diensten der nächsten 14 Tage.
 
 ## Built With
-
 * [Atom](https://github.com/atom/atom)
 * [Javascript](https://en.wikipedia.org/wiki/JavaScript)
-* [JQuery](https://jquery.com/)u
+* [JQuery](https://jquery.com/)
 * jQueryUI
 * PouchDB
 * jQuery DataTable
 
 ## Contributing
-
-Always welcome just fork and commit.
+Always welcome just fork and request. Join us on [Slack](https://niuslittlehelpers.slack.com/signup).
 
 ## [Authors](https://github.com/geraldbaeck/NIUsLittleHelper/graphs/contributors)
-
 * **Gerald Bäck** - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
 * **Sebastian Kuttnig** - [github](https://github.com/dersebbel)
 * **Stephan Spindler** - [github](https://github.com/spind42)
 * **Daniel Steiner** - [github](https://github.com/danielsteiner) - [web](https://danielsteiner.net)
 
 ## License
-
-This is free and unencumbered software released into the public domain - see the [UNLICENSE.md](UNLICENSE.md) file for details. NIU is probably intellectual property of the Austrian Red Cross, but that's not relevant at all.
+This is free and unencumbered software released into the public domain - see the [UNLICENSE.md](UNLICENSE.md) file for details. NIU is probably intellectual property of the Austrian Red Cross.
