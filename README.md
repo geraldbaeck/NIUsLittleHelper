@@ -61,8 +61,8 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 * Es lässt sich nun eine Liste aller freien Dienstnummern anzeigen.
 
 ## Version History
-+ *0.1* initial commit
-+ *0.2* VCF Download
++ *0.10* initial commit
++ *0.20* VCF Download
 + *0.21* Kurzdienstselector wird nur mehr angezeigt, wenn es Kurzdienste gibt
 + *0.22* Die Kontakttabelle der Dienstführung wird jetzt standardmäßig ausgeblendet
 + *0.30* [NIU+ Features](#zusätzliche-daten-zur-lv-statistik-lvstatistik-lvstatisticaspx) eingebaut
@@ -72,6 +72,7 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.34* FunktionärInnenfeatures: Gaststatus und Dienstgrad lassen sich nun in Liste/Ausdruck auswerten um Beförderungen zu erleichtern.
 + *0.35* Funktion zum herunterladen einer Kalenderdatei mit den RD-Diensten der nächsten 14 Tage.
 + *0.36* Kurssuche: Filter nach Ausbildungsart
++ *0.37* Pflichtfortbildungen über Liste/Ausdruck
 
 ## Built With
 * [Atom](https://github.com/atom/atom)
