@@ -15,12 +15,53 @@ var department = {
 var icsDLButton = "<a class='getCal'>Meinen Dienstplan für die nächsten 14 Tage herunterladen</a>";
 
 $('body').on("click", ".getCal", function(){
-
     cal.download("Dienstplan");
 });
 $(document).ready(function() {
-    $(".MultiDutyRoster").prepend(icsDLButton);
-   
+    getRDDuty();
+    getAmbulanceDuty();
+});
+var getAmbulanceDuty = function(){
+    //TODO: Derzeit passiert das ganze async, wenn also noch nicht alle ambulanzen geladen sind, sind nicht alle in der ICS datei drinnen. 
+    //Der Call sollte daher geändert werden. 
+    var ambulance = $('.AmbulanceTable tbody').children();
+    var ambcount = ambulance.length-1;
+    var parsedamb = 0;
+    $(ambulance).each(function(key, amb){
+        if(key>0)
+        {
+            var parts   = $(amb).children();
+            var detailUri = "https://niu.wrk.at/"+$(parts[10]).children().attr("href");
+
+            $.ajax({
+                url: detailUri,
+                context: document.body
+            }).done(function(data){
+                var title       = $(data).find("#ctl00_main_m_AmbulanceDisplay_m_Webinfo").children().html();
+                var desc        = "Sub "+$(parts[1]).html();
+                var germanDate  = $(parts[5]).html();
+                var timeVon     = $(parts[6]).html();
+                var duration    = $(parts[9]).html().replace(',','.');
+                var pattern     = new RegExp("(<b>Wo:<\/b>).*");
+                var res         = pattern.exec(data);
+                var location    = res[0].substr(10).replace(/(<([^>]+)>)/ig,"");;
+                
+                var tmpDate     = germanDate.split('.');
+                var usDate      = tmpDate[1]+"/"+tmpDate[0]+"/"+tmpDate[2];
+                
+                var startDate   = new Date(usDate+" "+timeVon);
+                var endDate     = new Date(usDate+" "+timeVon).addHours(duration);
+                cal.addEvent('Ambulanz ' + title, desc, location, startDate.toISOString(), endDate.toISOString());
+                parsedamb++;
+                if(parsedamb == ambcount){
+                    $(".MultiDutyRoster").prepend(icsDLButton);
+                }
+            });
+        }
+    });
+}
+
+var getRDDuty = function(){   
     $(".MultiDutyRoster table").each(function(key, dutyTable){
         dutyType = $(dutyTable).find('.MessageHeader').html();
         var duties = $(dutyTable).find('#DutyRosterTable tbody tr');
@@ -91,6 +132,4 @@ $(document).ready(function() {
             }
         });
     });
-        
-
-});
+}
