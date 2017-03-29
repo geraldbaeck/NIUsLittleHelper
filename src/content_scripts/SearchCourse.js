@@ -5,10 +5,24 @@
 
 var kursauswahl;
 var kurssuche;
+var activeFilters = {}; //ul menüleiste, die wählbare suchfilter enthält
 
 
-//var STORAGE_KEY_SEARCH_COURSE_HIDE_SEARCH = "niu_search_course_hide_search";
-//var STORAGE_KEY_SEARCH_COURSE_HIDE_CHOOSE = "niu_search_course_hide_choose";
+function addSuchfilter(table, key, uiname, column_names, callback) {
+  suchfilter.append('<li><input  id="suchfilter_' + key + '" type="checkbox" value="value"><label for="suchfilter_' + key + '">' + uiname + '</label></li>');
+  suchfilter.find('#suchfilter_' + key).change(function() {
+      console.log("addSuchfilter --> click calling callback with checked: " + $(this).is(':checked'));
+      //callback( $(this).is(':checked') );
+      if ($(this).is(':checked')) {
+        activeFilters[key] = { "column_names" : column_names, "filter" : callback };
+      } else {
+        activeFilters[key] = undefined;
+      }
+      table.draw(); //redraw um suche erneut auszuführen!
+  });
+
+
+}
 
 
 //verstecke Kursauswahl und speichere status
@@ -126,35 +140,42 @@ $(document).ready(function() {
       body: "Bitte um Anmeldung zu " + data
     });
 
-    if (experimentalActivated()) {
-      return "<a href='" + mailto + "'>anmelden</a>";
-    } else {
-      return "";
-    }
+    experimentalActivated().then(function(activated){
+      if (activated) {
+        return "<a href='" + mailto + "'>anmelden</a>";
+      } else {
+        return "";
+      }
+    });
 
   }
 
+  //suchfilterleiste erzeugen
+  tabelle.before("<div class='Whitebox suchfilter'><ul id='suchfilter'></ul></div>");
+  suchfilter = $('#suchfilter');
 
   //DATATABLE
   var headers = new Array;
   var dataSet = new Array;
   var columns = new Array;
 
-  // tabelle.find("tr:first .MessageHeaderCenter").each(function(index) {
-  //     console.log("init dataset --> index " + index + " mit th " + $(this).text());
-  //
-  //     headers.push($(this).text());
-  //     if ($(this).text().length > 2) {
-  //       columns.push({
-  //         data: $(this).text(),
-  //         title: $(this).text(),
-  //         defaultContent: ""
-  //       });
-  //     }
-  // });
-
-  headers = ["abznr", "kurs", "von", "bis", "ort",
+  //Unterscheidung, wenn Ausbildungstabelle für User abgefragt wird, gibt es eine
+  //Spalte mehr, den Anmeldestatus!
+  maausbheaders = ["abznr", "kurs", "von", "bis", "ort",
+  "kursstatus", "anmeldestatus", "qualifikation", "fortbildungsstunden"];
+  ausbheaders = ["abznr", "kurs", "von", "bis", "ort",
   "kursstatus", "qualifikation", "fortbildungsstunden"];
+
+  col_anmeldestatus = {
+    data: "anmeldestatus",
+    title: "Anmeldestatus"
+  }
+
+ //stellt einen mailto Link zur Anmeldung zur Verfügung, siehe Funktion generateMailLink
+  col_anmeldelink = {
+      data: "abznr",
+      render: generateMailLink,
+  }
 
   columns = [
     {
@@ -163,17 +184,17 @@ $(document).ready(function() {
       render: function(data, type, full, meta) {
         return '<a class="open_course_link" href="/Kripo/Kufer/CourseDetail.aspx?CourseID=' + data + '">open</a>';
       }
-    },{
-      data: "abznr",
-      render: generateMailLink,
     },
+
     {
       data: "abznr",
       title: "ABZ Nr",
+      name: "abznr",
       defaultContent: "LEER"
     },{
       data: "kurs",
-      title: "Kurs"
+      title: "Kurs",
+      name: "kurs"
 
     },{
       data: "von",
@@ -188,10 +209,12 @@ $(document).ready(function() {
       title: "Ort"
     },{
       data: "kursstatus",
-      title: "Kursstatus (freie Plätze)"
+      title: "Kursstatus (freie Plätze)",
+      name: "kursstatus"
     },{
       data: "qualifikation",
       title: "Qualifikation",
+      name: "qualifikation",
       defaultContent: ""
     },{
       data: "fortbildungsstunden",
@@ -201,14 +224,37 @@ $(document).ready(function() {
   ];
 
   //TODO: Unterscheidung, wenn EmployeeId gesetzt! einbauen!
+
+
+  var tds = tabelle.find("tr:first").find("td");
+
+  var headers;
+  if (tds.length == 10) {
+    //es handelt sich um die Ausbildungen eines Users
+    //TODO: zusätzlich noch die Bemerkungen des Kurses für diesen User anzeigen
+    //diese Bemerkungen müssen aus den CourseDetails.aspx geladen werden!
+
+    headers = maausbheaders;
+    columns.push(col_anmeldestatus);
+  } else if (tds.length == 9){
+    //Ausbildungen ganz normal als Suche nach Ausbildungen
+    headers = ausbheaders;
+  } else {
+    throw "ungültige anzahl an spalten!";
+  }
+
   tabelle.find("tr").slice(1).each(function(index) {
     var row = {};
     if ($(this).find("td").length == 1) {
 
     } else {
+
+
+      //console.log("tds length: " + tds.length);
       $(this).find("td").each(function (index) {
+
         var val = $(this).text();
-        console.log("adding data: " + val + " als " + headers[index]);
+        //console.log("adding data: " + val + " als " + headers[index]);
         switch(index) {
             case 0: //ABZNR
               if (!(new RegExp("^.[0-9]+$").test(val))) {
@@ -275,14 +321,78 @@ $(document).ready(function() {
     }
   });
 
+  $.fn.dataTable.ext.search.push(
+    function( settings, searchData, index, rowData, counter ) {
+      var show = true;
+      for (let key in activeFilters) {
+        var f = activeFilters[key];
+        if (f === undefined) {
+          continue;
+        }
+        var data = {};
+        for (let c of f.column_names) {
+            var index = datatable.column(c + ":name").index("visible");
+            //console.log("$.fn.dataTable.ext.search --> set data[c] to " + searchData[index] + " c: " + c + " index: " + index);
+            data[c] = searchData[index];
+        }
+        //console.log("$.fn.dataTable.ext.search --> calling filter: data:" + data + "index:" + index + "rowData:" + rowData + "counter: " + counter);
+        show = show && f.filter(data, index, rowData, counter); //UND verknüpfung der suchfilter
+      }
+      return show;
+    }
+);
 
-  // $.get(chrome.extension.getURL("/src/webcontent/search_course_course_context_menu.html"))
-  // .then(function(data){
-  //
-  //
-  // });
+
+  addSuchfilter(datatable, "frei", "Nur Kurse mit freien Plätzen", ["kursstatus"], function(searchData, index, rowData, counter) {
+      //https://datatables.net/reference/api/column().search() todo: verwende regexpr
+      //console.log("calling suchfilter function freie plätze --> searchData: " + searchData.kursstatus);
+      var re = new RegExp("Offen \\([0-9]*[1-9]/[0-9]+\\)");
+      //console.log("addSuchfilter --> suchfilter function freie plätze --> matches: [" + searchData.kursstatus + "] regex: " + re.toString() + " result: " + re.test(searchData.kursstatus));
+      if (re.test(searchData.kursstatus)) {
+        return true;
+      }
+      return false;
+  });
+
+  addSuchfilter(datatable, "qualifikation_par_50", "Nur §50 Kurse", ["qualifikation"], function(searchData, index, rowData, counter) {
+      //https://datatables.net/reference/api/column().search() todo: verwende regexpr
+      return searchData.qualifikation.includes("§50");
+  });
 
 
+  addSuchfilter(datatable, "qualifikation_rea", "Nur §50 Reanimationstraining", ["qualifikation"], function(searchData, index, rowData, counter) {
+      return searchData.qualifikation.includes("Reanimationstraining");
+  });
+
+  addSuchfilter(datatable, "abznr_anrechnung", "Nur Anrechnungskurse", ["abznr"], function(searchData, index, rowData, counter) {
+      return searchData.abznr.includes("A");
+  });
+
+  addSuchfilter(datatable, "abznr_keine_anrechnung", "Keine Anrechnungskurse", ["abznr"], function(searchData, index, rowData, counter) {
+      return !(searchData.abznr.includes("A"));
+  });
+
+  addSuchfilter(datatable, "kurs_san_basis", "Nur SAN Basiskurse", ["kurs"], function(searchData, index, rowData, counter) {
+      return  searchData.kurs.includes("BAS - Ausbildung - Das Rote Kreuz") ||
+              searchData.kurs.includes("KHD-Praxistag") ||
+              searchData.kurs.includes("RS-Startmodul");
+  });
+
+  addSuchfilter(datatable, "kurs_kein_san", "Keine SAN Kurse", ["kurs", "qualifikation"], function(searchData, index, rowData, counter) {
+      return !(searchData.qualifikation.includes("§50") || searchData.kurs.includes("SAN")); //eher mehr ein Beispiel für mehrere spalten filter
+  });
+
+  addSuchfilter(datatable, "kurs_nur_gsd", "Nur GSD", ["kurs"], function(searchData, index, rowData, counter) {
+      return searchData.kurs.includes("GSD");
+  });
+
+  addSuchfilter(datatable, "kurs_nur_khd", "Nur KHD", ["kurs"], function(searchData, index, rowData, counter) {
+      return searchData.kurs.includes("KHD");
+  });
+
+  addSuchfilter(datatable, "kurs_nur_fkr", "Nur FKR", ["kurs"], function(searchData, index, rowData, counter) {
+      return searchData.kurs.includes("FKR");
+  });
 
 
 });

@@ -9,3 +9,12 @@
 span.ausblenden {
   margin-left: 20px;
 }
+
+.suchfilter li {
+  display: inline;
+  list-style: none;
+  /*border-style:solid;
+  border-color:grey;
+  border-width:thin;
+  padding: 10px;*/
+}

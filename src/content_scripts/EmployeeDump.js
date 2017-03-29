@@ -1,4 +1,4 @@
-/*
+﻿/*
 TODO: funktion schreiben, die eine spalte hinzufügen kann zur tabelle!
 und diese dann am besten über ein callback oder Promise?
 so befüllt
@@ -34,6 +34,7 @@ function addCalculationHandler(id, names, callback) {
         columns.push({
           data: name.calcname,
           title: name.uiname,
+          avg: name.avg,
           defaultContent: ""
         });
 
@@ -41,6 +42,7 @@ function addCalculationHandler(id, names, callback) {
 
 
         //TODO: solange das läuft kleines fenster anzeigen bzw. user informieren!
+        //TODO: um das NIU zu schonen sollten die Abfragen hier seriell abgearbeitet werden
         var ready = Promise.resolve();
         for (index in dataSet) {
           var row = dataSet[index];
@@ -52,7 +54,7 @@ function addCalculationHandler(id, names, callback) {
                var i = index;
                var r = row;
                var c = columns.length - 1;
-               resolve(callback(r.DNR, name)
+               var res = callback(r.DNR, name)
                 .then(function(value) {
                   r[name.calcname] = value;
                   //console.log("get cell: " + i + "#" + c);
@@ -61,7 +63,8 @@ function addCalculationHandler(id, names, callback) {
                 })
                 .catch(function(error) {
                   console.log("addCalculationHandler -> promise then mit error: " + error);
-                }));
+                });
+                resolve(res);
           });
           ready = ready.then(function() {
            return p;
@@ -102,26 +105,175 @@ function initDataTable() {
 
   $('#datatablediv').empty();
 
-  datatable = $('<table id="datatable"></table>')
+
+
+  datatable = $('<table id="datatable"></table>');
+
+  var l = columns.length;
+
+
+  var thead = $("<thead><tr></tr></thead>");
+  var tbody = $("<tbody><tr></tr></tbody>");
+  var tfoot = $("<tfoot><tr></tr></tfoot>");
+
+
+  for (let i = 0; i < columns.length; i++) {
+    thead.append("<th></th>");
+    tbody.find("tr").append("<td></td>");
+    tfoot.find("tr").append("<th></th>");
+  }
+
+  // datatable.append(thead);
+  //datatable.append(tbody);
+  datatable.append(tfoot);
+
   $('#datatablediv').append(datatable);
 
   datatable = datatable.DataTable({
+    footerCallback: function(tfoot, data, start, end, display) {
+        var api = this.api(); //, data;
+
+
+        //var i = 0;
+        for (let i = 0; i < columns.length; i++) {
+          var c = api.column(i);
+          if (!isNaN([c.data()[0]])) {
+            total = c.data().reduce(function(a,b) {
+              return (Number(a) + Number(b));
+            }, 0);
+
+            if (!isNaN(total)) {
+              $(c.footer()).find(".avg").html("avg: " + (total / data.length).toFixed(1)); //todo: durchschnitt berechnen!
+            }
+          }
+        }
+          // $( api.column( 0 ).footer() ).html(
+          //   "hallo " +
+          //        api.column( 0 ).data().reduce( function ( a, b ) {
+          //            return a + b;
+          //        }, 0 )
+          //    );
+
+    },
     destroy: true,
     data: dataSet,
     columns: columns,
     paging: false,
     fixedHeader : {
-      header: true
+      header: true,
+      footer: true
     }
-
-
   });
+
+  for (let i = 0; i < columns.length; i++) {
+    var html = "";
+    html = html + "<span >" + columns[i].title + "</span><br><input type='text' class='footer_input'></input>";
+    if (columns[i].avg) {
+      html = html + "<span class='avg'></span><br>";
+    }
+    console.log("initDataTable --> add html into footer: " + html);
+    $(datatable.column(i).footer()).html(html);
+    var that = datatable.column(i);
+    $(datatable.column(i).footer()).find(".footer_input").on('keyup change', function() {
+      var val = this.value;
+      console.log(".footer_input keyup change this.value: " + val);
+      if (activeFilters["input_field_col" + i] === undefined) {
+        //console.log("this.value: " + this.value + " that.search() " + activeFilters["input_field_col" + i].search);
+        activeFilters["input_field_col" + i] = {
+            "column_names" : [columns[i].name],
+            "filter" : function(searchData, index, rowData, counter) {
+              return true;
+            },
+            "search" : val
+        };
+      }
+      if (activeFilters["input_field_col" + i].search !== val) {
+
+        if (columns[i].type == number) {
+            //TODO: baue größer kleiner suche ein!
+        } else {
+          activeFilters["input_field_col" + i].filter = function(searchData, index, rowData, counter) {
+            console.log("search data: " + searchData[columns[i].name] + "includes: " + val);
+            return searchData[columns[i].name].includes(val);
+          }
+        }
+        datatable.draw();
+
+      }
+      console.log("activeFilters: " + JSON.stringify(activeFilters));
+    });
+
+
+
+
+
+  }
+
+  //$(datatable.column(2).footer()).html("halo welt");
+
 
   //verändere css, damit die sorting images angezeigt werden!
   $("#datatable").find(".sorting").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_both.png") + '")');
   $("#datatable").find(".sorting_asc").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_asc.png")  + '")');
   $("#datatable").find(".sorting_desc").css("background-image", 'url("' + chrome.extension.getURL("/img/sort_desc.png")  + '")');
 
+  $("#datatable").find("tbody").on("click", "tr", function() {
+    if ($(this).hasClass('selected')) {
+      $(this).removeClass("selected");
+    } else {
+      //table.find('tr.selected').removeClass('selected');
+
+      $(this).addClass('selected');
+    }
+  });
+
+  datatable.draw();
+}
+
+
+var activeFilters = {};
+
+$.fn.dataTable.ext.search.push(
+  function( settings, searchData, index, rowData, counter ) {
+    var show = true;
+    for (let key in activeFilters) {
+      var f = activeFilters[key];
+      if (f === undefined) {
+        continue;
+      }
+      var data = {};
+      for (let c of f.column_names) {
+          var index = datatable.column(c + ":name").index("visible");
+          //console.log("$.fn.dataTable.ext.search --> set data[c] to " + searchData[index] + " c: " + c + " index: " + index);
+          data[c] = searchData[index];
+      }
+      //console.log("$.fn.dataTable.ext.search --> calling filter: data:" + data + "index:" + index + "rowData:" + rowData + "counter: " + counter);
+      show = show && f.filter(data, index, rowData, counter); //UND verknüpfung der suchfilter
+    }
+    return show;
+  }
+);
+
+
+var mail = "test@example.com";
+function generateMailLink(subject, body, to, cc, bcc) {
+  //TODO: hole korrekte mailadresse!
+
+
+  var bcclist = "";
+  for (let m of bcc) {
+    bcclist = bcclist + "," + m;
+  }
+  bcclist = bcclist.substring(1, bcclist.length);
+
+  var mailto = "mailto:" + mail + "?" + $.param({
+    bcc : bcclist,
+    // subject : subject,
+    // body: body,
+    // to : to,
+    // cc : cc
+  });
+  return mailto;
 }
 
 $(document).ready(function() {
@@ -135,7 +287,8 @@ $(document).ready(function() {
       headers.push($(this).text());
       columns.push( {
         data: $(this).text(),
-        title: $(this).text()
+        title: $(this).text(),
+        name: $(this).text()
       });
   });
 
@@ -174,8 +327,8 @@ $(document).ready(function() {
 
         $("#dienstcount").append("<li><div id='dienstcount_" + key +"'>" + key + "<span class='menu_description'>" + DUTY_TYPES[key].description + "</span></div></li>");
         var col = [
-          {calcname : "hourduty$" + key, uiname : key + " Stunden" },
-          {calcname : "countduty$" + key, uiname : key + " Dienste"}
+          {calcname : "hourduty$" + key, uiname : key + " Stunden", avg : true },
+          {calcname : "countduty$" + key, uiname : key + " Dienste", avg : true}
         ];
         addCalculationHandler("#dienstcount_" + key, col, function(dnr, name) {
            //verkettete Promises...
@@ -192,10 +345,55 @@ $(document).ready(function() {
         });
     }
 
+    //$("#menu").button();
     $("#menu").menu();
 
+    header.after("<div id='select_all_button'>Alle Zeilen selektieren</div>");
+    header.after("<div id='clear_selection'>Selektion löschen</div>");
+    $('#select_all_button').button();
+    $('#select_all_button').click(function() {
+      $("#datatable").find("tbody tr").addClass("selected");
+    });
+    $('#clear_selection').button();
+    $('#clear_selection').click(function() {
+      $("#datatable").find("tbody tr").removeClass("selected");
+    });
 
+    header.after("<div id='mailto_alle_selektiert'>Mailto an alle sichtbaren</div>");
+    $('#mailto_alle_selektiert').button();
+    $('#mailto_alle_selektiert').click(function() {
 
+      var bcc = [];
+      // $("#datatable").find("tbody tr").each(function(index) {
+      //     $(this).text();
+      // });
+      var mails = datatable.rows({filter: 'applied'}).column(5).data().toArray();  //.nodes(); //column("Email:name");
+      console.log("mails: " + JSON.stringify(mails));
+      var mailto = generateMailLink("", "", [], [], mails);
+      console.log("mailto ist " + mailto);
+      window.open(mailto);
+    });
+
+    //$('#mailto_alle_selektiert').click();
+
+     addCalculationHandler("#pflichtfortbildungen", [{calcname : "pflichtfortbildungen", uiname : "Pflichtfortb."}], function(dnr, name) {
+       //verkettete Promises...
+
+       var pflichtfortb = {
+                           UID : "pfb",
+                           kurs1 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Kommunikation & Übergabe", "altName1" : "SAN - Fortbildung §50 - Pflichtfortbildung - Kommunikation und Übergabe", "altName2" : "", "absolved" : "?" },
+                           kurs2 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Großeinsatz - First Car", "altName1" : "", "altName2" : "", "absolved" : "?" }
+                         };
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return checkCourseAttendance(result.EID, pflichtfortb)
+        }).then( function(resultDict) {
+          return ("K&&Uuml;: " + resultDict.kurs1.absolved + "<br />First Car: " + resultDict.kurs2.absolved);
+        });
+
+     });
 
     addCalculationHandler("#grundkurse", [{calcname : "grundkurse", uiname : "Grundkurse"}], function(dnr, name) {
        //verkettete Promises...
@@ -215,7 +413,7 @@ $(document).ready(function() {
         });
 
      });
-     
+
      addCalculationHandler("#gaststatus", [{calcname : "gaststatus", uiname : "Gaststatus"}], function(dnr, name) {
        //verkettete Promises...
 
@@ -227,8 +425,8 @@ $(document).ready(function() {
           if(result.istGast) { return ("ja"); } else { return ("nein"); }
         });
 
-     }); 
-     
+     });
+
      addCalculationHandler("#dienstgrade", [{calcname : "dienstgrade", uiname : "Dienstgrad"}], function(dnr, name) {
        //verkettete Promises...
 
@@ -272,6 +470,8 @@ $(document).ready(function() {
       //zum testen
       //$("#rddienste").trigger("click"); //aktiviert gleich nach laden der seite den click
   });
+
+
 (function(){
         var searchParams = $("#ctl00_main_m_SearchParams");
         var dnrStart = searchParams.html().substr(15,4);
@@ -290,5 +490,5 @@ $(document).ready(function() {
         exp="";
       });
       searchParams.append("<br><b>Die nächste Freie Dienstnummer lautet \""+freieDnr[0]+"\"");
-    })();  
+    })();
 });
