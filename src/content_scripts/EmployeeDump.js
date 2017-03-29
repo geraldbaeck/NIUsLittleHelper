@@ -189,7 +189,7 @@ function initDataTable() {
       }
       if (activeFilters["input_field_col" + i].search !== val) {
 
-        if (columns[i].type == number) {
+        if (columns[i].type == Number) {
             //TODO: baue größer kleiner suche ein!
         } else {
           activeFilters["input_field_col" + i].filter = function(searchData, index, rowData, counter) {
