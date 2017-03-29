@@ -1,4 +1,4 @@
-/*
+﻿/*
 TODO: funktion schreiben, die eine spalte hinzufügen kann zur tabelle!
 und diese dann am besten über ein callback oder Promise?
 so befüllt
@@ -348,7 +348,6 @@ $(document).ready(function() {
     //$("#menu").button();
     $("#menu").menu();
 
-
     header.after("<div id='select_all_button'>Alle Zeilen selektieren</div>");
     header.after("<div id='clear_selection'>Selektion löschen</div>");
     $('#select_all_button').button();
@@ -377,6 +376,24 @@ $(document).ready(function() {
 
     //$('#mailto_alle_selektiert').click();
 
+     addCalculationHandler("#pflichtfortbildungen", [{calcname : "pflichtfortbildungen", uiname : "Pflichtfortb."}], function(dnr, name) {
+       //verkettete Promises...
+
+       var pflichtfortb = {
+                           UID : "pfb",
+                           kurs1 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Kommunikation & Übergabe", "altName1" : "SAN - Fortbildung §50 - Pflichtfortbildung - Kommunikation und Übergabe", "altName2" : "", "absolved" : "?" },
+                           kurs2 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Großeinsatz - First Car", "altName1" : "", "altName2" : "", "absolved" : "?" }
+                         };
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return checkCourseAttendance(result.EID, pflichtfortb)
+        }).then( function(resultDict) {
+          return ("K&&Uuml;: " + resultDict.kurs1.absolved + "<br />First Car: " + resultDict.kurs2.absolved);
+        });
+
+     });
 
     addCalculationHandler("#grundkurse", [{calcname : "grundkurse", uiname : "Grundkurse"}], function(dnr, name) {
        //verkettete Promises...
