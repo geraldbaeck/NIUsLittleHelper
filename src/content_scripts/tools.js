@@ -252,53 +252,34 @@ function dnrToIdentifier(dnr) {
   return getFromCache("empid_", dnr, { 'dnr' : dnr}, dnrToIdentifierNotCached);
 }
 
-function getEmployeeGuestStatus(empNID) {
-return getFromCache("guestid_", empNID, { 'empNID' : empNID}, getEmployeeGuestStatusNotCached);
+function getEmployeeDataSheet(empNID) {
+return getFromCache("datasheet_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
 }
 
-function getEmployeeGuestStatusNotCached(args)
+function getEmployeeDataSheetNotCached(args)
 {
   var dict = {};
   var empNID = args.empNID;
+  
+  return $.get("https://niu.wrk.at/Kripo/Employee/detailEmployee.aspx?EmployeeNumberID=" + empNID)
 
-         return $.get("https://niu.wrk.at/Kripo/Employee/detailEmployee.aspx?EmployeeNumberID=" + empNID)
+  .then(function(data) {
 
-        .then(function(data) {
+  dict["Vorname"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__firstName").val();
+  dict["Nachname"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__lastName").val();
+  dict["istGast"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__type_3").prop("checked");
+  dict["Dienstgrad"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__rank option:selected").text();
+  dict["FotoURL"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__picture").attr("src");
+  dict["Geburtstag"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeExtention__birthday_m_Textbox").val();
+  dict["Ersteintritt"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeExtention__firstEntry_m_Textbox").val();
+  dict["TelNummer"] = $(data).find("#ctl00_main_m_Employee_m_ccPersonContact_m_ccContact0_m_NumberLabel").text();
+  dict["Email"] = $(data).find("#ctl00_main_m_Employee_m_ccPersonContact_m_ccContact1_m_NumberLabel").text();
+  
+  return dict;
 
-         var gueststatus = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__type_3").prop("checked");
+  });
 
-         dict["istGast"] = gueststatus;
 
-         return dict;
-
-        });
-}
-
-function getEmployeeRank(empNID) {
-return getFromCache("rankid_", empNID, { 'empNID' : empNID}, getEmployeeRankNotCached);
-}
-
-/*
-eventuell könnte man sich überlegen hier mehr Informationen von detailEmployee auszulesen, um diese in das
-dict zu speichern, damit sie dann auch gecached werden.
-somit wäre dann der Name getEmployeeDetails auch besser für diese Funktion
-*/
-function getEmployeeRankNotCached(args)
-{
-  var dict = {};
-  var empNID = args.empNID;
-
-         return $.get("https://niu.wrk.at/Kripo/Employee/detailEmployee.aspx?EmployeeNumberID=" + empNID)
-
-        .then(function(data) {
-
-         var rank = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeMain__rank option:selected").text();
-
-         dict["rank"] = rank;
-
-         return dict;
-
-        });
 }
 
 function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {

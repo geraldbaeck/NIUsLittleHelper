@@ -420,9 +420,10 @@ $(document).ready(function() {
         return dnrToIdentifier(dnr)
         .then(function(result) {
           console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
-          return getEmployeeGuestStatus(result.ENID)
+          return getEmployeeDataSheet(result.ENID)
         }).then( function(result) {
           if(result.istGast) { return ("ja"); } else { return ("nein"); }
+
         });
 
      });
@@ -433,9 +434,9 @@ $(document).ready(function() {
         return dnrToIdentifier(dnr)
         .then(function(result) {
           console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
-          return getEmployeeRank(result.ENID)
+          return getEmployeeDataSheet(result.ENID)
         }).then( function(result) {
-          return(result.rank);
+          return(result.Dienstgrad);
         });
 
      });
