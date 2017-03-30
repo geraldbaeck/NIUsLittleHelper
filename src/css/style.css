@@ -18,3 +18,13 @@ span.ausblenden {
   border-width:thin;
   padding: 10px;*/
 }
+ a.tooltip div.tooltiptext {
+  font-weight: normal;
+  text-align: left;
+  }
+  a.tooltip img {
+  margin-right:3px;
+  }
+  a.tooltip > span {
+  width:400px !important;
+  }

@@ -329,7 +329,7 @@ $(document).ready(function() {
 
     for (key in DUTY_TYPES) {
 
-        $("#dienstcount").append("<li><div id='dienstcount_" + key +"'>" + key + "<span class='menu_description'>" + DUTY_TYPES[key].description + "</span></div></li>");
+        $("#dienstcount").append("<li><div id='dienstcount_" + key +"'>[" + key + "] <span class='menu_description'>" + DUTY_TYPES[key].description + "</span></div></li>");
         var col = [
           {calcname : "hourduty$" + key, uiname : key + " Stunden", avg : true },
           {calcname : "countduty$" + key, uiname : key + " Dienste", avg : true}
@@ -428,6 +428,20 @@ $(document).ready(function() {
         }).then( function(result) {
           if(result.istGast) { return ("ja"); } else { return ("nein"); }
 
+        });
+
+     });
+     
+     addCalculationHandler("#ampel", [{calcname : "ampel", uiname : "SAN-Ampel"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          $("head").append("<link rel=\"stylesheet\" type=\"text/css\" href=\"/Kripo/Shares/tooltip.css\">");
+          return result.AmpelCode;
         });
 
      });
