@@ -154,7 +154,7 @@ $(document).ready(function() {
   $('h1').before('<a href="#" style="font-size:8px;margin-left:2em;float:right;" id="SelToggle" class="hideSelectors">Suchoptionen einblenden</a>');
   $('#SelToggle').hide();
 
-  $('.DutyRoster').css('max-width', '900px');
+  $('.DutyRoster').css('max-width', '100%');
 
   tbl = prepareTable();
 
