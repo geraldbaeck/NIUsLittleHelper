@@ -19,6 +19,8 @@ so befüllt
 
 */
 var clicked = {};
+vex.defaultOptions.className = 'vex-theme-os';
+
 function addCalculationHandler(id, names, callback) {
 
   $(id).click(function() {
@@ -355,17 +357,20 @@ $(document).ready(function() {
     header.after("<div id='select_all_button'>Alle Zeilen selektieren</div>");
     header.after("<div id='clear_selection'>Selektion löschen</div>");
     $('#select_all_button').button();
+    $('#select_all_button').addClass("small-button");
     $('#select_all_button').click(function() {
       $("#datatable").find("tbody tr").addClass("selected");
     });
     $('#clear_selection').button();
+    $('#clear_selection').addClass("small-button");
     $('#clear_selection').click(function() {
       $("#datatable").find("tbody tr").removeClass("selected");
     });
 
-    header.after("<div id='mailto_alle_selektiert'>Mailto an alle sichtbaren</div>");
-    $('#mailto_alle_selektiert').button();
-    $('#mailto_alle_selektiert').click(function() {
+    header.after("<div id='mailto_alle_sichtbaren'>Mailto an alle sichtbaren</div>");
+    $('#mailto_alle_sichtbaren').button();
+    $('#mailto_alle_sichtbaren').addClass("small-button");
+    $('#mailto_alle_sichtbaren').click(function() {
 
       var bcc = [];
       // $("#datatable").find("tbody tr").each(function(index) {
@@ -377,6 +382,107 @@ $(document).ready(function() {
       console.log("mailto ist " + mailto);
       window.open(mailto);
     });
+
+    header.after("<div id='mailto_alle_selektiert'>Mailto an alle selektierten</div>");
+    $('#mailto_alle_selektiert').button();
+    $('#mailto_alle_selektiert').addClass("small-button");
+    $('#mailto_alle_selektiert').click(function() {
+      
+      if(datatable.rows('.selected').count() < 1)
+       {
+        vex.dialog.alert('Es wurde keine Auswahl getroffen, Funktion wird beendet.');
+        return;
+       }
+
+      var bcc = [];
+      // $("#datatable").find("tbody tr").each(function(index) {
+      //     $(this).text();
+      // });
+      var mailsObj = datatable.rows('.selected').data();  //.nodes(); //column("Email:name");
+      var mails = [];
+      $.each($(mailsObj),function(key,value){
+         mails.push(value.Email);
+       });
+
+      console.log("mails: " + JSON.stringify(mails));
+      var mailto = generateMailLink("", "", [], [], mails);
+      console.log("mailto ist " + mailto);
+      window.open(mailto);
+    });
+
+    header.after("<div id='memo_alle_selektiert'>Memo f&uuml;r alle selektierten</div>");
+    $('#memo_alle_selektiert').button();
+    $('#memo_alle_selektiert').addClass("small-button");
+    $('#memo_alle_selektiert').click(function() {
+
+       if(datatable.rows('.selected').count() < 1)
+       {
+        vex.dialog.alert('Es wurde keine Auswahl getroffen, Funktion wird beendet.');
+        return;
+       }
+       $("#memo_alle_selektiert").html("<img id='ajaxloader' src='" + chrome.extension.getURL('/img/ajax-loader.gif') + "'>");
+
+       return getOwnDNRs()
+       .then(function(returnDNrs)
+       {
+
+       $("#memo_alle_selektiert").html("Memo f&uuml;r alle selektierten");
+
+       var composeStr = 'Verfasser: <select name="memoverfasser" style="margin-bottom:5px;">';
+       $.each($(returnDNrs),function(key,value){
+         composeStr += '<option>' + value.trim() + '</option>';
+       });
+       composeStr += '</select>';
+
+       var selDnrsObj = datatable.rows('.selected').data();
+       var selDnrsArr = [];
+       $.each($(selDnrsObj),function(key,value){
+         selDnrsArr.push(value.DNR);
+       });
+
+       vex.dialog.open({
+       message: 'Memo wird angelegt bei: ' + selDnrsArr.toString(),
+       input: [
+         composeStr,
+        '<textarea name="memo" placeholder="Hallo, ich bin ein Memo." style="width:98%"></textarea>',
+        '<input type="textbox" name="memodate" placeholder="Datum" value="' + getNiuDateString(new Date()) + '" style="border:0px;"> ',
+        '<input type="textbox" name="memoreminder" placeholder="Erinnerungsdatum" style="border:0px;">'
+
+       ].join(''),
+       buttons: [
+        $.extend({}, vex.dialog.buttons.YES, { text: 'Anlegen' }),
+        $.extend({}, vex.dialog.buttons.NO, { text: 'Abbrechen' })
+       ],
+       callback: function (data) {
+        if (!data) {
+        } else {
+
+            var promises = [];
+
+            $.each( selDnrsObj, function( key, value ) {
+
+              var MemoObj = {};
+              MemoObj["memotext"] = data.memo;
+              MemoObj["dnr"] = value.DNR;
+              MemoObj["dnrself"] = data.memoverfasser;
+              MemoObj["memodate"] = data.memodate;
+              MemoObj["memoreminder"] = data.memoreminder;
+
+              promises.push(writeMemo(MemoObj));
+
+            });
+
+            $.when.apply($, promises).then(function(schemas) {
+            vex.dialog.alert('Memos wurden erfolgreich angelegt!')
+            }, function(e) {
+            vex.dialog.alert('Zumindest ein Memo konnte nicht erfolgreich angelegt werden!')
+            });
+           
+        }
+    }
+})
+});
+});
 
     //$('#mailto_alle_selektiert').click();
 

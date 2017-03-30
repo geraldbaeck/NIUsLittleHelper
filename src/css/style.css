@@ -28,3 +28,11 @@ span.ausblenden {
   a.tooltip > span {
   width:400px !important;
   }
+
+.ui-button-text {
+   font-size: inherit !important;
+} 
+
+.small-button {
+   font-size: .8em !important;
+}
