@@ -253,7 +253,7 @@ function dnrToIdentifier(dnr) {
 }
 
 function getEmployeeDataSheet(empNID) {
-return getFromCache("datasheet_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
+return getFromCache("datasheetv2_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
 }
 
 function getEmployeeDataSheetNotCached(args)
@@ -274,7 +274,13 @@ function getEmployeeDataSheetNotCached(args)
   dict["Ersteintritt"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeExtention__firstEntry_m_Textbox").val();
   dict["TelNummer"] = $(data).find("#ctl00_main_m_Employee_m_ccPersonContact_m_ccContact0_m_NumberLabel").text();
   dict["Email"] = $(data).find("#ctl00_main_m_Employee_m_ccPersonContact_m_ccContact1_m_NumberLabel").text();
-  
+  dict["AmpelCode"] = "";
+
+  $(data).find(".PermissionQualificationIcon").each(function() {
+   var amphtml = this.outerHTML;
+   if ($(amphtml).find('img').length) { dict["AmpelCode"] += amphtml;}
+  });
+
   return dict;
 
   });
