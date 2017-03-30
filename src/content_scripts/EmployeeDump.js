@@ -54,6 +54,10 @@ function addCalculationHandler(id, names, callback) {
                var i = index;
                var r = row;
                var c = columns.length - 1;
+               
+               r[name.calcname] = "<img id='ajaxloader' src='" + chrome.extension.getURL('/img/ajax-loader.gif') + "'>";
+               datatable.cell(i, c).invalidate().draw();
+
                var res = callback(r.DNR, name)
                 .then(function(value) {
                   r[name.calcname] = value;
