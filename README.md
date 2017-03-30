@@ -73,6 +73,7 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.35* Funktion zum herunterladen einer Kalenderdatei mit den RD-Diensten der nächsten 14 Tage.
 + *0.36* Kurssuche: Filter nach Ausbildungsart
 + *0.37* Pflichtfortbildungen über Liste/Ausdruck
++ *0.38* FunktionärInnenfeatures: SAN-Ampel in Liste/Ausdruck anzeigbar
 
 ## Built With
 * [Atom](https://github.com/atom/atom)
