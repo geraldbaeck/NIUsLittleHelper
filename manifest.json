@@ -110,6 +110,7 @@
               "js/jquery-ui/jquery-ui.js",
               "js/ics.js/ics.deps.min.js",
               "js/ics.js/ics.js",
+              "js/ouical/ouical.js",
               "src/content_scripts/lib/lib.js",
               "src/content_scripts/tools.js",
               "src/content_scripts/today.js"
