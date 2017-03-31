@@ -73,13 +73,16 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.35* Funktion zum herunterladen einer Kalenderdatei mit den RD-Diensten der nächsten 14 Tage.
 + *0.36* Kurssuche: Filter nach Ausbildungsart
 + *0.37* Pflichtfortbildungen über Liste/Ausdruck
-+ *0.38* FunktionärInnenfeatures: SAN-Ampel in Liste/Ausdruck anzeigbar
++ *0.38* FunktionärInnenfeatures: SAN-Ampel in Liste/Ausdruck
++ *0.39* FunktionärInnenfeatures: Memos direkt in Liste/Ausdruck verfassen
+
 
 ## Built With
 * [Atom](https://github.com/atom/atom)
 * [VSCode](https://github.com/Microsoft/vscode)
 * [Javascript](https://en.wikipedia.org/wiki/JavaScript)
 * [JQuery](https://jquery.com/)
+* [Vex](https://github.com/hubspot/vex)
 * jQueryUI
 * PouchDB
 * jQuery DataTable

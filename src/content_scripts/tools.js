@@ -188,6 +188,45 @@ function getFromCache(prefix, id, args, callback, classobject) {
     });
 }
 
+function getOwnDNRs()
+{
+ return getFromCache("ownDnr", "", "", getOwnDNRsNotCached);
+}
+
+function getOwnDNRsNotCached()
+{
+    return $.get("https://niu.wrk.at/Kripo/Employee/detailemployee.aspx?Displayself=true")
+    .then(function(data) {
+
+    var regexp = /\((.*?)\)/g;
+    var subStr = $(data).find("h1").text();
+    var foundMatch = regexp.exec(subStr);
+    var returnArr = foundMatch[1].split(",");
+    console.log(returnArr);
+    return returnArr;
+
+    });
+}
+
+function writeMemo(MemoObj)
+{
+    var post = {};
+
+    post["Memodate"] = MemoObj["memodate"];
+    post["Erinnerung"] = MemoObj["memoreminder"];
+    post["Memotext"] = MemoObj["memotext"];
+    post["Memo_neu"] = "Memo+neu";
+    post["DNR"] = MemoObj["dnr"]
+    post["verfasser"] = MemoObj["dnrself"];
+    return $.ajax({
+            url: "https://niu.wrk.at/df/memo/memo_Neu.asp",
+            data: post,
+            type: "POST"
+          });
+
+}
+
+
 
 /*
  * verwandelt die dienstnummer in die EmployeeId von NIU,
