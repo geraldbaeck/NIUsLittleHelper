@@ -195,11 +195,11 @@ function getOwnDNRs()
 
 function getOwnDNRsNotCached()
 {
-    return $.get("https://niu.wrk.at/Kripo/Employee/detailemployee.aspx?Displayself=true")
+    return $.get("https://niu.wrk.at/Kripo/Header.aspx")
     .then(function(data) {
 
     var regexp = /\((.*?)\)/g;
-    var subStr = $(data).find("h1").text();
+    var subStr = $(data).find("#userName").text();
     var foundMatch = regexp.exec(subStr);
     var returnArr = foundMatch[1].split(",");
     console.log(returnArr);
