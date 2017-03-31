@@ -41,10 +41,15 @@ var getAmbulanceDuty = function() {
     var ambulance = $('.AmbulanceTable tbody').children();
     var ambcount = ambulance.length - 1;
     var parsedamb = 0;
+    $('td.MessageBody, td.MessageBodyRightAlign').css('vertical-align', 'middle').css('display', 'table-cell').css('border', '1px').css('border-collapse', 'separate');
     $(ambulance).each(function(key, amb) {
-        if (key > 0) {
+        if (key === 0) {
+          $(amb).append('<td class="MessageHeaderCenter" width="100px"></td>');
+        } else {
           var parts   = $(amb).children();
           var detailUri = 'https://niu.wrk.at/' + $(parts[10]).children().attr('href');
+          var ambID = $(parts[0]).text().replace('/', '_').trim();
+          $(amb).attr('id', ambID);
 
           $.ajax({
             url: detailUri,
@@ -69,12 +74,31 @@ var getAmbulanceDuty = function() {
               if (parsedamb == ambcount) {
                 $('.MultiDutyRoster').prepend(icsDLButton);
               }
+
+              var calDienst = createCalendar({
+                options: {
+                  class: 'calExport',
+                  id: ambID, // You can pass an ID. If you don't, one will be generated
+                  linkText: '<img src="' + chrome.extension.getURL('/img/addCal.png') + '" style="margin-right:0.2em;"><span style="display:table-cell;vertical-align:middle;">Export</span>',
+                },
+                data: {
+                  title: title,
+                  start: startDate,
+                  duration: duration * 60,
+                  // end: new Date('June 15, 2013 23:00'), // If an end time is set, this will take precedence over duration
+                  address: location,
+                  description: desc
+                }
+              });
+              $('#' + ambID).append('<td class="MessageBody" id="exportCal_' + ambID + '"></td>');
+              $('#exportCal_' + ambID).append(calDienst);
             });
         }
       });
   }
 
 var getRDDuty = function() {
+  $('#DutyRosterTable thead tr.DutyRosterHeader').append('<td></td>');
   $('.MultiDutyRoster table').each(function(key, dutyTable) {
     dutyType = $(dutyTable).find('.MessageHeader').html();
     var duties = $(dutyTable).find('#DutyRosterTable tbody tr');
@@ -148,35 +172,23 @@ var getRDDuty = function() {
       }
       cal.addEvent(title, description, dienststelle, startDate.toISOString(), endDate.toISOString());
 
-      var myCalendar = createCalendar({
+      var calDienst = createCalendar({
         options: {
           class: 'calExport',
           id: dutyID, // You can pass an ID. If you don't, one will be generated
           linkText: '<img src="' + chrome.extension.getURL('/img/addCal.png') + '" style="margin-right:0.2em;margin-top:5px;"><span style="display:table-cell;vertical-align:middle;">Export</span>',
         },
         data: {
-          // Event title
           title: title,
-
-          // Event start date
           start: startDate,
-
-          // Event duration (IN MINUTES)
           duration: duration * 60,
-
-          // You can also choose to set an end time
-          // If an end time is set, this will take precedence over duration
-          // end: new Date('June 15, 2013 23:00'),
-
-          // Event Address
+          // end: new Date('June 15, 2013 23:00'), // If an end time is set, this will take precedence over duration
           address: dienststelle,
-
-          // Event Description
           description: description
         }
       });
       $('#' + dutyID).append('<td id="exportCal_' + dutyID + '"></td>');
-      $('#exportCal_' + dutyID).append(myCalendar);
+      $('#exportCal_' + dutyID).append(calDienst);
 
     });
   });
