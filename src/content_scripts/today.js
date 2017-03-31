@@ -23,6 +23,18 @@ $(document).ready(function() {
   getAmbulanceDuty();
 });
 
+function cleanName(name) {
+  if (name) {
+    name = name.replace('\n', '').replace('\r', '').replace('\t', '');
+    while (name.includes('  ')) {
+      name = name.replace('  ', ' ');
+    }
+  } else {
+    name = 'unbekannt';
+  }
+  return name;
+}
+
 var getAmbulanceDuty = function() {
     //TODO: Derzeit passiert das ganze async, wenn also noch nicht alle ambulanzen geladen sind, sind nicht alle in der ICS datei drinnen.
     //Der Call sollte daher geändert werden.
@@ -121,16 +133,20 @@ var getRDDuty = function() {
         var san2 = $(parts[6]).find('a').html();
       }
 
+      lenker = cleanName(lenker);
+      san1 = cleanName(san1);
+      san2 = cleanName(san2);
+
       var title = '';
-      var text = '';
+      var description = $(parts[7]).html() + '\r\n';
       if (type != 'Bezirkstellentätigkeit') {
         title = 'KTW ' + $(parts[3]).html();
-        text = $(parts[7]).html() + '\r\nLenker: ' + lenker + '\r\nSAN1: ' + san1 + '\r\nSAN2:' + san2;
+        description = 'Lenker: ' + lenker + '\r\nSAN1: ' + san1 + '\r\nSAN2:' + san2;
       } else {
         title = 'Referate ' + $(parts[3]).html();
-        text = $(parts[7]).html() + '\r\nReferent 1: ' + lenker + '\r\nReferent 2: ' + san1 + '\r\nReferent 3:' + san2;
+        description = 'Referent 1: ' + lenker + '\r\nReferent 2: ' + san1 + '\r\nReferent 3:' + san2;
       }
-      cal.addEvent(title, text, dienststelle, startDate.toISOString(), endDate.toISOString());
+      cal.addEvent(title, description, dienststelle, startDate.toISOString(), endDate.toISOString());
 
       var myCalendar = createCalendar({
         options: {
@@ -140,7 +156,7 @@ var getRDDuty = function() {
         },
         data: {
           // Event title
-          title: $(parts[3]).html(),
+          title: title,
 
           // Event start date
           start: startDate,
@@ -156,7 +172,7 @@ var getRDDuty = function() {
           address: dienststelle,
 
           // Event Description
-          description: text
+          description: description
         }
       });
       $('#' + dutyID).append('<td id="exportCal_' + dutyID + '"></td>');
