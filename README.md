@@ -1,4 +1,4 @@
-# NIU's little helper
+﻿# NIU's little helper
 Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz ([NIU](https://niu.wrk.at/)).
 
 ## Installation
@@ -75,7 +75,8 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.37* Pflichtfortbildungen über Liste/Ausdruck
 + *0.38* FunktionärInnenfeatures: SAN-Ampel in Liste/Ausdruck
 + *0.39* FunktionärInnenfeatures: Memos direkt in Liste/Ausdruck verfassen
-
++ *0.40* RTW Dienstpläne nun nach Permanenz filterbar + Benutzer wird nun über aktive Erweiterung informiert.
++ *0.41* Geplante Dienste können jetzt nach eigenen Diensten durchsucht/gefiltert werden
 
 ## Built With
 * [Atom](https://github.com/atom/atom)

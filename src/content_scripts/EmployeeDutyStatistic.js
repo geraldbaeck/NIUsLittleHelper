@@ -78,7 +78,8 @@ $(document).ready(function() {
             switch (i) {
               case 4: // Fahrer
               case 5: // SAN1
-              case 6: // SAN2
+              case 6: // SAN2, Error Try-Catch um bei 2-spaltigen Dienstarten keinen Programmabbruch zu verursachen.
+                try {
                 if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
                   var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
                   rawKollegen.push(kollege);
@@ -98,6 +99,10 @@ $(document).ready(function() {
                   }
                 }
                 break;
+                }
+                catch(err) {
+                break;
+                }
               default:
                 break;
             }
@@ -105,7 +110,8 @@ $(document).ready(function() {
             switch (i) {
               case 5: // Fahrer
               case 6: // SAN1
-              case 7: // SAN2
+              case 7: // SAN2, Error Try-Catch um bei 2-spaltigen Dienstarten keinen Programmabbruch zu verursachen.
+                try {
                 if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
                   var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
                   rawKollegen.push(kollege);
@@ -125,6 +131,10 @@ $(document).ready(function() {
                   }
                 }
                 break;
+                }
+                catch (err) {
+                  break;
+                }
               default:
                 break;
             }

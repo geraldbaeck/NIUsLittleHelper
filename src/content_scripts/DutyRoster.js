@@ -1,10 +1,33 @@
 $(document).ready(function() {
 
+  // sucht eigene NIU IDs
+  // returns array of IDs
+  function getOwnIDs() {
+    var ownIDs = [];
+    $('select[name="ctl00$main$ddProposeEmployeeNumber"] option').each(function (key, val) {
+      if ($(val).text() !== 'DEAKTIV.') {
+        ownIDs.push($(val).text());
+      }
+    });
+    return ownIDs;
+  }
+
+  function isSelf(str, ownIDs) {
+    var r = false;
+    $(ownIDs).each(function(key, id) {
+      if (str.includes(id)) {
+        r = true;
+      }
+    });
+    return r;
+  }
+
   // scrapes the table data
   // and enriches the rows with metadata
   // to enable filtering
   function prepareTable() {
-    var rtrn = {NKTW: false, Kurzdienst: false, Permanenz: false};
+    var ownIDs = getOwnIDs();
+    var rtrn = {NKTW: false, Kurzdienst: false, Permanenz: false, myDienst: false};
     var $table = $('table#DutyRosterTable tbody');
 
     $table.find('tr').each(function(key, val) {
@@ -19,6 +42,8 @@ $(document).ready(function() {
       var isTagdienst = false;
       var isNachtdienst = false;
       var isPermanenz = false;
+      var permanenzBS = 'ha';
+      var isMyDienst = false;
       var dienstLaenge;
 
       $(this).find('td').each(function(key, val) {
@@ -45,7 +70,15 @@ $(document).ready(function() {
             }
             break;
           case 3: // Ort
+
+            var typeCode = $(this).parent().attr('class');
+            if (typeCode.includes('West')) { permanenzBS = 'west'; }
+            if (typeCode.includes('Nord')) { permanenzBS = 'nord'; }
+            if (typeCode.includes('DDL')) { permanenzBS = 'ddl'; }
+            if (typeCode.includes('VS')) { permanenzBS = 'vs'; }
+            if (typeCode.includes('BVS')) { permanenzBS = 'bvs'; }
             break;
+
           case 4: // SEW
           case 5: // SAN1
           case 6: // SAN2
@@ -55,6 +88,11 @@ $(document).ready(function() {
 
             if (val.includes(openIndikator)) {
               isNotMeldable = false;
+            }
+
+            if (isSelf(val, ownIDs)) {
+              isMyDienst = true;
+              rtrn.myDienst = true;
             }
 
             break;
@@ -85,13 +123,18 @@ $(document).ready(function() {
       $('tr#' + dienstID).attr('isTagdienst', isTagdienst);
       $('tr#' + dienstID).attr('isNachtdienst', isNachtdienst);
       $('tr#' + dienstID).attr('isPermanenz', isPermanenz);
+      $('tr#' + dienstID).attr('permanenzBS', permanenzBS);
       $('tr#' + dienstID).attr('dienstLaenge', dienstLaenge);
+      $('tr#' + dienstID).attr('isMyDienst', isMyDienst);
     });
 
     return rtrn;
   }
 
   function filterTable() {
+
+    if ($('select[name=permanenzBS] option:selected').val() === '-') { $('#DutyRosterTable > tbody > tr').show(); }
+
     $('tr[isEmpty]').show();
     if ($('#DutyRosterFilterEmpty').is(':checked')) {
       $('tr[isEmpty=true]').hide();
@@ -111,6 +154,14 @@ $(document).ready(function() {
 
     if ($('#DutyRosterFilterPermanenz').is(':checked')) {
       $('tr[isPermanenz=false]').hide();
+    }
+
+    if ($('select[name=permanenzBS] option:selected').val() !== '-') {
+      $('#DutyRosterTable > tbody > tr[permanenzBS!=' + $('select[name=permanenzBS] option:selected').val() + ']').hide();
+    }
+
+    if ($('#DutyRosterFiltermyDienst').is(':checked')) {
+      $('tr[isMyDienst=false]').hide();;
     }
 
     $('tr[' + $('input[name=dienstTyp]:checked').val() + '=false]').hide();
@@ -169,6 +220,9 @@ $(document).ready(function() {
   if (tbl.Kurzdienst) {
     $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterKurzdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur Kurzdienste</div>');
   }
+  if (tbl.myDienst) {
+    $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFiltermyDienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur eigene Dienste</div>');
+  }
   // Makes no sense to offer this
   // if (tbl.Permanenz) {
   //   $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterPermanenz" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur Permanenzen</div>');
@@ -178,6 +232,10 @@ $(document).ready(function() {
   $('#rdColumn').append(plcDiv + '<input type="radio" name="dienstTyp" value="isTagdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">Tagdienste</div>');
   $('#rdColumn').append(plcDiv + '<input type="radio" name="dienstTyp" value="isNachtdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">Nachtdienste</div>');
   $('#rdColumn').append(plcDiv + '<input type="radio" name="dienstTyp" value="alle" class="TableHack" style="margin-right:0.3em;vertical-align:middle;" checked>Alle Dienste</div>');
+
+  $('#rdColumn').append(plcDiv + '<select id="permanenzBSsel" name="permanenzBS" class="TableHack" style="margin-right:0.3em;vertical-align:middle;"><option value="-">-</option><option value="ha">nur HA Permanenzen</option><option value="west">nur West Permanenzen</option><option value="ddl">nur DDL Permanenzen</option><option value="vs">nur VS Permanenzen</option><option value="nord">nur Nord Permanenzen</option><option value="bvs">nur BVS Permanenzen</option></div>');
+
+  if ($('#ctl00_main_ddDutyType option:selected').text().indexOf('RK') === -1) { $('#permanenzBSsel').hide(); }
 
   // add hide selector
   $('div.whitebox:not([id])').append('<div style="float:right;padding-right:3px;"><a class="hideSelectors">&#10006;</a></div>');  // div box for checkboxes
