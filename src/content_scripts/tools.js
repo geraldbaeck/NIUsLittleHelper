@@ -213,15 +213,22 @@ function writeMemo(MemoObj)
     var post = {};
 
     post["Memodate"] = MemoObj["memodate"];
-    post["Erinnerung"] = MemoObj["memoreminder"];
-    post["Memotext"] = MemoObj["memotext"];
+    if (MemoObj["memoreminder"] !== undefined) {
+      post["Erinnerung"] = MemoObj["memoreminder"];
+    }
+
+
     post["Memo_neu"] = "Memo+neu";
     post["DNR"] = MemoObj["dnr"]
     post["verfasser"] = MemoObj["dnrself"];
+
+    var formdatastring = Object.entries(post).map(([k, v]) => `${k}=${v}`).join('&');  //erstelle eine parameterliste param1=etwas&param2=text
+    formdatastring = formdatastring + "&Memotext=" + escape(MemoObj["memotext"]); //Verwende nur bei memotext escape und füge den Parameter an
     return $.ajax({
             url: "https://niu.wrk.at/df/memo/memo_Neu.asp",
-            data: post,
-            type: "POST"
+            data: formdatastring,
+            type: "POST",
+            contentType: "application/x-www-form-urlencoded"
           });
 
 }
@@ -299,7 +306,7 @@ function getEmployeeDataSheetNotCached(args)
 {
   var dict = {};
   var empNID = args.empNID;
-  
+
   return $.get("https://niu.wrk.at/Kripo/Employee/detailEmployee.aspx?EmployeeNumberID=" + empNID)
 
   .then(function(data) {
