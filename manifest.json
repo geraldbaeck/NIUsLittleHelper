@@ -115,7 +115,7 @@
               "src/content_scripts/tools.js",
               "src/content_scripts/today.js"
             ],
-      "css" : ["src/css/style.css"],
+      "css" : ["src/css/style.css", "js/ouical/ouical.css"],
       "all_frames": true,
       "run_at": "document_end"
     },
