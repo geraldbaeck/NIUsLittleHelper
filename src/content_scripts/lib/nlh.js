@@ -196,25 +196,32 @@ if (NLH === undefined) {
       $("#pageTitle").after(b);
       $("#nlh_options_button").button();
       $("#nlh_options_button").click(function() {
+        //TODO: optionen weg auslagern vom PLUGIN code hinzu web only code...
         //TODO: show options dialog....
+        //TODO: hide framesset und zeige optionen an
 
-        vex.dialog.open({
-          message: "NIU's little Helper Optionen",
-          input: [
-            '<input name="experimental" type="checkbox" checked/>',
-          ].join(''),
-          buttons: [
-            $.extend({}, vex.dialog.buttons.YES, { text: "speichern"}),
-            $.extend({}, vex.dialog.buttons.NO, { text: "abbrechen"})
-          ],
-          callback: function(data) {
-            if (!data) {
-              console.log("cancelled!")
-            } else {
-              console.log("gespeichert!")
-            }
-          }
-        });
+        //TODO: generiere optionen seite
+
+        //TODO: nach dem schließen zeige frameset wieder normal an!
+
+
+        // vex.dialog.open({
+        //   message: "NIU's little Helper Optionen",
+        //   input: [
+        //     '<input name="experimental" type="checkbox" checked/>',
+        //   ].join(''),
+        //   buttons: [
+        //     $.extend({}, vex.dialog.buttons.YES, { text: "speichern"}),
+        //     $.extend({}, vex.dialog.buttons.NO, { text: "abbrechen"})
+        //   ],
+        //   callback: function(data) {
+        //     if (!data) {
+        //       console.log("cancelled!")
+        //     } else {
+        //       console.log("gespeichert!")
+        //     }
+        //   }
+        // });
 
 
       });
