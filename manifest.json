@@ -135,8 +135,14 @@
       "matches": ["https://niu.wrk.at/Kripo/Header.aspx"],
       "js": ["src/definitions.js",
         "js/jquery/jquery.js",
+        "js/jquery-ui/jquery-ui.js",
+        "js/pouchdb/pouchdb-6.1.2.js",
+        "js/datatable/jquery.dataTables.min.js",
+        "js/vex/vex.combined.min.js",
+        "src/content_scripts/lib/lib.js",
+        "src/content_scripts/lib/nlh.js",
         "src/content_scripts/Header.js"],
-      "css" : ["src/css/style.css"],
+      "css" : ["src/css/style.css", "js/datatable/jquery.dataTables.min.css", "/js/vex/vex-theme-os.css", "js/jquery-ui/jquery-ui.css"],
       "all_frames": true,
       "run_at": "document_end"
     }
