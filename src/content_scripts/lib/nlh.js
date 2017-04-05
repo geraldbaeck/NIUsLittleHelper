@@ -131,7 +131,11 @@ if (NLH === undefined) {
       console.debug("NLH.onReady() --> iterate over: " + this.activeAddins);
       for (let addin of this.activeAddins) {
         console.debug("NLH.onReady() --> calling onReady of addin: " + JSON.stringify(addin));
+        try {
           addin.onReady();
+        }catch (e) {  //fange eventuelle Fehler im addin ab...
+          console.error("Error: " + e);
+        }
       }
     }
 
@@ -195,7 +199,51 @@ if (NLH === undefined) {
       let b = $('<span id="nlh_options_button">NLH Options</span>');
       $("#pageTitle").after(b);
       $("#nlh_options_button").button();
+
+      console.debug("parent frames: " + $(parent.frames));
+
+      // $("#pageTitle").after("<div id='testdialog'>hallo welt</div>");
+      // $("#testdialog").dialog({
+      //   autoOpen: true,
+      //   width: 400,
+      //   height: 400
+      // })
+
+      $(top.frames['main'].document.body).prepend(
+          ['<dialog id="favDialog">',
+            '<form method="dialog"><section>',
+              '<p><label for="favAnimal">Favorite animal:</label>',
+              '<select id="favAnimal" name="favAnimal">',
+                '<option></option>',
+                '<option>Brine shrimp</option>',
+                '<option>Red panda</option>',
+                '<option>Spider monkey</option>',
+                '</select>',
+              '</p>',
+              '</section>',
+              '<menu>',
+              '<button id="cancel" type="reset">Cancel</button>',
+              '<button type="submit">Confirm</button>',
+              '</menu>',
+              '</form>',
+          '</dialog>']
+          .join(''));
+
+      var jqMain = top.frames['main'].$;
+      console.debug("jqMain is : " + jqMain);
+      //var dialog = $(top.frames['main'].document.getElementById('favDialog'));
+      var dialog = jqMain('#favDialog');
+      console.debug("dialog is " + dialog);
+      dialog = dialog.dialog({
+        autoOpen: true,
+        modal:true
+      });
+
       $("#nlh_options_button").click(function() {
+        console.debug("showing options dialog");
+        //$('#favDialog').showModal();;
+        //dialog.showModal();
+        dialog.dialog("open");
         //TODO: optionen weg auslagern vom PLUGIN code hinzu web only code...
         //TODO: show options dialog....
         //TODO: hide framesset und zeige optionen an
@@ -203,6 +251,8 @@ if (NLH === undefined) {
         //TODO: generiere optionen seite
 
         //TODO: nach dem schließen zeige frameset wieder normal an!
+
+
 
 
         // vex.dialog.open({
