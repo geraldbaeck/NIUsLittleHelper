@@ -108,89 +108,88 @@ function getDB() {
   return db;
 }
 
-function saveToCache(prefix, id, object) {
-  console.log("saveToCache --> called");
-  var db = getDB();
-
-  var dict = {};
-  dict['object'] = object;
-  dict['lastchange'] = new Date().getTime();
-  dict['_id'] = prefix + id;
-  var key = prefix + id;
-  return db.get(key)
-  .catch(function(error) {
-      if (error.name === 'not_found') {
-          return dict;
-      }
-  })
-  .then(function(olddoc) {
-      if (olddoc.hasOwnProperty('_rev')) {
-        dict['_rev'] = olddoc['_rev'];
-      }
-
-      return db.put(dict)
-        .then(function() {
-          console.log("saveToCache --> erfolgreich gespeichert: " + JSON.stringify(dict));
-          return object;
-      }).catch(function(error) {
-          console.log("saveToCache --> fehler beim speichern in pouchdb!: " + dict + " error: " +  error);
-          return object; //auch im fehlerfalle
-      });
-  })
-
-}
-
-function getFromCache(prefix, id, args, callback, classobject) {
-  console.log("getFromCache --> lade vom cache: " + prefix + id);
-  var db = getDB();
-  var key = prefix + id;
-
-  //promise verkettet
-  return isCacheActive()
-    .then(function(cache) {
-      if (!cache) { return Promise.reject("cache ist ausgeschalten!"); }
-    })
-    .then(function() {
-      return db.get(key);
-    })
-    .then(function(doc){
-
-      console.log("getFromCache --> doc: " + JSON.stringify(doc));
-      var now = new Date().getTime();
-      if (now - doc.lastchange > MAX_CACHE_TIME) {
-        console.log("getFromCache --> fail weil cache ablauf!");
-        return Promise.reject("maximale cache zeit " + MAX_CACHE_TIME + "ms abgelaufen!");
-      }
-      if (classobject === undefined) {
-        //console.log("just as it is....");
-        return doc.object;
-      } else {
-        //console.log("parse from json string...: " + doc.object);
-        return classobject.fromJson(doc.object);
-      }
-    })
-    .catch(function(reason) {  //promise rejected, jetzt lade von niu!
-     console.log("getFromCache --> fail: " + reason);
-     return callback(args).then(function(object) {
-       console.log("getFromCache --> lade von niu: " + JSON.stringify(object));
-       var save = object;
-       if (classobject != undefined) {
-         save = object.toJson();
-       }
-       isCacheActive().then(function(active) {
-         active && saveToCache(prefix, id, save).then(function() {});
-       });
-
-       return object;
-    });
-
-     //return saveToCache(prefix, id, promise);
-    });
-}
+// function saveToCache(prefix, id, object) {
+//   console.log("saveToCache --> called");
+//   var db = getDB();
+//
+//   var dict = {};
+//   dict['object'] = object;
+//   dict['lastchange'] = new Date().getTime();
+//   dict['_id'] = prefix + id;
+//   var key = prefix + id;
+//   return db.get(key)
+//   .catch(function(error) {
+//       if (error.name === 'not_found') {
+//           return dict;
+//       }
+//   })
+//   .then(function(olddoc) {
+//       if (olddoc.hasOwnProperty('_rev')) {
+//         dict['_rev'] = olddoc['_rev'];
+//       }
+//
+//       return db.put(dict)
+//         .then(function() {
+//           console.log("saveToCache --> erfolgreich gespeichert: " + JSON.stringify(dict));
+//           return object;
+//       }).catch(function(error) {
+//           console.log("saveToCache --> fehler beim speichern in pouchdb!: " + dict + " error: " +  error);
+//           return object; //auch im fehlerfalle
+//       });
+//   })
+// }
+//
+// function getFromCache(prefix, id, args, callback, classobject) {
+//   console.log("getFromCache --> lade vom cache: " + prefix + id);
+//   var db = getDB();
+//   var key = prefix + id;
+//
+//   //promise verkettet
+//   return isCacheActive()
+//     .then(function(cache) {
+//       if (!cache) { return Promise.reject("cache ist ausgeschalten!"); }
+//     })
+//     .then(function() {
+//       return db.get(key);
+//     })
+//     .then(function(doc){
+//
+//       console.log("getFromCache --> doc: " + JSON.stringify(doc));
+//       var now = new Date().getTime();
+//       if (now - doc.lastchange > MAX_CACHE_TIME) {
+//         console.log("getFromCache --> fail weil cache ablauf!");
+//         return Promise.reject("maximale cache zeit " + MAX_CACHE_TIME + "ms abgelaufen!");
+//       }
+//       if (classobject === undefined) {
+//         //console.log("just as it is....");
+//         return doc.object;
+//       } else {
+//         //console.log("parse from json string...: " + doc.object);
+//         return classobject.fromJson(doc.object);
+//       }
+//     })
+//     .catch(function(reason) {  //promise rejected, jetzt lade von niu!
+//      console.log("getFromCache --> fail: " + reason);
+//      return callback(args).then(function(object) {
+//        console.log("getFromCache --> lade von niu: " + JSON.stringify(object));
+//        var save = object;
+//        if (classobject != undefined) {
+//          save = object.toJson();
+//        }
+//        isCacheActive().then(function(active) {
+//          active && saveToCache(prefix, id, save).then(function() {});
+//        });
+//
+//        return object;
+//     });
+//
+//      //return saveToCache(prefix, id, promise);
+//     });
+// }
 
 function getOwnDNRs()
 {
- return getFromCache("ownDnr", "", "", getOwnDNRsNotCached);
+ return NLH.getFromCache("ownDnr", "", "", getOwnDNRsNotCached);
 }
 
 function getOwnDNRsNotCached()
@@ -295,11 +294,11 @@ function dnrToIdentifierNotCached(args) {
   dnr to identifier pouchdb cached
 */
 function dnrToIdentifier(dnr) {
-  return getFromCache("empid_", dnr, { 'dnr' : dnr}, dnrToIdentifierNotCached);
+  return NLH.getFromCache("empid_", dnr, { 'dnr' : dnr}, dnrToIdentifierNotCached);
 }
 
 function getEmployeeDataSheet(empNID) {
-return getFromCache("datasheetv2_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
+  return NLH.getFromCache("datasheetv2_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
 }
 
 function getEmployeeDataSheetNotCached(args)
@@ -338,7 +337,7 @@ function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
     //return calculateDutyStatisticNonCached({'empID' : empID, 'reqtype' : reqtype, 'reqStartDate' : reqStartDate, 'reqEndDate' : reqEndDate});
 
     var dutyId = empID; //TODO: reqStart, reqEndDate einbauen!
-    return getFromCache("dutyid_", dutyId,
+    return NLH.getFromCache("dutyid_", dutyId,
       {'empID' : empID, 'reqtype' : reqtype, 'reqStartDate' : reqStartDate, 'reqEndDate' : reqEndDate},
       calculateDutyStatisticNonCached, DutyCount);
 }
@@ -734,7 +733,7 @@ function calculateDutyStatisticNonCached(args) {
 }
 
 function checkCourseAttendance(empID, courseDict) {
-return getFromCache("courseattend_", empID + courseDict.UID, { 'empID' : empID, 'courseDict' : courseDict}, checkCourseAttendanceNotCached);
+  return NLH.getFromCache("courseattend_", empID + courseDict.UID, { 'empID' : empID, 'courseDict' : courseDict}, checkCourseAttendanceNotCached);
 }
 
 //TODO: $.get liefert schon ein promise zurück, somit ist das new Promise unnötig

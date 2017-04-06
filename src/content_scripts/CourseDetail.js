@@ -1,3 +1,11 @@
+
+
+
+
+
+
+
+
 $(document).ready(function() {
 
     console.log("SearchCourse");
@@ -44,14 +52,14 @@ $(document).ready(function() {
     Kuerzel setzen:
 
     */
-    var bemerkung = $("#ctl00_main_m_NewAssignment_m_Notice");
-
-    //TODO: importiere tools.js
-    //console.log("set bemerkung to " + getKuerzel());
-    getKuerzel().then(function(kuerzel) {
-      console.log("getKuerzel then [" + kuerzel + "]");
-      bemerkung.val(kuerzel);
-    });
+    // var bemerkung = $("#ctl00_main_m_NewAssignment_m_Notice");
+    //
+    // //TODO: importiere tools.js
+    // //console.log("set bemerkung to " + getKuerzel());
+    // getKuerzel().then(function(kuerzel) {
+    //   console.log("getKuerzel then [" + kuerzel + "]");
+    //   bemerkung.val(kuerzel);
+    // });
 
     makeEmployeeSearchField(input);
 

@@ -63,6 +63,12 @@ function hideKurssuche() {
   });
 }
 
+
+
+
+
+
+
 $(document).ready(function() {
   /* Erweiterung der Kurssuche um eine Kalendaransicht */
   // NOCH VIEL ARBEIT...

@@ -31,8 +31,13 @@ span.ausblenden {
 
 .ui-button-text {
    font-size: inherit !important;
-} 
+}
 
 .small-button {
    font-size: .8em !important;
+}
+
+#options_dialog {
+    width:80%;
+    height:80%;
 }

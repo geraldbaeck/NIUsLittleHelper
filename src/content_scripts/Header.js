@@ -5,6 +5,19 @@ class Test1 extends NLH.NiuHelperAddin {
   constructor(name) {
     super(name);
     this.urls = ["Header.aspx"];
+    this.options = {
+      "addin1.fun_button" : {
+        category: "Test.Button",
+        name: "Hallo welt",
+        //id: "nlh.delete_cache",
+        description: "",
+        type: 'Button',
+        callback: function() {
+          console.log("Hallo WELT!");
+          alert("nerv.....!");
+        }
+      }
+    };
   }
 
   onReady() {
@@ -26,6 +39,9 @@ NLH.registerAddin( new Test1("Test1"));
 NLH.registerAddin( new NLH.NiuHelperAddin("Test2"));
 
 NLH.registerAddin( new NLH.NiuHelperAddin("hallowelt"));
+
+
+
 
 
 
