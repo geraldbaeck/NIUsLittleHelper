@@ -375,6 +375,8 @@ $(document).ready(function() {
   addSuchfilter(datatable, "kurs_san_basis", "Nur SAN Basiskurse", ["kurs"], function(searchData, index, rowData, counter) {
       return  searchData.kurs.includes("BAS - Ausbildung - Das Rote Kreuz") ||
               searchData.kurs.includes("KHD-Praxistag") ||
+              searchData.kurs.includes("KHD-SD-Praxis") ||
+              searchData.kurs.includes("Ambulanzseminar") ||
               searchData.kurs.includes("RS-Startmodul");
   });
 
