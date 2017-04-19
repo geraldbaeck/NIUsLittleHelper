@@ -80,28 +80,29 @@ $(document).ready(function() {
               case 5: // SAN1
               case 6: // SAN2, Error Try-Catch um bei 2-spaltigen Dienstarten keinen Programmabbruch zu verursachen.
                 try {
-                if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
-                  var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
-                  rawKollegen.push(kollege);
-                } else if ($(val).text() !== '') {
-                  switch (i) {
-                    case 4: // SEF
-                      rawDutyAs.push('SEF');
-                      break;
-                    case 5: // SAN1
-                      rawDutyAs.push('SAN1');
-                      break;
-                    case 6: // SAN2
-                      rawDutyAs.push('SAN2');
-                      break;
-                    default:
-                      break;
+                  if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
+                    var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).replace('Wunschmeldung', '').replace(':', '').replace('>', '').trim();
+                    rawKollegen.push(kollege);
+                  } else if ($(val).text() !== '') {
+                    switch (i) {
+                      case 4: // SEF
+                        rawDutyAs.push('SEF');
+                        break;
+                      case 5: // SAN1
+                        rawDutyAs.push('SAN1');
+                        break;
+                      case 6: // SAN2
+                        rawDutyAs.push('SAN2');
+                        break;
+                      default:
+                        break;
+                    }
                   }
+                  break;
                 }
-                break;
-                }
-                catch(err) {
-                break;
+                catch (err) {
+                  console.log(err);
+                  break;
                 }
               default:
                 break;
@@ -112,25 +113,25 @@ $(document).ready(function() {
               case 6: // SAN1
               case 7: // SAN2, Error Try-Catch um bei 2-spaltigen Dienstarten keinen Programmabbruch zu verursachen.
                 try {
-                if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
-                  var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
-                  rawKollegen.push(kollege);
-                } else if ($(val).text() !== '') {
-                  switch (i) {
-                    case 5: // SEF
-                      rawDutyAs.push('SEF');
-                      break;
-                    case 6: // SAN1
-                      rawDutyAs.push('SAN1');
-                      break;
-                    case 7: // SAN2
-                      rawDutyAs.push('SAN2');
-                      break;
-                    default:
-                      break;
+                  if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
+                    var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
+                    rawKollegen.push(kollege);
+                  } else if ($(val).text() !== '') {
+                    switch (i) {
+                      case 5: // SEF
+                        rawDutyAs.push('SEF');
+                        break;
+                      case 6: // SAN1
+                        rawDutyAs.push('SAN1');
+                        break;
+                      case 7: // SAN2
+                        rawDutyAs.push('SAN2');
+                        break;
+                      default:
+                        break;
+                    }
                   }
-                }
-                break;
+                  break;
                 }
                 catch (err) {
                   break;
