@@ -551,6 +551,19 @@ $(document).ready(function() {
         });
 
      });
+     
+      addCalculationHandler("#fotofehlt", [{calcname : "fotofehlt", uiname : "Foto fehlt?"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          if(result.FotoURL.includes("unknown")) { return "ja"; } else { return "nein"; }
+        });
+
+     });
 
      addCalculationHandler("#ampel", [{calcname : "ampel", uiname : "SAN-Ampel"}], function(dnr, name) {
        //verkettete Promises...

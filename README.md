@@ -77,7 +77,7 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.39* FunktionärInnenfeatures: Memos direkt in Liste/Ausdruck verfassen
 + *0.40* RTW Dienstpläne nun nach Permanenz filterbar + Benutzer wird nun über aktive Erweiterung informiert.
 + *0.41* Geplante Dienste können jetzt nach eigenen Diensten durchsucht/gefiltert werden
-+ *0.42* FunktionärInnenfeatures: AD Benutzer können gesammelt in Liste/Ausdruck angezeigt werden, somit lässt sich prüfen ob der/die MA bereits einen NIU Zugang hat.
++ *0.42* FunktionärInnenfeatures: AD Benutzer können gesammelt in Liste/Ausdruck angezeigt werden, somit lässt sich prüfen ob der/die MA bereits einen NIU Zugang hat. Fehlende Mitarbeiter-Fotos können nun ebenfalls über Liste/Ausdruck ausgewertet werden.
 
 ## Built With
 * [Atom](https://github.com/atom/atom)
