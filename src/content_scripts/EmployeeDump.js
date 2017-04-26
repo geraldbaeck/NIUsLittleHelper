@@ -537,6 +537,20 @@ $(document).ready(function() {
         });
 
      });
+     
+     addCalculationHandler("#niuzugang", [{calcname : "niuzugang", uiname : "AD-Benutzer"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          return result.ADuser;
+
+        });
+
+     });
 
      addCalculationHandler("#ampel", [{calcname : "ampel", uiname : "SAN-Ampel"}], function(dnr, name) {
        //verkettete Promises...
