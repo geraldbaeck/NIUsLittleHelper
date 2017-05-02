@@ -15,7 +15,7 @@ $(document).ready(function() {
   function isSelf(str, ownIDs) {
     var r = false;
     $(ownIDs).each(function(key, id) {
-      if (str.includes(id)) {
+      if ($(str).text().includes(id)) {
         r = true;
       }
     });
