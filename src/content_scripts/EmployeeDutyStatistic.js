@@ -209,7 +209,7 @@ $(document).ready(function() {
       $('#charts' + i).append('<table style="float:left;"><thead><tr><td><strong>Übersicht:</strong></td></tr></thead><tbody class="additionalData' + i + '"><tr><td></td></tr></tbody></table>');
       $('.additionalData' + i).append('<tr><td>Dienste: </td><td style="text-align:right;">' + countDienste + '</td></tr>');
       $('.additionalData' + i).append('<tr><td>Gesamtdauer: </td><td style="text-align:right;">' + sumDuty + '</td></tr>');
-      $('.additionalData' + i).append('<tr><td>durchschnitt Dauer: </td><td style="text-align:right;">' + Math.round(sumDuty / countDienste) + '</td></tr>');
+      $('.additionalData' + i).append('<tr><td>durchschnittl. Dauer: </td><td style="text-align:right;">' + Math.round(sumDuty / countDienste) + '</td></tr>');
 
       $('#charts' + i).append('<table style="float:left;margin-left:20px;"><thead><tr><td><strong>Top KollegInnen:</strong></td></tr></thead><tbody class="topKollegen' + i + '"><tr><td></td></tr></tbody></table>');
       Object.keys(countKollegenSorted.reverse().slice(0,5)).forEach(function(key, object) {
