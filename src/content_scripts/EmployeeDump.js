@@ -565,6 +565,94 @@ $(document).ready(function() {
         });
 
      });
+     
+        addCalculationHandler("#sanber", [{calcname : "sanber", uiname : "SAN-Berechtigung"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          var berArray = result.PermissionArray;
+          var permString = "";
+          var arrayLength = berArray.length;
+
+          for (var i = 0; i < arrayLength; i++) {
+          if(berArray[i].typ === "SAN" && !berArray[i].revoked) { permString += berArray[i].permission + "<br>"; }
+          };
+
+          return permString;
+
+        });
+
+     });
+     
+     addCalculationHandler("#fsdber", [{calcname : "fsdber", uiname : "FSD-Berechtigung"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          var berArray = result.PermissionArray;
+          var permString = "";
+          var arrayLength = berArray.length;
+
+          for (var i = 0; i < arrayLength; i++) {
+          if(berArray[i].typ.includes("GSD") && !berArray[i].revoked) { permString += berArray[i].permission + "<br>"; }
+          };
+
+          return permString;
+
+        });
+
+     });
+     
+      addCalculationHandler("#fahrber", [{calcname : "fahrber", uiname : "Fahrer-Berechtigung"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          var berArray = result.PermissionArray;
+          var permString = "";
+          var arrayLength = berArray.length;
+
+          for (var i = 0; i < arrayLength; i++) {
+          if(berArray[i].typ.includes("Fahrer") && !berArray[i].revoked) { permString += berArray[i].permission + "<br>"; }
+          };
+
+          return permString;
+
+        });
+
+     });
+     
+      addCalculationHandler("#alleber", [{calcname : "alleber", uiname : "Berechtigungen"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          var berArray = result.PermissionArray;
+          var permString = "";
+          var arrayLength = berArray.length;
+
+          for (var i = 0; i < arrayLength; i++) {
+          if(!berArray[i].revoked) { permString += berArray[i].typ + " -> " + berArray[i].permission + "<br>"; }
+          };
+
+          return permString;
+
+        });
+
+     });
 
      addCalculationHandler("#ampel", [{calcname : "ampel", uiname : "SAN-Ampel"}], function(dnr, name) {
        //verkettete Promises...

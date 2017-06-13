@@ -299,7 +299,7 @@ function dnrToIdentifier(dnr) {
 }
 
 function getEmployeeDataSheet(empNID) {
-return getFromCache("datasheetv3_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
+return getFromCache("datasheetv4_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
 }
 
 function getEmployeeDataSheetNotCached(args)
@@ -321,6 +321,25 @@ function getEmployeeDataSheetNotCached(args)
   dict["TelNummer"] = $(data).find("#ctl00_main_m_Employee_m_ccPersonContact_m_ccContact0_m_NumberLabel").text();
   dict["Email"] = $(data).find("#ctl00_main_m_Employee_m_ccPersonContact_m_ccContact1_m_NumberLabel").text();
   dict["ADuser"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeExtention_m_Employee > tbody > tr > td:contains('Wrk.at\')").text();
+
+  var permArray = [];
+
+  $(data).find(".PermissionRow").each(function() {
+
+    var permDict = {};
+    
+    permDict["typ"] = $(this).find(".PermissionType").text();
+    permDict["permission"] = $(this).find(".PermissionName").text();
+    
+    permDict["revoked"] = $(this).find(".PermissionCheckbox").find("input").is(':checked');
+
+    permArray.push(permDict);
+
+
+  });
+
+  dict["PermissionArray"] = permArray;
+
   dict["AmpelCode"] = "";
 
   $(data).find(".PermissionQualificationIcon").each(function() {

@@ -78,6 +78,7 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.40* RTW Dienstpläne nun nach Permanenz filterbar + Benutzer wird nun über aktive Erweiterung informiert.
 + *0.41* Geplante Dienste können jetzt nach eigenen Diensten durchsucht/gefiltert werden
 + *0.42* FunktionärInnenfeatures: AD Benutzer können gesammelt in Liste/Ausdruck angezeigt werden, somit lässt sich prüfen ob der/die MA bereits einen NIU Zugang hat. Fehlende Mitarbeiter-Fotos können nun ebenfalls über Liste/Ausdruck ausgewertet werden.
++ *0.43* FunktionärInnenfeatures: Berechtigungen lassen sich nun in Liste/Ausdruck auswerten.
 
 ## Built With
 * [Atom](https://github.com/atom/atom)
