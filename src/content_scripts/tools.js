@@ -763,9 +763,9 @@ function checkCourseAttendanceNotCached(args) {
     // Function accepts courseDict in format of:
     //var courseDict = {
     //                    UID : "Unique ID for Cache"
-    //                    kurs1 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" },
-    //                    kurs2 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" },
-    //                    kurs3 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" }
+    //                    kurs1 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "absolved" : "?" },
+    //                    kurs2 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "absolved" : "?" },
+    //                    kurs3 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "absolved" : "?" }
     // [... unlimited additions to dictionary possible but format has to remain the same! ]
     //                  };
 
@@ -805,10 +805,13 @@ function checkCourseAttendanceNotCached(args) {
                 success: function(data, status) {
 
                     var absolvedCourses = [];
+                    var absolvedCourseIDs = [];
 
                     $(data).find(".CourseTitel").each(function(index, element) {
-                    absolvedCourses.push($(element).text());
+                    absolvedCourses.push($(element).text().trim());
+                    absolvedCourseIDs.push($(element).parent().prev().text().trim());
                     });
+
 
                     for(var course in courseDict) {
 
@@ -817,6 +820,7 @@ function checkCourseAttendanceNotCached(args) {
                     if($.inArray(courseDict[course].Name, absolvedCourses) !== -1) { found = true; }
                     if($.inArray(courseDict[course].altName1, absolvedCourses) !== -1) { found = true; }
                     if($.inArray(courseDict[course].altName2, absolvedCourses) !== -1) { found = true; }
+                    if($.inArray(courseDict[course].courseID, absolvedCourseIDs) !== -1) { found = true; }
 
                     if(found === true) { courseDict[course].absolved = "ja"; } else { courseDict[course].absolved = "nein"; }
 
