@@ -491,7 +491,7 @@ $(document).ready(function() {
 
        var pflichtfortb = {
                            UID : "pfb",
-                           kurs1 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Kommunikation & Übergabe", "altName1" : "SAN - Fortbildung §50 - Pflichtfortbildung - Kommunikation und Übergabe", "altName2" : "", "courseID" : "", "absolved" : "?" },
+                           kurs1 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Kommunikation & Übergabe", "altName1" : "SAN - Fortbildung §50 - Pflichtfortbildung - Kommunikation und Übergabe", "altName2" : "", "courseID" : "A03241", "absolved" : "?" },
                            kurs2 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Großeinsatz - First Car", "altName1" : "", "altName2" : "", "courseID" : "", "absolved" : "?" }
                          };
 
