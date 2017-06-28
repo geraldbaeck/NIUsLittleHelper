@@ -79,6 +79,8 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.41* Geplante Dienste können jetzt nach eigenen Diensten durchsucht/gefiltert werden
 + *0.42* FunktionärInnenfeatures: AD Benutzer können gesammelt in Liste/Ausdruck angezeigt werden, somit lässt sich prüfen ob der/die MA bereits einen NIU Zugang hat. Fehlende Mitarbeiter-Fotos können nun ebenfalls über Liste/Ausdruck ausgewertet werden.
 + *0.43* FunktionärInnenfeatures: Berechtigungen lassen sich nun in Liste/Ausdruck auswerten.
++ *0.44* FunktionärInnenfeatures: Das Pflichtfortbildungs-Tool wertet nun den Teilnahmestatus am jeweiligen Kurs aus (Angemeldet/Teilgenommen bzw. weder noch).
+
 
 ## Built With
 * [Atom](https://github.com/atom/atom)

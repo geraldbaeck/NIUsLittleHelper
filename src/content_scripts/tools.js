@@ -763,9 +763,9 @@ function checkCourseAttendanceNotCached(args) {
     // Function accepts courseDict in format of:
     //var courseDict = {
     //                    UID : "Unique ID for Cache"
-    //                    kurs1 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "absolved" : "?" },
-    //                    kurs2 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "absolved" : "?" },
-    //                    kurs3 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "absolved" : "?" }
+    //                    kurs1 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "tnStatus" : "nein" },
+    //                    kurs2 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "tnStatus" : "nein" },
+    //                    kurs3 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "tnStatus" : "nein" }
     // [... unlimited additions to dictionary possible but format has to remain the same! ]
     //                  };
 
@@ -793,7 +793,7 @@ function checkCourseAttendanceNotCached(args) {
             post["ctl00$main$m_From$m_Textbox"] = "01.01.1995";
             post["ctl00$main$m_Until$m_Textbox"] = todaysDateString;
             post["ctl00$main$m_Options$0"] = "on";
-            post["ctl00$main$m_Options$2"] = "on";
+            //post["ctl00$main$m_Options$2"] = "on"; only absolved courses
             post["ctl00$main$m_Options$5"] = "on";
             post["ctl00$main$m_CourseName"] = "";
 
@@ -804,28 +804,38 @@ function checkCourseAttendanceNotCached(args) {
                 type: "POST",
                 success: function(data, status) {
 
-                    var absolvedCourses = [];
-                    var absolvedCourseIDs = [];
+                    var registeredCourses = [];
 
-                    $(data).find(".CourseTitel").each(function(index, element) {
-                    absolvedCourses.push($(element).text().trim());
-                    absolvedCourseIDs.push($(element).parent().prev().text().trim());
+                    $(data).find("#ctl00_main_m_CourseList__CourseTable > tbody > tr").each(function(index, element) {
+
+                    var singleCourseDict = { abzID : "", titel : "", tnStatus : "" };
+
+                    if($(element).find(".CourseTitel").length > 0) // filtern der nicht-kurs-zeilen
+                    {
+
+                    singleCourseDict.abzID = $('td:eq(0)', element).text().trim();
+                    singleCourseDict.titel = $('td:eq(1)', element).text().trim();
+                    singleCourseDict.tnStatus = $('td:eq(6)', element).text().trim();
+                    registeredCourses.push(singleCourseDict);
+
+                    }
+
                     });
 
 
                     for(var course in courseDict) {
 
-                    var found = false;
+                            for(var regCourse in registeredCourses) {
 
-                    if($.inArray(courseDict[course].Name, absolvedCourses) !== -1) { found = true; }
-                    if($.inArray(courseDict[course].altName1, absolvedCourses) !== -1) { found = true; }
-                    if($.inArray(courseDict[course].altName2, absolvedCourses) !== -1) { found = true; }
-                    if($.inArray(courseDict[course].courseID, absolvedCourseIDs) !== -1) { found = true; }
+                            if(registeredCourses[regCourse].abzID === courseDict[course].courseID) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
+                            if(registeredCourses[regCourse].titel === courseDict[course].Name) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
+                            if(registeredCourses[regCourse].titel === courseDict[course].altName1) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
+                            if(registeredCourses[regCourse].titel === courseDict[course].altName2) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
 
-                    if(found === true) { courseDict[course].absolved = "ja"; } else { courseDict[course].absolved = "nein"; }
+                            }
 
                     }
-                    resolve(courseDict) //Ausgabe des Ergebnisses
+                    resolve(courseDict); //Ausgabe des Ergebnisses
 
                 }
             });
