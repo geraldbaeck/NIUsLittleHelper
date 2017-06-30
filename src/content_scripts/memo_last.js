@@ -6,7 +6,7 @@ $("th:contains('Memo über')").each(function( index ) {
 
 var tableObj = this;
 
-$(tableObj).append("<div style='text-align:right; float: right;'><a id='gearButton" + counter + "'><img src=" + chrome.extension.getURL('/img/gear.svg') + " width='12'></a></div>");
+$(tableObj).append(" <a id='gearButton" + counter + "'><img src=" + chrome.extension.getURL('/img/gear.svg') + " width='12'></a>");
 
 $("#gearButton" + counter).click(function() {
 

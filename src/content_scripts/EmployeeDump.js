@@ -593,7 +593,8 @@ $(document).ready(function() {
           var arrayLength = berArray.length;
 
           for (var i = 0; i < arrayLength; i++) {
-          if(berArray[i].typ === "SAN" && !berArray[i].revoked) { permString += berArray[i].permission + "<br>"; }
+          if(berArray[i].typ === "SAN" && !berArray[i].revoked) { permString += "SAN: " + berArray[i].permission + "<br>"; }
+          if(berArray[i].typ === "SanG" && !berArray[i].revoked) { permString += "SanG: " + berArray[i].permission + "<br>"; }
           };
 
           return permString;
