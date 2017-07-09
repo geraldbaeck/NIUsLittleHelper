@@ -1,9 +1,9 @@
-// 0.45.1 silent update
-//chrome.runtime.onInstalled.addListener(function (object) {
-//    chrome.tabs.create({url: chrome.extension.getURL("src/webcontent/welcome.html")}, function (tab) {
-//        console.log("Launching splash website due to event: " + object.reason);
-//    });
-//});
+// 0.46 non-silent update
+chrome.runtime.onInstalled.addListener(function (object) {
+    chrome.tabs.create({url: chrome.extension.getURL("src/webcontent/welcome.html")}, function (tab) {
+        console.log("Launching splash website due to event: " + object.reason);
+    });
+});
 
 const filesInDirectory = dir => new Promise (resolve =>
 
