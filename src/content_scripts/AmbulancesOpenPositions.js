@@ -33,13 +33,17 @@ $(document).ready(function() {
     $('br').remove();
     $('table.openPositionsSubTable').css('width', '100%');
     $('table.openPositionsSubTable').css('margin-bottom', '0.9em');
-    $('table.ambuTable').hide();
-    $('.TableHack').each(function() {
-      var positionID = $(this).attr('positionID');
-      if ($(this).is(':checked')) {
-        $('table[' + positionID + '=true]').show();
-      }
-    });
+    if ($('#TableHack input:checkbox:checked').length) {
+      $('table.ambuTable').hide();
+      $('.TableHack').each(function() {
+        var positionID = $(this).attr('positionID');
+        if ($(this).is(':checked')) {
+          $('table[' + positionID + '=true]').show();
+        }
+      });
+    } else {
+      $('table.ambuTable').show();  // no checkbox select show all
+    }
   }
 
   console.log('hello ambulanzis');
@@ -48,7 +52,7 @@ $(document).ready(function() {
   // add selectors
   $('#aspnetForm div').slice(1).first().prepend('<table class="DFTable" style="float:left;margin-bottom:0.9em;margin-top:1em;width:100%;"><tr><td><div id="TableHack" style="text-align:left;"></div></td></tr></table>');
   $.each(tbl, function() {
-    $('#TableHack').append('<span style="white-space:nowrap;vertical-align: middle;padding-right:0.5em;"><label for="pos_' + this + '">' + this + '</label>: <input type="checkbox" id="pos_' + this + '" positionID="' + this + '" class="TableHack" style="padding:0;"></span><wbr>')
+    $('#TableHack').append('<span style="white-space:nowrap;vertical-align: middle;padding-right:0.5em;"><label for="pos_' + this + '">' + this + '</label>: <input type="checkbox" id="pos_' + this + '" positionID="' + this + '" class="TableHack" style="margin-right:0.6em;vertical-align:middle;top:0.005em;"></span><wbr>')
   });
 
   $('.TableHack').change(function() {

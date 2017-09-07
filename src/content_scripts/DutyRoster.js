@@ -15,7 +15,7 @@ $(document).ready(function() {
   function isSelf(str, ownIDs) {
     var r = false;
     $(ownIDs).each(function(key, id) {
-      if (str.includes(id)) {
+      if ($(str).text().includes(id)) {
         r = true;
       }
     });
@@ -27,15 +27,17 @@ $(document).ready(function() {
   // to enable filtering
   function prepareTable() {
     var ownIDs = getOwnIDs();
-    var rtrn = {NKTW: false, Kurzdienst: false, Permanenz: false, myDienst: false};
+    var rtrn = {NKTW: false, Kurzdienst: false, Permanenz: false, myDienst: false, isMeldableAs: {}};
     var $table = $('table#DutyRosterTable tbody');
+    var duties = getDuties($('.DutyRosterHeader'));
 
     $table.find('tr').each(function(key, val) {
 
-      // create placholder vars
+      // create placeholder vars
       var dienstID = $(this).attr('id');
       var isEmpty = true;
       var isNotMeldable = true;
+      var isMeldableAs = [];
       var isNKTW = false;
       var currentDateString;
       var isKurzdienst = false;
@@ -55,6 +57,7 @@ $(document).ready(function() {
           case 1: // Datum
             currentDateString = val;
             break;
+
           case 2: // Uhrzeit
             dienstLaenge = getDurationFromTimeString(currentDateString, val);
             // $(this).after('<td>' + dienstLaenge + '</td>');  // Stunden einblenden nicht nötig
@@ -69,8 +72,8 @@ $(document).ready(function() {
               isNachtdienst = true;
             }
             break;
-          case 3: // Ort
 
+          case 3: // Ort
             var typeCode = $(this).parent().attr('class');
             if (typeCode.includes('West')) { permanenzBS = 'west'; }
             if (typeCode.includes('Nord')) { permanenzBS = 'nord'; }
@@ -88,6 +91,8 @@ $(document).ready(function() {
 
             if (val.includes(openIndikator)) {
               isNotMeldable = false;
+              isMeldableAs.push(key);
+              rtrn.isMeldableAs[key.toString()] = duties[key];
             }
 
             if (isSelf(val, ownIDs)) {
@@ -96,21 +101,23 @@ $(document).ready(function() {
             }
 
             break;
+
           case 7: // Bemerkung
             if (val.includes('NKTW') || val.includes('N-KTW') || val.includes('Notfall-KTW')) {
               isNKTW = true;
               rtrn.NKTW = true;
             }
-
             break;
+
           case 9: // P = Permanenz
             if (val === 'P') {
               isPermanenz = true;
               rtrn.Permanenz = true;
             }
             break;
-          case 8: // PAL
-          case 10: // Dienstführung Funktionen
+
+          //case 8: // PAL
+          //case 10: // Dienstführung Funktionen
           default:
             break;
         }
@@ -126,6 +133,9 @@ $(document).ready(function() {
       $('tr#' + dienstID).attr('permanenzBS', permanenzBS);
       $('tr#' + dienstID).attr('dienstLaenge', dienstLaenge);
       $('tr#' + dienstID).attr('isMyDienst', isMyDienst);
+      for (k in isMeldableAs) {
+        $('tr#' + dienstID).attr('isMeldableAs_' + isMeldableAs[k].toString(), true);
+      }
     });
 
     return rtrn;
@@ -140,9 +150,25 @@ $(document).ready(function() {
       $('tr[isEmpty=true]').hide();
     }
 
-    if ($('#DutyRosterFilterMeldable').is(':checked')) {
-      $('tr[isMeldable=false]').hide();
+    if ($('#chkColumnMeldbar input[type=checkbox]:checked').length > 0) {
+      $('tr[isMeldable=false]').hide();   // hide all non meldable stuff
+      // hide all non checked columns
+      $('#chkColumnMeldbar input[type=checkbox]').not(':checked').each(function () {
+        $('tr[isMeldableAs_' + $(this).val() + '=true]').hide();
+      });
+      // show all checked columns
+      $('#chkColumnMeldbar input[type=checkbox]:checked').each(function () {
+        if ($('#DutyRosterFilterEmpty').is(':checked')) {
+          $('tr[isMeldableAs_' + $(this).val() + '=true][isEmpty=false]').show();
+        } else {
+          $('tr[isMeldableAs_' + $(this).val() + '=true]').show();
+        }
+      });
     }
+
+    // if ($('#DutyRosterFilterMeldable').is(':checked')) {
+    //   $('tr[isMeldable=false]').hide();
+    // }
 
     if ($('#DutyRosterFilterNKTW').is(':checked')) {
       $('tr[isNKTW=false]').hide();
@@ -165,6 +191,7 @@ $(document).ready(function() {
     }
 
     $('tr[' + $('input[name=dienstTyp]:checked').val() + '=false]').hide();
+
   }
 
   function dfToggle() {
@@ -197,6 +224,17 @@ $(document).ready(function() {
     chrome.storage.sync.set(val)
   }
 
+  // liest die Funktionen aus dem Dienstplan aus
+  function getDuties(header) {
+    duties = {};
+    header.find('td').each(function(key, val) {
+      if ($(val).hasClass('DRCShift')) {
+        duties[key.toString()] = $(val).text();
+      }
+    });
+    return duties;
+  }
+
   // hide dienstführungstabelle
   $('.DFTable').parent().parent().hide();
 
@@ -213,7 +251,7 @@ $(document).ready(function() {
   $('div.whitebox:not([id])').append('<div id="chkColumn" style="float:left;font-weight:bold;padding:5px;"></div>');  // div box for checkboxes
   var plcDiv = '<div style="vert-align:middle;">';
   $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterEmpty" class="TableHack" style="margin-right:0.3em;vertical-align:middle;top:0.005em;">Leerzeilen filtern</div>');
-  $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterMeldable" class="TableHack" style="margin-right:0.3em;vertical-align:middle;top:0.005em;">nur meldbare Dienste</div>');
+  //$('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterMeldable" class="TableHack" style="margin-right:0.3em;vertical-align:middle;top:0.005em;">nur meldbare Dienste</div>');
   if (tbl.NKTW) {
     $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterNKTW" class="TableHack" style="margin-right:0.3em;vertical-align:middle;top:0.005em;">nur NKTW</div>');
   }
@@ -223,17 +261,26 @@ $(document).ready(function() {
   if (tbl.myDienst) {
     $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFiltermyDienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur eigene Dienste</div>');
   }
+
   // Makes no sense to offer this
   // if (tbl.Permanenz) {
   //   $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterPermanenz" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur Permanenzen</div>');
   // }
 
-  $('div.whitebox:not([id])').append('<div id="rdColumn" style="float:left;font-weight:bold;padding:5px;"></div>');  // div box for radio buttons
-  $('#rdColumn').append(plcDiv + '<input type="radio" name="dienstTyp" value="isTagdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">Tagdienste</div>');
-  $('#rdColumn').append(plcDiv + '<input type="radio" name="dienstTyp" value="isNachtdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">Nachtdienste</div>');
-  $('#rdColumn').append(plcDiv + '<input type="radio" name="dienstTyp" value="alle" class="TableHack" style="margin-right:0.3em;vertical-align:middle;" checked>Alle Dienste</div>');
+  // Dienstselektion (Tagdienst, Nachtdienst, egal)
+  $('div.whitebox:not([id])').append('<div id="rdColumnDienste" style="float:left;font-weight:bold;padding:5px;"></div>');  // div box for radio buttons
+  $('#rdColumnDienste').append(plcDiv + '<input type="radio" name="dienstTyp" value="isTagdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">Tagdienste</div>');
+  $('#rdColumnDienste').append(plcDiv + '<input type="radio" name="dienstTyp" value="isNachtdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">Nachtdienste</div>');
+  $('#rdColumnDienste').append(plcDiv + '<input type="radio" name="dienstTyp" value="alle" class="TableHack" style="margin-right:0.3em;vertical-align:middle;" checked>Alle Dienste</div>');
+  $('#rdColumnDienste').append(plcDiv + '<select id="permanenzBSsel" name="permanenzBS" class="TableHack" style="margin-right:0.3em;vertical-align:middle;"><option value="-">-</option><option value="ha">nur HA Permanenzen</option><option value="west">nur West Permanenzen</option><option value="ddl">nur DDL Permanenzen</option><option value="vs">nur VS Permanenzen</option><option value="nord">nur Nord Permanenzen</option><option value="bvs">nur BVS Permanenzen</option></div>');
 
-  $('#rdColumn').append(plcDiv + '<select id="permanenzBSsel" name="permanenzBS" class="TableHack" style="margin-right:0.3em;vertical-align:middle;"><option value="-">-</option><option value="ha">nur HA Permanenzen</option><option value="west">nur West Permanenzen</option><option value="ddl">nur DDL Permanenzen</option><option value="vs">nur VS Permanenzen</option><option value="nord">nur Nord Permanenzen</option><option value="bvs">nur BVS Permanenzen</option></div>');
+  // Nur meldbare Dienste als
+  if (tbl.isMeldableAs !== {}) {
+    $('div.whitebox:not([id])').append('<div id="chkColumnMeldbar" style="float:left;font-weight:bold;padding:5px;">Nur meldbare Dienste als:</div>');  // div box for radio buttons
+    for (var f in tbl.isMeldableAs) {
+      $('#chkColumnMeldbar').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterMeldable_' + f + '" value="' + f + '" class="TableHack" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;">' + duties[f] + '</div>');
+    }
+  }
 
   if ($('#ctl00_main_ddDutyType option:selected').text().indexOf('RK') === -1) { $('#permanenzBSsel').hide(); }
 

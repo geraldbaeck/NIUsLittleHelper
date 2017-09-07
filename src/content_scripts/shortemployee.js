@@ -71,11 +71,17 @@ $(document).ready(function() {
     employee['PHOTO;TYPE=PNG'] = e(imageSrc);  // photo with url
 
     // query url for the UID
-    $.urlParam = function (name) {
+    $.urlParam = function () {
+      var name = 'EmployeeID';
+      if (window.location.href.includes('EmployeeNumberID')) {
+        name = 'EmployeeNumberID';
+      }
       var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+      console.log(window.location.href);
+      console.log();
       return results[1] || 0;
     }
-    employee.UID = 'urn:uuid:' + $.urlParam('EmployeeNumberID');
+    employee.UID = 'urn:uuid:' + $.urlParam();
 
     // Kontaktmöglichkeiten
     $('table#ctl00_main_shortEmpl_contacts_m_tblPersonContactMain tbody tr[id]').each(function () {

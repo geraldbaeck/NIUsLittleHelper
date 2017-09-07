@@ -213,15 +213,22 @@ function writeMemo(MemoObj)
     var post = {};
 
     post["Memodate"] = MemoObj["memodate"];
-    post["Erinnerung"] = MemoObj["memoreminder"];
-    post["Memotext"] = MemoObj["memotext"];
+    if (MemoObj["memoreminder"] !== undefined) {
+      post["Erinnerung"] = MemoObj["memoreminder"];
+    }
+
+
     post["Memo_neu"] = "Memo+neu";
     post["DNR"] = MemoObj["dnr"]
     post["verfasser"] = MemoObj["dnrself"];
+
+    var formdatastring = Object.entries(post).map(([k, v]) => `${k}=${v}`).join('&');  //erstelle eine parameterliste param1=etwas&param2=text
+    formdatastring = formdatastring + "&Memotext=" + escape(MemoObj["memotext"]); //Verwende nur bei memotext escape und füge den Parameter an
     return $.ajax({
             url: "https://niu.wrk.at/df/memo/memo_Neu.asp",
-            data: post,
-            type: "POST"
+            data: formdatastring,
+            type: "POST",
+            contentType: "application/x-www-form-urlencoded"
           });
 
 }
@@ -292,14 +299,14 @@ function dnrToIdentifier(dnr) {
 }
 
 function getEmployeeDataSheet(empNID) {
-return getFromCache("datasheetv2_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
+return getFromCache("datasheetv4_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
 }
 
 function getEmployeeDataSheetNotCached(args)
 {
   var dict = {};
   var empNID = args.empNID;
-  
+
   return $.get("https://niu.wrk.at/Kripo/Employee/detailEmployee.aspx?EmployeeNumberID=" + empNID)
 
   .then(function(data) {
@@ -313,6 +320,26 @@ function getEmployeeDataSheetNotCached(args)
   dict["Ersteintritt"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeExtention__firstEntry_m_Textbox").val();
   dict["TelNummer"] = $(data).find("#ctl00_main_m_Employee_m_ccPersonContact_m_ccContact0_m_NumberLabel").text();
   dict["Email"] = $(data).find("#ctl00_main_m_Employee_m_ccPersonContact_m_ccContact1_m_NumberLabel").text();
+  dict["ADuser"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeExtention_m_Employee > tbody > tr > td:contains('Wrk.at\')").text();
+
+  var permArray = [];
+
+  $(data).find(".PermissionRow").each(function() {
+
+    var permDict = {};
+    
+    permDict["typ"] = $(this).find(".PermissionType").text();
+    permDict["permission"] = $(this).find(".PermissionName").text();
+    
+    permDict["revoked"] = $(this).find(".PermissionCheckbox").find("input").is(':checked');
+
+    permArray.push(permDict);
+
+
+  });
+
+  dict["PermissionArray"] = permArray;
+
   dict["AmpelCode"] = "";
 
   $(data).find(".PermissionQualificationIcon").each(function() {
@@ -736,9 +763,9 @@ function checkCourseAttendanceNotCached(args) {
     // Function accepts courseDict in format of:
     //var courseDict = {
     //                    UID : "Unique ID for Cache"
-    //                    kurs1 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" },
-    //                    kurs2 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" },
-    //                    kurs3 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", "absolved" : "?" }
+    //                    kurs1 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "tnStatus" : "nein" },
+    //                    kurs2 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "tnStatus" : "nein" },
+    //                    kurs3 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "tnStatus" : "nein" }
     // [... unlimited additions to dictionary possible but format has to remain the same! ]
     //                  };
 
@@ -766,7 +793,7 @@ function checkCourseAttendanceNotCached(args) {
             post["ctl00$main$m_From$m_Textbox"] = "01.01.1995";
             post["ctl00$main$m_Until$m_Textbox"] = todaysDateString;
             post["ctl00$main$m_Options$0"] = "on";
-            post["ctl00$main$m_Options$2"] = "on";
+            //post["ctl00$main$m_Options$2"] = "on"; only absolved courses
             post["ctl00$main$m_Options$5"] = "on";
             post["ctl00$main$m_CourseName"] = "";
 
@@ -777,24 +804,38 @@ function checkCourseAttendanceNotCached(args) {
                 type: "POST",
                 success: function(data, status) {
 
-                    var absolvedCourses = [];
+                    var registeredCourses = [];
 
-                    $(data).find(".CourseTitel").each(function(index, element) {
-                    absolvedCourses.push($(element).text());
+                    $(data).find("#ctl00_main_m_CourseList__CourseTable > tbody > tr").each(function(index, element) {
+
+                    var singleCourseDict = { abzID : "", titel : "", tnStatus : "" };
+
+                    if($(element).find(".CourseTitel").length > 0) // filtern der nicht-kurs-zeilen
+                    {
+
+                    singleCourseDict.abzID = $('td:eq(0)', element).text().trim();
+                    singleCourseDict.titel = $('td:eq(1)', element).text().trim();
+                    singleCourseDict.tnStatus = $('td:eq(6)', element).text().trim();
+                    registeredCourses.push(singleCourseDict);
+
+                    }
+
                     });
+
 
                     for(var course in courseDict) {
 
-                    var found = false;
+                            for(var regCourse in registeredCourses) {
 
-                    if($.inArray(courseDict[course].Name, absolvedCourses) !== -1) { found = true; }
-                    if($.inArray(courseDict[course].altName1, absolvedCourses) !== -1) { found = true; }
-                    if($.inArray(courseDict[course].altName2, absolvedCourses) !== -1) { found = true; }
+                            if(registeredCourses[regCourse].abzID === courseDict[course].courseID) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
+                            if(registeredCourses[regCourse].titel === courseDict[course].Name) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
+                            if(registeredCourses[regCourse].titel === courseDict[course].altName1) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
+                            if(registeredCourses[regCourse].titel === courseDict[course].altName2) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
 
-                    if(found === true) { courseDict[course].absolved = "ja"; } else { courseDict[course].absolved = "nein"; }
+                            }
 
                     }
-                    resolve(courseDict) //Ausgabe des Ergebnisses
+                    resolve(courseDict); //Ausgabe des Ergebnisses
 
                 }
             });

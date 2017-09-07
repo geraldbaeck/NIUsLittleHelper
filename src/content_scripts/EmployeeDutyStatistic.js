@@ -80,28 +80,29 @@ $(document).ready(function() {
               case 5: // SAN1
               case 6: // SAN2, Error Try-Catch um bei 2-spaltigen Dienstarten keinen Programmabbruch zu verursachen.
                 try {
-                if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
-                  var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
-                  rawKollegen.push(kollege);
-                } else if ($(val).text() !== '') {
-                  switch (i) {
-                    case 4: // SEF
-                      rawDutyAs.push('SEF');
-                      break;
-                    case 5: // SAN1
-                      rawDutyAs.push('SAN1');
-                      break;
-                    case 6: // SAN2
-                      rawDutyAs.push('SAN2');
-                      break;
-                    default:
-                      break;
+                  if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
+                    var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).replace('Wunschmeldung', '').replace(':', '').replace('>', '').trim();
+                    rawKollegen.push(kollege);
+                  } else if ($(val).text() !== '') {
+                    switch (i) {
+                      case 4: // SEF
+                        rawDutyAs.push('SEF');
+                        break;
+                      case 5: // SAN1
+                        rawDutyAs.push('SAN1');
+                        break;
+                      case 6: // SAN2
+                        rawDutyAs.push('SAN2');
+                        break;
+                      default:
+                        break;
+                    }
                   }
+                  break;
                 }
-                break;
-                }
-                catch(err) {
-                break;
+                catch (err) {
+                  console.log(err);
+                  break;
                 }
               default:
                 break;
@@ -112,25 +113,25 @@ $(document).ready(function() {
               case 6: // SAN1
               case 7: // SAN2, Error Try-Catch um bei 2-spaltigen Dienstarten keinen Programmabbruch zu verursachen.
                 try {
-                if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
-                  var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
-                  rawKollegen.push(kollege);
-                } else if ($(val).text() !== '') {
-                  switch (i) {
-                    case 5: // SEF
-                      rawDutyAs.push('SEF');
-                      break;
-                    case 6: // SAN1
-                      rawDutyAs.push('SAN1');
-                      break;
-                    case 7: // SAN2
-                      rawDutyAs.push('SAN2');
-                      break;
-                    default:
-                      break;
+                  if (!$(val).text().includes(dienstnummer) && $(val).text() !== '') {
+                    var kollege = $(val).text().substring(0, $(val).text().indexOf('(')).trim();
+                    rawKollegen.push(kollege);
+                  } else if ($(val).text() !== '') {
+                    switch (i) {
+                      case 5: // SEF
+                        rawDutyAs.push('SEF');
+                        break;
+                      case 6: // SAN1
+                        rawDutyAs.push('SAN1');
+                        break;
+                      case 7: // SAN2
+                        rawDutyAs.push('SAN2');
+                        break;
+                      default:
+                        break;
+                    }
                   }
-                }
-                break;
+                  break;
                 }
                 catch (err) {
                   break;
@@ -208,7 +209,7 @@ $(document).ready(function() {
       $('#charts' + i).append('<table style="float:left;"><thead><tr><td><strong>Übersicht:</strong></td></tr></thead><tbody class="additionalData' + i + '"><tr><td></td></tr></tbody></table>');
       $('.additionalData' + i).append('<tr><td>Dienste: </td><td style="text-align:right;">' + countDienste + '</td></tr>');
       $('.additionalData' + i).append('<tr><td>Gesamtdauer: </td><td style="text-align:right;">' + sumDuty + '</td></tr>');
-      $('.additionalData' + i).append('<tr><td>durchschnitt Dauer: </td><td style="text-align:right;">' + Math.round(sumDuty / countDienste) + '</td></tr>');
+      $('.additionalData' + i).append('<tr><td>durchschnittl. Dauer: </td><td style="text-align:right;">' + Math.round(sumDuty / countDienste) + '</td></tr>');
 
       $('#charts' + i).append('<table style="float:left;margin-left:20px;"><thead><tr><td><strong>Top KollegInnen:</strong></td></tr></thead><tbody class="topKollegen' + i + '"><tr><td></td></tr></tbody></table>');
       Object.keys(countKollegenSorted.reverse().slice(0,5)).forEach(function(key, object) {

@@ -77,6 +77,11 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.39* FunktionärInnenfeatures: Memos direkt in Liste/Ausdruck verfassen
 + *0.40* RTW Dienstpläne nun nach Permanenz filterbar + Benutzer wird nun über aktive Erweiterung informiert.
 + *0.41* Geplante Dienste können jetzt nach eigenen Diensten durchsucht/gefiltert werden
++ *0.42* FunktionärInnenfeatures: AD Benutzer können gesammelt in Liste/Ausdruck angezeigt werden, somit lässt sich prüfen ob der/die MA bereits einen NIU Zugang hat. Fehlende Mitarbeiter-Fotos können nun ebenfalls über Liste/Ausdruck ausgewertet werden.
++ *0.43* FunktionärInnenfeatures: Berechtigungen lassen sich nun in Liste/Ausdruck auswerten.
++ *0.44* FunktionärInnenfeatures: Das Pflichtfortbildungs-Tool wertet nun den Teilnahmestatus am jeweiligen Kurs aus (Angemeldet/Teilgenommen bzw. weder noch). Kommando-Funktionen für den jeweiligen Mitarbeiter sind nun direkt über Liste/Ausdruck aufrufbar.
++ *0.45* FunktionärInnenfeatures: Kommando-Funktionen für den jeweiligen Mitarbeiter sind nun ebenfalls in "Memo LAST" aufrufbar.
++ *0.46* Das Spezialdienst-Formular wird nun mit den Standardinformationen vorausgefüllt. (Datum, Enduhrzeit, Bez.-Funktionär)
 
 ## Built With
 * [Atom](https://github.com/atom/atom)

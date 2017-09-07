@@ -56,7 +56,7 @@ function addCalculationHandler(id, names, callback) {
                var i = index;
                var r = row;
                var c = columns.length - 1;
-               
+
                r[name.calcname] = "<img id='ajaxloader' src='" + chrome.extension.getURL('/img/ajax-loader.gif') + "'>";
                datatable.cell(i, c).invalidate().draw();
 
@@ -95,13 +95,14 @@ function addCalculationHandler(id, names, callback) {
 
 var dataSet = new Array;
 var columns = new Array;
+
 // var dataTableColumns = new Array;
 var datatable = undefined;
 function initDataTable() {
   //console.log("initDataTable --> dataSet lenght: " + dataSet.length );
   //console.log("initDataTable --> columns: " + columns.length);
 
-  if (!(datatable === undefined)) {
+  if (datatable !== undefined) {
       datatable.destroy();
       console.log("initDataTable --> after destroy: dataSet lenght: " + dataSet.length + " columns: " + columns.length);
       datatable = undefined;
@@ -139,8 +140,6 @@ function initDataTable() {
     footerCallback: function(tfoot, data, start, end, display) {
         var api = this.api(); //, data;
 
-
-        //var i = 0;
         for (let i = 0; i < columns.length; i++) {
           var c = api.column(i);
           if (!isNaN([c.data()[0]])) {
@@ -153,13 +152,6 @@ function initDataTable() {
             }
           }
         }
-          // $( api.column( 0 ).footer() ).html(
-          //   "hallo " +
-          //        api.column( 0 ).data().reduce( function ( a, b ) {
-          //            return a + b;
-          //        }, 0 )
-          //    );
-
     },
     destroy: true,
     data: dataSet,
@@ -180,11 +172,16 @@ function initDataTable() {
     console.log("initDataTable --> add html into footer: " + html);
     $(datatable.column(i).footer()).html(html);
     var that = datatable.column(i);
+
+    if (activeFilters["input_field_col" + i] !== undefined) {
+      $(datatable.column(i).footer()).find(".footer_input").val(activeFilters["input_field_col" + i].search);
+    }
+
+
     $(datatable.column(i).footer()).find(".footer_input").on('keyup change', function() {
       var val = this.value;
       console.log(".footer_input keyup change this.value: " + val);
-      if (activeFilters["input_field_col" + i] === undefined) {
-        //console.log("this.value: " + this.value + " that.search() " + activeFilters["input_field_col" + i].search);
+      if (activeFilters["input_field_col" + i] === undefined) { //init des Dictionaries einmal mit einem immer true filter
         activeFilters["input_field_col" + i] = {
             "column_names" : [columns[i].name],
             "filter" : function(searchData, index, rowData, counter) {
@@ -194,13 +191,18 @@ function initDataTable() {
         };
       }
       if (activeFilters["input_field_col" + i].search !== val) {
+        activeFilters["input_field_col" + i].search = val;
+        console.debug("Ändere suchfunktion in spalte index: " + i + " mit data: " + columns[i].data );
 
         if (columns[i].type == Number) {
-            //TODO: baue größer kleiner suche ein!
+          activeFilters["input_field_col" + i].filter = function(searchData, index, rowData, counter) {
+            console.info("suche nach nummer!");
+            return String(rowData[columns[i].data]).includes(val);
+          }
         } else {
           activeFilters["input_field_col" + i].filter = function(searchData, index, rowData, counter) {
-            console.log("search data: " + searchData[columns[i].name] + "includes: " + val);
-            return searchData[columns[i].name].includes(val);
+
+            return String(rowData[columns[i].data]).includes(val);
           }
         }
         datatable.draw();
@@ -208,10 +210,6 @@ function initDataTable() {
       }
       console.log("activeFilters: " + JSON.stringify(activeFilters));
     });
-
-
-
-
 
   }
 
@@ -247,14 +245,16 @@ $.fn.dataTable.ext.search.push(
       if (f === undefined) {
         continue;
       }
-      var data = {};
-      for (let c of f.column_names) {
-          var index = datatable.column(c + ":name").index("visible");
-          //console.log("$.fn.dataTable.ext.search --> set data[c] to " + searchData[index] + " c: " + c + " index: " + index);
-          data[c] = searchData[index];
-      }
-      //console.log("$.fn.dataTable.ext.search --> calling filter: data:" + data + "index:" + index + "rowData:" + rowData + "counter: " + counter);
-      show = show && f.filter(data, index, rowData, counter); //UND verknüpfung der suchfilter
+      // var data = {};
+      // for (let c of f.column_names) { //übergebe an filter die Daten, die er braucht zum filtern
+      //     console.debug("c ist " + c);
+      //     //var index = datatable.column(c + ":name").index("visible");
+      //     console.debug("$.fn.dataTable.ext.search --> searchData: " + JSON.stringify(searchData) + " rowData: " + JSON.stringify(rowData));
+      //     console.log("$.fn.dataTable.ext.search --> set data[c] to " + searchData[index] + " c: " + c + " index: " + index);
+      //     data[c] = rowData[c];
+      // }
+      console.debug("$.fn.dataTable.ext.search --> calling filter: searchData:" + searchData + "index:" + index + "rowData:" + rowData + "counter: " + counter);
+      show = show && f.filter(searchData, index, rowData, counter); //UND verknüpfung der suchfilter
     }
     return show;
   }
@@ -333,18 +333,18 @@ $(document).ready(function() {
 
         $("#dienstcount").append("<li><div id='dienstcount_" + key +"'>[" + key + "] <span class='menu_description'>" + DUTY_TYPES[key].description + "</span></div></li>");
         var col = [
-          {calcname : "hourduty$" + key, uiname : key + " Stunden", avg : true },
-          {calcname : "countduty$" + key, uiname : key + " Dienste", avg : true}
+          {calcname : "hourduty$" + key, uiname : key + " Stunden", avg : true, type : Number },
+          {calcname : "countduty$" + key, uiname : key + " Dienste", avg : true, type : Number}
         ];
         addCalculationHandler("#dienstcount_" + key, col, function(dnr, name) {
            //verkettete Promises...
            return dnrToIdentifier(dnr).then(
                   function(result) {
-                    console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+                    console.debug("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
                     return calculateDutyStatistic(result.ENID, "");
                   }).then(
                     function(statresult) {
-                      console.log("key: " + key + "name" + JSON.stringify(name) + "statresult: " + statresult);
+                      console.debug("key: " + key + "name" + JSON.stringify(name) + "statresult: " + statresult);
                       return statresult.getDuty(name.calcname);
                     }
                   );
@@ -387,7 +387,7 @@ $(document).ready(function() {
     $('#mailto_alle_selektiert').button();
     $('#mailto_alle_selektiert').addClass("small-button");
     $('#mailto_alle_selektiert').click(function() {
-      
+
       if(datatable.rows('.selected').count() < 1)
        {
         vex.dialog.alert('Es wurde keine Auswahl getroffen, Funktion wird beendet.');
@@ -477,7 +477,7 @@ $(document).ready(function() {
             }, function(e) {
             vex.dialog.alert('Zumindest ein Memo konnte nicht erfolgreich angelegt werden!')
             });
-           
+
         }
     }
 })
@@ -490,9 +490,9 @@ $(document).ready(function() {
        //verkettete Promises...
 
        var pflichtfortb = {
-                           UID : "pfb",
-                           kurs1 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Kommunikation & Übergabe", "altName1" : "SAN - Fortbildung §50 - Pflichtfortbildung - Kommunikation und Übergabe", "altName2" : "", "absolved" : "?" },
-                           kurs2 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Großeinsatz - First Car", "altName1" : "", "altName2" : "", "absolved" : "?" }
+                           UID : "pfb2",
+                           kurs1 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Kommunikation & Übergabe", "altName1" : "SAN - Fortbildung §50 - Pflichtfortbildung - Kommunikation und Übergabe", "altName2" : "", "courseID" : "A03241", "tnStatus" : "nein" },
+                           kurs2 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Großeinsatz - First Car", "altName1" : "", "altName2" : "", "courseID" : "", "tnStatus" : "nein" }
                          };
 
         return dnrToIdentifier(dnr)
@@ -500,7 +500,7 @@ $(document).ready(function() {
           console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
           return checkCourseAttendance(result.EID, pflichtfortb)
         }).then( function(resultDict) {
-          return ("K&&Uuml;: " + resultDict.kurs1.absolved + "<br />First Car: " + resultDict.kurs2.absolved);
+          return ("K&&Uuml;: " + resultDict.kurs1.tnStatus + "<br />First Car: " + resultDict.kurs2.tnStatus);
         });
 
      });
@@ -509,9 +509,10 @@ $(document).ready(function() {
        //verkettete Promises...
 
        var grundkurse = {
-                           kurs1 : { "Name" : "BAS - Ausbildung - Das Rote Kreuz - Auch du bist ein Teil davon! (QM)", "altName1" : "BAS - Ausbildung - Das Rote Kreuz - auch du bist ein Teil davon!", "altName2" : "", "absolved" : "?" },
-                           kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "absolved" : "?" },
-                           kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "absolved" : "?" }
+                           UID : "grk2",
+                           kurs1 : { "Name" : "BAS - Ausbildung - Das Rote Kreuz - Auch du bist ein Teil davon! (QM)", "altName1" : "BAS - Ausbildung - Das Rote Kreuz - auch du bist ein Teil davon!", "altName2" : "", "courseID" : "", "tnStatus" : "nein" },
+                           kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "courseID" : "", "tnStatus" : "nein" },
+                           kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "courseID" : "", "tnStatus" : "nein" }
                          };
 
         return dnrToIdentifier(dnr)
@@ -519,7 +520,7 @@ $(document).ready(function() {
           console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
           return checkCourseAttendance(result.EID, grundkurse)
         }).then( function(resultDict) {
-          return ("Das RK: " + resultDict.kurs1.absolved + "<br />AmbSem: " + resultDict.kurs2.absolved + "<br />KHD-SD: " + resultDict.kurs3.absolved);
+          return ("Das RK: " + resultDict.kurs1.tnStatus + "<br />AmbSem: " + resultDict.kurs2.tnStatus + "<br />KHD-SD: " + resultDict.kurs3.tnStatus);
         });
 
      });
@@ -538,6 +539,136 @@ $(document).ready(function() {
 
      });
      
+     addCalculationHandler("#niuzugang", [{calcname : "niuzugang", uiname : "AD-Benutzer"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          return result.ADuser;
+
+        });
+
+     });
+     
+     addCalculationHandler("#shortcuts", [{calcname : "shortcuts", uiname : "Kommando"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+
+          return("<ul><li><a target='_blank' href='https://niu.wrk.at/Kripo/Employee/summaryemployee.aspx?EmployeeId=" + result.EID + "'>Mitarbeiter</a><br /></li><li><a target='_blank' href='https://niu.wrk.at/Kripo/Employee/detailEmployee.aspx?EmployeeId=" + result.EID + "'>Details</a><br /></li><li><a target='_blank' href='https://niu.wrk.at/Kripo/Employee/ListAvailabilities.aspx?EmployeeNumberID=" + result.ENID + "'>Urlaub</a><br /></li><li><a target='_blank' href='https://niu.wrk.at/df/fahrscheingeld/entschaedigung/entschaedigung.asp?DienstNr=" + dnr + "'>Fahrscheingeld</a><br /></li><li><a target='_blank' href='https://niu.wrk.at/Kripo/Employee/UniformList.aspx?EmployeeId=" + result.EID + "'>Uniform</a><br /></li><li><a target='_blank' href='https://niu.wrk.at/Kripo/Employee/IssuedKeys.aspx?EmployeeId=" + result.EID + "'>Schl&uuml;ssel</a><br /></li><li><a target='_blank' href='https://niu.wrk.at/df/memo/memo_eingeben.asp?DienstNr=" + dnr + "'>Memo</a><br /></li><li><a target='_blank' href='https://niu.wrk.at/Kripo/Kufer/SearchCourse.aspx?EmployeeId=" + result.EID + "'>Ausbildung</a><br /></li><li><a target='_blank' href='https://niu.wrk.at/Kripo/Employee/LVStatistic.aspx?EmployeeId=" + result.EID + "'>LV Statistik</a><br /></li><li><a target='_blank' href='https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + result.ENID + "'>Statistik</a><br /></li><li><a target='_blank' href='https://niu.wrk.at/Kripo/Employee/Conan/ListDocuments.aspx?EmployeeId=" + result.EID + "'>Dokumente</a><br /></li></ul>");
+
+
+        });
+
+     });
+
+      addCalculationHandler("#fotofehlt", [{calcname : "fotofehlt", uiname : "Foto fehlt?"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          if(result.FotoURL.includes("unknown")) { return "ja"; } else { return "nein"; }
+        });
+
+     });
+     
+        addCalculationHandler("#sanber", [{calcname : "sanber", uiname : "SAN-Berechtigung"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          var berArray = result.PermissionArray;
+          var permString = "";
+          var arrayLength = berArray.length;
+
+          for (var i = 0; i < arrayLength; i++) {
+          if(berArray[i].typ === "SAN" && !berArray[i].revoked) { permString += "SAN: " + berArray[i].permission + "<br>"; }
+          if(berArray[i].typ === "SanG" && !berArray[i].revoked) { permString += "SanG: " + berArray[i].permission + "<br>"; }
+          };
+
+          return permString;
+
+        });
+
+     });
+     
+     addCalculationHandler("#fsdber", [{calcname : "fsdber", uiname : "FSD-Berechtigung"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          var berArray = result.PermissionArray;
+          var permString = "";
+          var arrayLength = berArray.length;
+
+          for (var i = 0; i < arrayLength; i++) {
+          if(berArray[i].typ.includes("GSD") && !berArray[i].revoked) { permString += berArray[i].permission + "<br>"; }
+          };
+
+          return permString;
+
+        });
+
+     });
+     
+      addCalculationHandler("#fahrber", [{calcname : "fahrber", uiname : "Fahrer-Berechtigung"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          var berArray = result.PermissionArray;
+          var permString = "";
+          var arrayLength = berArray.length;
+
+          for (var i = 0; i < arrayLength; i++) {
+          if(berArray[i].typ.includes("Fahrer") && !berArray[i].revoked) { permString += berArray[i].permission + "<br>"; }
+          };
+
+          return permString;
+
+        });
+
+     });
+     
+      addCalculationHandler("#alleber", [{calcname : "alleber", uiname : "Berechtigungen"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getEmployeeDataSheet(result.ENID)
+        }).then( function(result) {
+          var berArray = result.PermissionArray;
+          var permString = "";
+          var arrayLength = berArray.length;
+
+          for (var i = 0; i < arrayLength; i++) {
+          if(!berArray[i].revoked) { permString += berArray[i].typ + " -> " + berArray[i].permission + "<br>"; }
+          };
+
+          return permString;
+
+        });
+
+     });
+
      addCalculationHandler("#ampel", [{calcname : "ampel", uiname : "SAN-Ampel"}], function(dnr, name) {
        //verkettete Promises...
 

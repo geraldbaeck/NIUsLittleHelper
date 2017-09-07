@@ -3,7 +3,7 @@
   "short_name": "NIU++",
   "author": "Gerald Baeck",
   "description": "Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz (NIU).",
-  "version": "0.41",
+  "version": "0.47",
   "homepage_url": "http://baeck.at",
   "options_ui" : {
     "page" : "src/options.html",
@@ -26,12 +26,31 @@
     "/src/webcontent/*"
   ],
   "background": {
-    "scripts": ["src/background/hot-reload.js"]
+    "scripts": ["src/background/background.js"]
   },
   "content_scripts": [
     {
       "matches": ["https://niu.wrk.at/Kripo/DutyRosterNH/DutyRoster.aspx*"],
       "js": ["js/jquery/jquery-3.1.1.slim.min.js", "src/content_scripts/lib/lib.js", "src/content_scripts/DutyRoster.js"],
+      "all_frames": true,
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://niu.wrk.at/df/memo/memo_last.asp*", "https://niu.wrk.at/df/memo/Memo_last.asp*"],
+      "js": ["src/definitions.js",
+        "js/jquery/jquery.js",
+        "js/pouchdb/pouchdb-6.1.2.js",
+        "src/content_scripts/lib/lib.js",
+        "src/content_scripts/tools.js",
+        "src/content_scripts/memo_last.js"],
+      "all_frames": true,
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://niu.wrk.at/TNG/SpezialdienstErfassung/Spezialdiensteingabe.asp"],
+      "js": ["src/definitions.js",
+        "js/jquery/jquery.js",
+        "src/content_scripts/Spezialdiensteingabe.js"],
       "all_frames": true,
       "run_at": "document_end"
     },

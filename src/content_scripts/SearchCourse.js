@@ -9,7 +9,7 @@ var activeFilters = {}; //ul menüleiste, die wählbare suchfilter enthält
 
 
 function addSuchfilter(table, key, uiname, column_names, callback) {
-  suchfilter.append('<li><input  id="suchfilter_' + key + '" type="checkbox" value="value"><label for="suchfilter_' + key + '">' + uiname + '</label></li>');
+  suchfilter.append('<li><input  id="suchfilter_' + key + '" type="checkbox" value="value"><label for="suchfilter_' + key + '" style="padding-right:1em;">' + uiname + '</label></li>');
   suchfilter.find('#suchfilter_' + key).change(function() {
       console.log("addSuchfilter --> click calling callback with checked: " + $(this).is(':checked'));
       //callback( $(this).is(':checked') );
@@ -363,6 +363,10 @@ $(document).ready(function() {
   addSuchfilter(datatable, "qualifikation_rea", "Nur §50 Reanimationstraining", ["qualifikation"], function(searchData, index, rowData, counter) {
       return searchData.qualifikation.includes("Reanimationstraining");
   });
+  
+  addSuchfilter(datatable, "qualifikation_rez", "Nur §51 Rezertifizierung", ["qualifikation"], function(searchData, index, rowData, counter) {
+      return searchData.qualifikation.includes("Rezertifizierung");
+  });
 
   addSuchfilter(datatable, "abznr_anrechnung", "Nur Anrechnungskurse", ["abznr"], function(searchData, index, rowData, counter) {
       return searchData.abznr.includes("A");
@@ -375,6 +379,8 @@ $(document).ready(function() {
   addSuchfilter(datatable, "kurs_san_basis", "Nur SAN Basiskurse", ["kurs"], function(searchData, index, rowData, counter) {
       return  searchData.kurs.includes("BAS - Ausbildung - Das Rote Kreuz") ||
               searchData.kurs.includes("KHD-Praxistag") ||
+              searchData.kurs.includes("KHD-SD-Praxis") ||
+              searchData.kurs.includes("Ambulanzseminar") ||
               searchData.kurs.includes("RS-Startmodul");
   });
 
