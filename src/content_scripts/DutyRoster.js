@@ -224,17 +224,6 @@ $(document).ready(function() {
     chrome.storage.sync.set(val)
   }
 
-  // liest die Funktionen aus dem Dienstplan aus
-  function getDuties(header) {
-    duties = {};
-    header.find('td').each(function(key, val) {
-      if ($(val).hasClass('DRCShift')) {
-        duties[key.toString()] = $(val).text();
-      }
-    });
-    return duties;
-  }
-
   // hide dienstführungstabelle
   $('.DFTable').parent().parent().hide();
 

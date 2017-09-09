@@ -9,9 +9,21 @@ function getDurationFromTimeString(currentDateString, timeString) {
   var pattern = /(\d{2})\.(\d{2})\.(\d{4})/;
   startDate = new Date(currentDateString.replace(pattern,'$3-$2-$1 ') + startTime);
   stopDate = new Date(currentDateString.replace(pattern,'$3-$2-$1 ') + stopTime);
-  if (stopDate < startDate) {
+  if (stopDate <= startDate) {
     stopDate.setDate(stopDate.getDate() + 1);  // add one day if dienst ends on the next day
   };
   var hours = Math.abs(stopDate - startDate) / 36e5;
   return hours;
+}
+
+// liest die verfügbaren Funktionen aus der Dienstplan-Tabelle aus
+// header: jquery object of table header tr
+function getDuties(header) {
+  duties = {};
+  header.find('td').each(function(key, val) {
+    if ($(val).hasClass('DRCShift')) {
+      duties[key.toString()] = $(val).text();
+    }
+  });
+  return duties;
 }
