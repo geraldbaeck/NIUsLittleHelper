@@ -22,21 +22,30 @@ $('body').on('click', '.getCal', function() {
 $(document).ready(function() {
   $('table.AmbulanceTable').find('a').attr('target', 'wrk_todayDetail');
   $('#ctl00_main_m_CourseList__CourseTable').find('a').attr('target', 'wrk_todayDetail');
-  getRDDuty();
+  getDuty();
   getAmbulanceDuty();
   getCourses();
 });
 
-function cleanName(name) {
+function _cleanName(name) {
   if (name) {
     name = name.replace(/(\r\n|\n|\r)/gm, '').replace('\t', '');
     while (name.includes('  ')) {
-      name = name.replace('  ', ' ');
+      name = name.replace('  ', ' ').trim();
     }
   } else {
-    name = 'unbekannt';
+    name = '-';
   }
   return name;
+}
+
+function _queryEmployee(detailUri, employeeID) {
+  $.ajax({
+    url: detailUri,
+    context: document.body
+  }).done(function(rawHtml) {
+    return scrapeEmployee($.parseHTML(rawHtml), detailUri);
+  });
 }
 
 var getCourses = function() {
@@ -73,73 +82,74 @@ var getCourses = function() {
 };
 
 var getAmbulanceDuty = function() {
-    //TODO: Derzeit passiert das ganze async, wenn also noch nicht alle ambulanzen geladen sind, sind nicht alle in der ICS datei drinnen.
-    //Der Call sollte daher geändert werden.
-    var ambulance = $('.AmbulanceTable tbody').children();
-    var ambcount = ambulance.length - 1;
-    var parsedamb = 0;
-    $('td.MessageBody, td.MessageBodyRightAlign').css('vertical-align', 'middle').css('display', 'table-cell').css('border', '1px').css('border-collapse', 'separate');
-    $(ambulance).each(function(key, amb) {
-        if (key === 0) {
-          $(amb).append('<td class="MessageHeaderCenter" width="100px"></td>');
-        } else {
-          var parts   = $(amb).children();
-          var detailUri = 'https://niu.wrk.at/' + $(parts[10]).children().attr('href');
-          var ambID = $(parts[0]).text().replace('/', '_').trim();
-          $(amb).attr('id', ambID);
+  var ambulance = $('.AmbulanceTable tbody').children();
+  var ambcount = ambulance.length - 1;
+  var parsedamb = 0;
+  $('td.MessageBody, td.MessageBodyRightAlign').css('vertical-align', 'middle').css('display', 'table-cell').css('border', '1px').css('border-collapse', 'separate');
+  $(ambulance).each(function(key, amb) {
+      if (key === 0) {
+        $(amb).append('<td class="MessageHeaderCenter" width="100px"></td>');
+      } else {
+        var parts   = $(amb).children();
+        var ambUrl = 'https://niu.wrk.at/' + $(parts[10]).children().attr('href');
+        var ambID = $(parts[0]).text().replace('/', '_').trim() + $(parts[1]).text().trim();
+        $(amb).attr('id', ambID);
 
-          $.ajax({
-            url: detailUri,
-            context: document.body
-          }).done(function(data) {
-              var title       = $(data).find('#ctl00_main_m_AmbulanceDisplay_m_Webinfo').children().html();
+        //console.log('query ambulance ' + ambID + ' @ ' + ambUrl);
+        $.ajax({
+          url: ambUrl,
+          context: document.body
+        }).done(function(data) {
+          //console.log('done ambulance ' + ambID + ' @ ' + ambUrl);
+          var title       = $(data).find('#ctl00_main_m_AmbulanceDisplay_m_Webinfo').children().html();
 
-              var desc        = (detailUri + '\r\n\r\n\r\n' + $(data).find('#ctl00_main_m_AmbulanceDisplay_m_Webinfo').text()).substring(0,8000);
-              var germanDate  = $(parts[5]).html();
-              var timeVon     = $(parts[6]).html();
-              var duration    = $(parts[9]).html().replace(',','.');
-              var pattern     = new RegExp('(<b>Wo:<\/b>).*');
-              var res         = pattern.exec(data);
-              var location    = '';
-              if (res) {
-                var location    = res[0].substr(10).replace(/(<([^>]+)>)/ig,'').trim();
-              }
+          var desc        = (ambUrl + '\r\n\r\n\r\n' + $(data).find('#ctl00_main_m_AmbulanceDisplay_m_Webinfo').text()).substring(0,8000);
+          var germanDate  = $(parts[5]).html();
+          var timeVon     = $(parts[6]).html();
+          var duration    = $(parts[9]).html().replace(',','.');
+          var pattern     = new RegExp('(<b>Wo:<\/b>).*');
+          var res         = pattern.exec(data);
+          var location    = '';
+          if (res) {
+            var location    = res[0].substr(10).replace(/(<([^>]+)>)/ig,'').trim();
+          }
 
-              var tmpDate     = germanDate.split('.');
-              var usDate      = tmpDate[1] + '/' + tmpDate[0] + '/' + tmpDate[2];
+          var tmpDate     = germanDate.split('.');
+          var usDate      = tmpDate[1] + '/' + tmpDate[0] + '/' + tmpDate[2];
 
-              var startDate   = new Date(usDate + ' ' + timeVon);
-              var endDate     = new Date(usDate + ' ' + timeVon).addHours(duration);
-              cal.addEvent('Ambulanz ' + title, desc, location, startDate.toISOString(), endDate.toISOString());
-              parsedamb++;
-              if (parsedamb == ambcount) {
-                $('.MultiDutyRoster').prepend(icsDLButton);
-              }
+          var startDate   = new Date(usDate + ' ' + timeVon);
+          var endDate     = new Date(usDate + ' ' + timeVon).addHours(duration);
+          cal.addEvent('Ambulanz ' + title, desc, location, startDate.toISOString(), endDate.toISOString());
+          parsedamb++;
+          if (parsedamb == ambcount) {
+            $('.MultiDutyRoster').prepend(icsDLButton);
+          }
 
-              var calDienst = createCalendar({
-                options: {
-                  class: 'calExport',
-                  id: ambID, // You can pass an ID. If you don't, one will be generated
-                  linkText: '<img src="' + chrome.extension.getURL('/img/addCal.png') + '" style="margin-right:0.2em;"><span style="display:table-cell;vertical-align:middle;">Export</span>',
-                },
-                data: {
-                  title: title,
-                  start: startDate,
-                  duration: duration * 60,
-                  // end: new Date('June 15, 2013 23:00'), // If an end time is set, this will take precedence over duration
-                  address: location,
-                  description: desc
-                }
-              });
-              $('#' + ambID).append('<td class="MessageBody" id="exportCal_' + ambID + '"></td>');
-              $('#exportCal_' + ambID).append(calDienst);
-            });
-        }
-      });
-  }
+          var calDienst = createCalendar({
+            options: {
+              class: 'calExport',
+              id: ambID, // You can pass an ID. If you don't, one will be generated
+              linkText: '<img src="' + chrome.extension.getURL('/img/addCal.png') + '" style="margin-right:0.2em;"><span style="display:table-cell;vertical-align:middle;">Export</span>',
+            },
+            data: {
+              title: title,
+              start: startDate,
+              duration: duration * 60,
+              // end: new Date('June 15, 2013 23:00'), // If an end time is set, this will take precedence over duration
+              address: location,
+              description: desc
+            }
+          });
+          $('#' + ambID).append('<td class="MessageBody" id="exportCal_' + ambID + '"></td>');
+          $('#exportCal_' + ambID).append(calDienst);
+        });
+      }
+    });
+}
 
-var getRDDuty = function() {
-  $('#DutyRosterTable thead tr.DutyRosterHeader').append('<td></td>');
+// "normale Dienste"
+var getDuty = function() {
+  $('#DutyRosterTable theads tr.DutyRosterHeader').append('<td></td>');
   $('.MultiDutyRoster table').each(function(key, dutyTable) {
     dutyType = $(dutyTable).find('.MessageHeader').html();
     var dienste = $(dutyTable).find('#DutyRosterTable tbody tr');
@@ -161,55 +171,24 @@ var getRDDuty = function() {
       var dienststelle = department[$(parts[3]).html()];
       var dutyID = $(duty).attr('id');
 
-      // var dutyClass = $(parts[2]).attr('class');
-      // var type = '';
-      // switch (dutyClass) {
-      //   case 'DutyRosterTimeCodeDay':
-      //     if (duration == 2) {
-      //       type = 'Bezirkstellentätigkeit';
-      //     } else if (duration == '8.5') {
-      //       type = 'VM / NM Dienst';
-      //     } else if (duration == '7.5') {
-      //       type = 'Kurz';
-      //     } else if (duration == '12') {
-      //       type = 'Tag';
-      //     }
-      //     break;
-      //   case 'DutyRosterTimeCodeLongNight':
-      //     type = 'Nacht';
-      //     break;
-      //   case 'DutyRosterTimeCodeShortNight':
-      //     type = 'KurzNacht';
-      //     break;
-      // }
-      // if (typeof $(parts[4]).find('a').html() !== 'undefined') {
-      //   var lenker = $(parts[4]).find('a').html().trim();
-      // } else {
-      //   var san2 = $(parts[4]).find('a').html();
-      // }
-      // if (typeof $(parts[5]).find('a').html() !== 'undefined') {
-      //   var san1 = $(parts[5]).find('a').html().trim();
-      // } else {
-      //   var san2 = $(parts[5]).find('a').html();
-      // }
-      // if (typeof $(parts[6]).find('a').html() !== 'undefined') {
-      //   var san2 = $(parts[6]).find('a').html().trim();
-      // } else {
-      //   var san2 = $(parts[6]).find('a').html();
-      // }
-      //
-      // lenker = cleanName(lenker);
-      // san1 = cleanName(san1);
-      // san2 = cleanName(san2);
-
       var description = '';
-      var duties = getDuties($(dutyTable).find('.DutyRosterHeader'));
-      for (i in duties) {
-        description += duties[i] + ': ' + cleanName($(parts[i]).find('a').text()) + '\r\n';
+      var currentDutyFunctions = getDuties($(dutyTable).find('.DutyRosterHeader'));
+      for (i in currentDutyFunctions) {
+        description += currentDutyFunctions[i] + ': ';
+        var displayName = _cleanName($(parts[i]).find('a').text());
+        var rawID = $(parts[i]).find('a').attr('href');
+        if (rawID != undefined) {
+          var employeeID = rawID.substring(rawID.indexOf('\'') + 1,rawID.lastIndexOf('\''));
+          var employeeLink = 'https://niu.wrk.at/Kripo/Employee/shortemployee.aspx?EmployeeNumberID=' + employeeID;
+          description += '<a href="' + employeeLink + '">' + displayName + '</a>';
+        } else {
+          description += displayName;
+        }
+        description += '\r\n';
       }
       description += '\r\n' + $(parts[7]).html();
-      cal.addEvent(dutyType, description, dienststelle, startDate.toISOString(), endDate.toISOString());
 
+      cal.addEvent(dutyType, description, dienststelle, startDate.toISOString(), endDate.toISOString());
       var calDienst = createCalendar({
         options: {
           class: 'calExport',
