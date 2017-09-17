@@ -299,7 +299,7 @@ function dnrToIdentifier(dnr) {
 }
 
 function getEmployeeDataSheet(empNID) {
-return getFromCache("datasheetv4_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
+return getFromCache("datasheetv5_", empNID, { 'empNID' : empNID}, getEmployeeDataSheetNotCached);
 }
 
 function getEmployeeDataSheetNotCached(args)
@@ -319,7 +319,7 @@ function getEmployeeDataSheetNotCached(args)
   dict["Geburtstag"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeExtention__birthday_m_Textbox").val();
   dict["Ersteintritt"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeExtention__firstEntry_m_Textbox").val();
   dict["TelNummer"] = $(data).find("#ctl00_main_m_Employee_m_ccPersonContact_m_ccContact0_m_NumberLabel").text();
-  dict["Email"] = $(data).find("#ctl00_main_m_Employee_m_ccPersonContact_m_ccContact1_m_NumberLabel").text();
+  dict["Email"] = $(data).find("a[href*='mailto']").attr("href").replace("mailto:", "");
   dict["ADuser"] = $(data).find("#ctl00_main_m_Employee_m_ccEmployeeExtention_m_Employee > tbody > tr > td:contains('Wrk.at\')").text();
 
   var permArray = [];

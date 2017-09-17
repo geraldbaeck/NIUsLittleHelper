@@ -82,6 +82,7 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.44* FunktionärInnenfeatures: Das Pflichtfortbildungs-Tool wertet nun den Teilnahmestatus am jeweiligen Kurs aus (Angemeldet/Teilgenommen bzw. weder noch). Kommando-Funktionen für den jeweiligen Mitarbeiter sind nun direkt über Liste/Ausdruck aufrufbar.
 + *0.45* FunktionärInnenfeatures: Kommando-Funktionen für den jeweiligen Mitarbeiter sind nun ebenfalls in "Memo LAST" aufrufbar.
 + *0.46* Das Spezialdienst-Formular wird nun mit den Standardinformationen vorausgefüllt. (Datum, Enduhrzeit, Bez.-Funktionär)
++ *0.48* Dienste auf der Startseite lassen sich nun in diverse Kalenderprogramme exportieren. (Google, iCal etc..)
 
 ## Built With
 * [Atom](https://github.com/atom/atom)

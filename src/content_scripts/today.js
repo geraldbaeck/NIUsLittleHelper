@@ -149,7 +149,7 @@ var getAmbulanceDuty = function() {
 
 // "normale Dienste"
 var getDuty = function() {
-  $('#DutyRosterTable theads tr.DutyRosterHeader').append('<td></td>');
+  $('<td style="text-align:center;width:80px;"></td>').appendTo('.DutyRosterHeader');
   $('.MultiDutyRoster table').each(function(key, dutyTable) {
     dutyType = $(dutyTable).find('.MessageHeader').html();
     var dienste = $(dutyTable).find('#DutyRosterTable tbody tr');

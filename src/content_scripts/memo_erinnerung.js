@@ -1,10 +1,12 @@
-﻿$(document).ready(function() {
+$(document).ready(function() {
 
 var counter = 0;
 
-$("th:contains('Memo über')").each(function( index ) {
+$("tbody > tr:first-child > th").each(function( index ) {
 
 var tableObj = this;
+
+if($(tableObj).text().indexOf("erneute") == -1) {
 
 $(tableObj).append(" <a id='mailButton" + counter + "'><img src=" + chrome.extension.getURL('/img/envelope.svg') + " width='12'></a>");
 $(tableObj).append(" <a id='gearButton" + counter + "'><img src=" + chrome.extension.getURL('/img/gear.svg') + " width='12'></a>");
@@ -15,7 +17,7 @@ var buttonObj = this;
 
 $(buttonObj).find("img").attr("src", chrome.extension.getURL('/img/ajax-loader.gif'));
 
-const regex = /.*?\((.*?)\)/g;
+const regex = /(.*?) /g;
 var resultDNRs = regex.exec($(tableObj).text());
 var resultDNr = resultDNRs[1].split(",")[0];
 
@@ -31,7 +33,7 @@ var buttonObj = this;
 
 $(buttonObj).find("img").attr("src", chrome.extension.getURL('/img/ajax-loader.gif'));
 
-const regex = /.*?\((.*?)\)/g;
+const regex = /(.*?) /g;
 var resultDNRs = regex.exec($(tableObj).text());
 var resultDNr = resultDNRs[1].split(",")[0];
 
@@ -43,6 +45,7 @@ return getEmployeeDataSheet(result.ENID) }).then( function(result) {
 });
 });
 counter++;
+}
 });
 
 });
