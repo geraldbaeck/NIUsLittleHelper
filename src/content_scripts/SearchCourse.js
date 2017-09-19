@@ -32,7 +32,7 @@ function hideKursauswahl() {
   chrome.storage.sync.set(set, function() {
     kursauswahl.hide();
     var einblenden = $("<h5 class='einblenden'><a>Kursauswahl einblenden</a></h5>");
-    $(".Whitebox").prepend(einblenden);
+    $(".Whitebox:eq(0)").prepend(einblenden);
     einblenden.click(function() {
       var set = {};
       set[STORAGE_KEY_SEARCH_COURSE_HIDE_CHOOSE] = false;
@@ -51,7 +51,7 @@ function hideKurssuche() {
   chrome.storage.sync.set(set, function() {
     kurssuche.hide();
     var einblenden = $("<h5 class='einblenden'><a>Kurssuche einblenden</a></h5>");
-    $(".Whitebox").append(einblenden);
+    $(".Whitebox:eq(0)").append(einblenden);
     einblenden.click(function() {
       var set = {};
       set[STORAGE_KEY_SEARCH_COURSE_HIDE_SEARCH] = false;
@@ -70,8 +70,8 @@ $(document).ready(function() {
 
   //kurssuche ausblenden
   //$(".Whitebox").hide();
-  kursauswahl = $(".Whitebox table tr").slice(0,4);
-  kurssuche = $(".Whitebox table tr").slice(4);
+  kursauswahl = $("tr:contains('Kursauswahl')").nextUntil("tr:has('#ctl00_main_m_Select')").addBack().next("tr").addBack();
+  kurssuche = $("tr:contains('Kurssuche')").nextUntil("tr:has('#ctl00_main_m_Search')").addBack().next("tr").addBack();
 
   $(".Whitebox table h4").append("<span class='ausblenden'><a>ausblenden</a></span>");
   $(".Whitebox .ausblenden").click(function() {
@@ -363,7 +363,7 @@ $(document).ready(function() {
   addSuchfilter(datatable, "qualifikation_rea", "Nur §50 Reanimationstraining", ["qualifikation"], function(searchData, index, rowData, counter) {
       return searchData.qualifikation.includes("Reanimationstraining");
   });
-  
+
   addSuchfilter(datatable, "qualifikation_rez", "Nur §51 Rezertifizierung", ["qualifikation"], function(searchData, index, rowData, counter) {
       return searchData.qualifikation.includes("Rezertifizierung");
   });
@@ -400,5 +400,8 @@ $(document).ready(function() {
       return searchData.kurs.includes("FKR");
   });
 
+  addSuchfilter(datatable, "kurs_pflichtf", "Nur Pflichtfortbildungen", ["kurs"], function(searchData, index, rowData, counter) {
+      return  searchData.kurs.includes("RD-Fortbildung");
+  });
 
 });
