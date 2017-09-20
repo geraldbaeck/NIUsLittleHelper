@@ -19,12 +19,13 @@ var icsDLButton = '<a class="getCal">Meinen Dienstplan für die nächsten 14 Tag
 $('body').on('click', '.getCal', function() {
   cal.download('Dienstplan');
 });
+
 $(document).ready(function() {
   $('table.AmbulanceTable').find('a').attr('target', 'wrk_todayDetail');
   $('#ctl00_main_m_CourseList__CourseTable').find('a').attr('target', 'wrk_todayDetail');
-  getDuty();
-  getAmbulanceDuty();
-  getCourses();
+  $.when(getDuty(), getAmbulanceDuty(), getCourses()).done(function() {
+    $('.MultiDutyRoster').prepend(icsDLButton);
+  });
 });
 
 function _cleanName(name) {
@@ -79,6 +80,7 @@ var getCourses = function() {
     $('#' + courseID).append('<td class="MessageBody" id="exportCal_' + courseID + '"></td>');
     $('#exportCal_' + courseID).append(calDienst);
   }
+  return courses.length;
 };
 
 var getAmbulanceDuty = function() {
@@ -120,10 +122,10 @@ var getAmbulanceDuty = function() {
           var startDate   = new Date(usDate + ' ' + timeVon);
           var endDate     = new Date(usDate + ' ' + timeVon).addHours(duration);
           cal.addEvent('Ambulanz ' + title, desc, location, startDate.toISOString(), endDate.toISOString());
-          parsedamb++;
-          if (parsedamb == ambcount) {
-            $('.MultiDutyRoster').prepend(icsDLButton);
-          }
+          // parsedamb++;
+          // if (parsedamb == ambcount) {
+          //   c
+          // }
 
           var calDienst = createCalendar({
             options: {
@@ -145,14 +147,17 @@ var getAmbulanceDuty = function() {
         });
       }
     });
+  return ambulance.length - 1;
 }
 
 // "normale Dienste"
 var getDuty = function() {
+  var dienste_count = 0;
   $('<td style="text-align:center;width:80px;"></td>').appendTo('.DutyRosterHeader');
   $('.MultiDutyRoster table').each(function(key, dutyTable) {
     dutyType = $(dutyTable).find('.MessageHeader').html();
     var dienste = $(dutyTable).find('#DutyRosterTable tbody tr');
+    dienste_count += dienste.length;
     $(dienste).each(function(key, duty) {
       var tmp = $(duty).find('td');
       var parts = $(tmp).siblings();
@@ -209,4 +214,5 @@ var getDuty = function() {
 
     });
   });
+  return dienste_count;
 };
