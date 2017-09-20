@@ -13,7 +13,17 @@ var department = {
   VS:'Wiener Rotes Kreuz Bezirksstelle Van Swieten - Landgutgasse 8, 1100 Wien',
   BVS:'Wiener Rotes Kreuz Bezirksstelle Bertha von Suttner - Negerlegasse 8, 1020 Wien',
   RD:'Wiener Rotes Kreuz Zentrale - Nottendorfergasse 21, 1030 Wien'
-}
+};
+var dienststellenKuerzel = {
+  LV: 'Nodo',
+  DDL:'DDL',
+  West:'West',
+  Nord:'Nord',
+  KSS:'KSS',
+  VS:'Nodo',
+  BVS:'BvS',
+  RD:'Nodo'
+};
 var icsDLButton = '<a class="getCal">Meinen Dienstplan für die nächsten 14 Tage herunterladen</a>';
 
 $('body').on('click', '.getCal', function() {
@@ -155,12 +165,17 @@ var getDuty = function() {
   var dienste_count = 0;
   $('<td style="text-align:center;width:80px;"></td>').appendTo('.DutyRosterHeader');
   $('.MultiDutyRoster table').each(function(key, dutyTable) {
-    dutyType = $(dutyTable).find('.MessageHeader').html();
+    var dutyType = $(dutyTable).find('.MessageHeader').html();
     var dienste = $(dutyTable).find('#DutyRosterTable tbody tr');
     dienste_count += dienste.length;
     $(dienste).each(function(key, duty) {
       var tmp = $(duty).find('td');
       var parts = $(tmp).siblings();
+
+      var titel = dutyType.replace('fixiert', '').replace('geplant', '').trim();
+      if (titel.includes('RTW') || titel.includes('KTW') && dutyType.includes('fixiert')) {
+        titel += ' &#x1f691; ' + $(parts[4]).text() + ' (' + dienststellenKuerzel[$(parts[3]).text()] + ')';
+      }
       var timeVon = $(parts[2]).html().substr(0, $(parts[2]).html().indexOf(' - '));
       var timeBis = $(parts[2]).html().substr($(parts[2]).html().indexOf(' - ') + 3);
       timeVon = timeVon.trim() + ':00';
@@ -193,7 +208,7 @@ var getDuty = function() {
       }
       description += '\r\n' + $(parts[7]).html();
 
-      cal.addEvent(dutyType, description, dienststelle, startDate.toISOString(), endDate.toISOString());
+      cal.addEvent(titel, description, dienststelle, startDate.toISOString(), endDate.toISOString());
       var calDienst = createCalendar({
         options: {
           class: 'calExport',
@@ -201,7 +216,7 @@ var getDuty = function() {
           linkText: '<img src="' + chrome.extension.getURL('/img/addCal.png') + '" style="margin-right:0.2em;margin-top:5px;"><span style="display:table-cell;vertical-align:middle;">Export</span>',
         },
         data: {
-          title: dutyType,
+          title: titel,
           start: startDate,
           duration: duration * 60,
           // end: new Date('June 15, 2013 23:00'), // If an end time is set, this will take precedence over duration
