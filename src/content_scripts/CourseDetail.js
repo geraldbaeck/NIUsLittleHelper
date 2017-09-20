@@ -95,8 +95,6 @@ $(document).ready(function() {
               if (rawDate.length == 9) {
                 rawDate = '0' + rawDate;
               }
-              console.log(rawDate);
-              console.log(rawDate.length);
               termin.start = new Date(rawDate.replace(datePattern,'$3-$2-$1') + 'T' + $($(t).find('td')[1]).text().trim().split('-')[0].trim() + ':00');
               termin.ende = new Date(rawDate.replace(datePattern,'$3-$2-$1') + 'T' + $($(t).find('td')[1]).text().trim().split('-')[1].trim() + ':00');
 
@@ -126,7 +124,7 @@ $(document).ready(function() {
       });
       if (course.Termine.length == 0) {
         var termin = {
-          id: course.id + '_' + tcount.toString(),
+          id: course.id + '_A',
           titel: course.titel,
           start: course.Kursbeginn,
           ende: course.Kursende,
@@ -185,6 +183,6 @@ $(document).ready(function() {
       // $('#exportCal_' + ambID).append(calDienst);
     }
 
-    console.log(scrapeCourse());
+    scrapeCourse();
 
   });
