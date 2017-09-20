@@ -173,9 +173,13 @@ var getDuty = function() {
       var parts = $(tmp).siblings();
 
       var titel = dutyType.replace('fixiert', '').replace('geplant', '').trim();
-      if (titel.includes('RTW') || titel.includes('KTW') && dutyType.includes('fixiert')) {
-        titel += ' &#x1f691; ' + $(parts[4]).text() + ' (' + dienststellenKuerzel[$(parts[3]).text()] + ')';
+      if (titel.includes('RTW') || titel.includes('KTW')) {
+        if (dutyType.includes('fixiert')) {
+          titel += ' &#x1f691; ' + $(parts[4]).text();
+        }
+        titel += ' (' + dienststellenKuerzel[$(parts[3]).text()] + ')';
       }
+
       var timeVon = $(parts[2]).html().substr(0, $(parts[2]).html().indexOf(' - '));
       var timeBis = $(parts[2]).html().substr($(parts[2]).html().indexOf(' - ') + 3);
       timeVon = timeVon.trim() + ':00';
@@ -190,6 +194,13 @@ var getDuty = function() {
 
       var dienststelle = department[$(parts[3]).html()];
       var dutyID = $(duty).attr('id');
+
+      var comment = '';
+      $(dutyTable).find('.DutyRosterHeader').find('td').each(function(key, val) {
+        if ($(val).hasClass('DRCComment')) {
+          comment = '\r\n' + $(parts[key]).html();
+        }
+      });
 
       var description = '';
       var currentDutyFunctions = getDuties($(dutyTable).find('.DutyRosterHeader'));
@@ -206,7 +217,7 @@ var getDuty = function() {
         }
         description += '\r\n';
       }
-      description += '\r\n' + $(parts[7]).html();
+      description += comment;
 
       cal.addEvent(titel, description, dienststelle, startDate.toISOString(), endDate.toISOString());
       var calDienst = createCalendar({
