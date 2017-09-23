@@ -1,4 +1,44 @@
 
+function cleanName(name) {
+  if (name) {
+    name = name.replace(/(\r\n|\n|\r)/gm, '').replace('\t', '');
+    while (name.includes('  ')) {
+      name = name.replace('  ', ' ').trim();
+    }
+  } else {
+    name = '-';
+  }
+  return name;
+}
+
+// extrahiert Mitarbeiterdaten aus dem Link
+// eg. <a href="javascript:SEmpFNRID('0ba9916e-e305-4df6-b318-a671013118a1');">Bäck (7822)</a>
+function getEmployeeDataFromLink(link) {
+  var employeeData = {
+    displayName: cleanName($(link).text()),
+    id: undefined,
+    url: undefined
+  }
+  var rawID = $(link).attr('href');
+  if (rawID != undefined) {
+    employeeData.id = rawID.substring(rawID.indexOf('\'') + 1,rawID.lastIndexOf('\''));
+    employeeData.url = 'https://niu.wrk.at/Kripo/Employee/shortemployee.aspx?EmployeeNumberID=' + employeeData.id;
+  }
+  return employeeData;
+}
+
+// erstellt ein Kalendar Export Element
+function createCalElement(termin) {
+  return createCalendar({
+    options: {
+      class: 'calExport',
+      id: termin.id, // You can pass an ID. If you don't, one will be generated
+      linkText: '<img src="' + chrome.extension.getURL('/img/addCal.png') + '" style="margin-right:0.2em;"><span style="display:table-cell;vertical-align:middle;">Export</span>',
+    },
+    data: termin
+  });
+}
+
 // berechnet aus der angegebenen Zeitspanne im NIU (zb 18:00 - 00:00)
 // die Dauer in Stunden
 // currentDateString: das im NIU verwendete Datum eg. "19.03.2017"
@@ -27,6 +67,19 @@ function getDuties(header) {
     }
   });
   return duties;
+}
+
+// gibt die spaltennummer einer tabelle für eine bestimmte headerklasse zurück
+// CAVE: gibt nur die erste Spaltennummer zurück, weiter vorkommen werden ignoriert.
+function getHeaderNumber(header, className) {
+  var nr;
+  header.find('td').each(function(key, val) {
+    if ($(val).hasClass(className)) {
+      nr = key;
+      return false; // break the jquery.each loop (very weird)
+    }
+  });
+  return nr;
 }
 
 // holt die verfügbaren MitarbeiterInnenDaten

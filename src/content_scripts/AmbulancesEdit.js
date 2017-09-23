@@ -23,17 +23,6 @@ $(document).ready(function() {
       return ambulance;
     };
 
-    function createCalElement(termin) {
-      return createCalendar({
-        options: {
-          class: 'calExport',
-          id: termin.id, // You can pass an ID. If you don't, one will be generated
-          linkText: '<img src="' + chrome.extension.getURL('/img/addCal.png') + '" style="margin-right:0.2em;"><span style="display:table-cell;vertical-align:middle;">Export</span>',
-        },
-        data: termin
-      });
-    }
-
     console.log(scrapeAmbulance());
 
   });

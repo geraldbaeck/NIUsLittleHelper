@@ -4,26 +4,6 @@ Date.prototype.addHours = function(h) {
 }
 
 var cal = ics();
-var department = {
-  LV: 'Wiener Rotes Kreuz Zentrale - Nottendorfergasse 21, 1030 Wien',
-  DDL:'Wiener Rotes Kreuz Bezirksstelle DDL - Nottendorfergasse 21, 1030 Wien',
-  West:'Wiener Rotes Kreuz Bezirksstelle West - Spallartgasse 10a, 1140 Wien',
-  Nord:'Wiener Rotes Kreuz Bezirksstelle Nord - Karl-Schäfer-Straße 8, 1210 Wien',
-  KSS:'Wiener Rotes Kreuz Bezirksstelle Nord - Karl-Schäfer-Straße 8, 1210 Wien',
-  VS:'Wiener Rotes Kreuz Bezirksstelle Van Swieten - Landgutgasse 8, 1100 Wien',
-  BVS:'Wiener Rotes Kreuz Bezirksstelle Bertha von Suttner - Negerlegasse 8, 1020 Wien',
-  RD:'Wiener Rotes Kreuz Zentrale - Nottendorfergasse 21, 1030 Wien'
-};
-var dienststellenKuerzel = {
-  LV: 'Nodo',
-  DDL:'DDL',
-  West:'West',
-  Nord:'Nord',
-  KSS:'KSS',
-  VS:'Nodo',
-  BVS:'BvS',
-  RD:'Nodo'
-};
 var icsDLButton = '<a class="getCal">Meinen Dienstplan für die nächsten 14 Tage herunterladen</a>';
 
 $('body').on('click', '.getCal', function() {
@@ -37,18 +17,6 @@ $(document).ready(function() {
     $('.MultiDutyRoster').prepend(icsDLButton);
   });
 });
-
-function _cleanName(name) {
-  if (name) {
-    name = name.replace(/(\r\n|\n|\r)/gm, '').replace('\t', '');
-    while (name.includes('  ')) {
-      name = name.replace('  ', ' ').trim();
-    }
-  } else {
-    name = '-';
-  }
-  return name;
-}
 
 function _queryEmployee(detailUri, employeeID) {
   $.ajax({
@@ -206,14 +174,11 @@ var getDuty = function() {
       var currentDutyFunctions = getDuties($(dutyTable).find('.DutyRosterHeader'));
       for (i in currentDutyFunctions) {
         description += currentDutyFunctions[i] + ': ';
-        var displayName = _cleanName($(parts[i]).find('a').text());
-        var rawID = $(parts[i]).find('a').attr('href');
-        if (rawID != undefined) {
-          var employeeID = rawID.substring(rawID.indexOf('\'') + 1,rawID.lastIndexOf('\''));
-          var employeeLink = 'https://niu.wrk.at/Kripo/Employee/shortemployee.aspx?EmployeeNumberID=' + employeeID;
-          description += '<a href="' + employeeLink + '">' + displayName + '</a>';
+        var employeeData = getEmployeeDataFromLink($(parts[i]).find('a'));
+        if (employeeData.url != undefined) {
+          description += '<a href="' + employeeData.url + '">' + employeeData.displayName + '</a>';
         } else {
-          description += displayName;
+          description += employeeData.displayName;
         }
         description += '\r\n';
       }
