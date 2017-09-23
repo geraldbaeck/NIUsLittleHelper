@@ -31,7 +31,14 @@
   "content_scripts": [
     {
       "matches": ["https://niu.wrk.at/Kripo/DutyRosterNH/DutyRoster.aspx*"],
-      "js": ["js/jquery/jquery-3.1.1.slim.min.js", "src/content_scripts/lib/lib.js", "src/content_scripts/DutyRoster.js"],
+      "js": [
+        "js/jquery/jquery-3.1.1.slim.min.js",
+        "js/moment/moment.min.js",
+        "js/ouical/ouical.js",
+        "src/content_scripts/lib/data.js",
+        "src/content_scripts/lib/lib.js",
+        "src/content_scripts/DutyRoster.js"
+      ],
       "all_frames": true,
       "run_at": "document_end"
     },
@@ -73,6 +80,7 @@
         "js/jquery/jquery.js",
         "js/moment/moment.min.js",
         "js/ouical/ouical.js",
+        "src/content_scripts/lib/lib.js",
         "src/content_scripts/AmbulancesEdit.js"
       ],
       "all_frames": true,
@@ -156,23 +164,26 @@
     },
     {
       "matches": ["https://niu.wrk.at/Kripo/Today/Today.aspx"],
-      "js": [ "src/definitions.js",
-              "js/jquery/jquery.js",
-              "js/jquery-ui/jquery-ui.js",
-              "js/ics.js/ics.deps.min.js",
-              "js/ics.js/ics.js",
-              "js/ouical/ouical.js",
-              "src/content_scripts/lib/lib.js",
-              "src/content_scripts/tools.js",
-              "src/content_scripts/today.js"
-            ],
+      "js": [
+        "src/definitions.js",
+        "js/jquery/jquery.js",
+        "js/jquery-ui/jquery-ui.js",
+        "js/ics.js/ics.deps.min.js",
+        "js/ics.js/ics.js",
+        "js/ouical/ouical.js",
+        "src/content_scripts/lib/data.js",
+        "src/content_scripts/lib/lib.js",
+        "src/content_scripts/tools.js",
+        "src/content_scripts/today.js"
+      ],
       "css" : ["src/css/style.css", "js/ouical/ouical.css"],
       "all_frames": true,
       "run_at": "document_end"
     },
     {
       "matches": ["https://niu.wrk.at/Kripo/Employee/newEmployee.aspx"],
-      "js": ["src/definitions.js",
+      "js": [
+        "src/definitions.js",
         "js/jquery/jquery.js",
         "js/jquery-ui/jquery-ui.js",
         "js/pouchdb/pouchdb-6.1.2.js",

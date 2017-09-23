@@ -30,16 +30,24 @@ $(document).ready(function() {
     var rtrn = {NKTW: false, Kurzdienst: false, Permanenz: false, myDienst: false, isMeldableAs: {}};
     var $table = $('table#DutyRosterTable tbody');
     var duties = getDuties($('.DutyRosterHeader'));
+    var headerNr = {
+      DRCDate: getHeaderNumber($('.DutyRosterHeader'), 'DRCDate'),
+      DRCTime: getHeaderNumber($('.DutyRosterHeader'), 'DRCTime'),
+      DRCDivision: getHeaderNumber($('.DutyRosterHeader'), 'DRCDivision'),
+      DRCComment: getHeaderNumber($('.DutyRosterHeader'), 'DRCComment')
+    };
 
     $table.find('tr').each(function(key, val) {
 
       // create placeholder vars
       var dienstID = $(this).attr('id');
+      var dienstOrt = 'DDL';
       var isEmpty = true;
       var isNotMeldable = true;
       var isMeldableAs = [];
       var isNKTW = false;
       var currentDateString;
+      var currentDurationString;
       var isKurzdienst = false;
       var isTagdienst = false;
       var isNachtdienst = false;
@@ -47,18 +55,18 @@ $(document).ready(function() {
       var permanenzBS = 'ha';
       var isMyDienst = false;
       var dienstLaenge;
+      var employees = [];
 
       $(this).find('td').each(function(key, val) {
         val = val.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
         var openIndikator = 'title="Melden"';
         switch (key) {
-          case 0: // Wochentag
-            break;
-          case 1: // Datum
+          case headerNr['DRCDate']: // Datum
             currentDateString = val;
             break;
 
-          case 2: // Uhrzeit
+          case headerNr['DRCTime']: // Uhrzeit
+            currentDurationString = val;
             dienstLaenge = getDurationFromTimeString(currentDateString, val);
             // $(this).after('<td>' + dienstLaenge + '</td>');  // Stunden einblenden nicht nötig
             var typeCode = $(this).attr('class');
@@ -73,53 +81,49 @@ $(document).ready(function() {
             }
             break;
 
-          case 3: // Ort
+          case headerNr['DRCDivision']: // Ort
             var typeCode = $(this).parent().attr('class');
             if (typeCode.includes('West')) { permanenzBS = 'west'; }
             if (typeCode.includes('Nord')) { permanenzBS = 'nord'; }
             if (typeCode.includes('DDL')) { permanenzBS = 'ddl'; }
             if (typeCode.includes('VS')) { permanenzBS = 'vs'; }
             if (typeCode.includes('BVS')) { permanenzBS = 'bvs'; }
+
+            dienstOrt = department[$(this).text().trim()];
             break;
 
-          case 4: // SEW
-          case 5: // SAN1
-          case 6: // SAN2
-            if (val && !val.includes(openIndikator)) {
-              isEmpty = false;
-            }
-
-            if (val.includes(openIndikator)) {
-              isNotMeldable = false;
-              isMeldableAs.push(key);
-              rtrn.isMeldableAs[key.toString()] = duties[key];
-            }
-
-            if (isSelf(val, ownIDs)) {
-              isMyDienst = true;
-              rtrn.myDienst = true;
-            }
-
-            break;
-
-          case 7: // Bemerkung
+          case headerNr['DRCComment']: // Bemerkung
             if (val.includes('NKTW') || val.includes('N-KTW') || val.includes('Notfall-KTW')) {
               isNKTW = true;
               rtrn.NKTW = true;
             }
             break;
 
-          case 9: // P = Permanenz
-            if (val === 'P') {
-              isPermanenz = true;
-              rtrn.Permanenz = true;
-            }
-            break;
-
-          //case 8: // PAL
-          //case 10: // Dienstführung Funktionen
           default:
             break;
+        }
+
+        // muss außerhalb des switch statements erledigt werden, weil es auch
+        // dienste mit nur 2 Funktionen gibts
+        if (key.toString() in duties) {
+          if (val && !val.includes(openIndikator)) {
+            isEmpty = false;
+          }
+
+          if (val.includes(openIndikator)) {
+            isNotMeldable = false;
+            isMeldableAs.push(key);
+            rtrn.isMeldableAs[key.toString()] = duties[key];
+          }
+
+          if (isSelf(val, ownIDs)) {
+            isMyDienst = true;
+            rtrn.myDienst = true;
+          }
+
+          var employee = getEmployeeDataFromLink(val);
+          employee['dienstFunktion'] = duties[key];
+          employees.push(employee);
         }
       });
 
@@ -135,6 +139,35 @@ $(document).ready(function() {
       $('tr#' + dienstID).attr('isMyDienst', isMyDienst);
       for (k in isMeldableAs) {
         $('tr#' + dienstID).attr('isMeldableAs_' + isMeldableAs[k].toString(), true);
+      }
+
+      // dienst object zum späteren Cal export
+      var dienst = {
+        id: dienstID,
+        title: $('#ctl00_main_ddDutyType option:selected').text().trim(),
+        start: moment(currentDateString + ' ' + currentDurationString.split('-')[0].trim(), 'D.M.YYYY H:mm').toDate(),
+        duration: dienstLaenge * 60,
+        address: dienstOrt,
+        description: ''
+      };
+      for (employee of employees) {
+        var descLine = employee.dienstFunktion + ': ';
+        if (employee.url != undefined) {
+          descLine += '<a href="' + employee.url + '">' + employee.displayName + '</a>';
+        } else {
+          descLine += employee.displayName;
+        }
+        descLine += '\r\n';
+        dienst.description += descLine;
+      }
+
+      // Termin export in die letzte Spalte
+      var cal = createCalElement(dienst);
+      $('tr#' + dienstID).find('td:last').append('<div id="exportCal_' + dienst.id + '" hidden></div>');
+      $('#exportCal_' + dienst.id).append(cal);
+      if (isMyDienst) {
+        $('tr#' + dienstID).css('background-color', '#a5c7ea');
+        $('#exportCal_' + dienst.id).show();
       }
     });
 
@@ -249,6 +282,7 @@ $(document).ready(function() {
   }
   if (tbl.myDienst) {
     $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFiltermyDienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur eigene Dienste</div>');
+    $('td.DRCCommands').css('width', '90px');
   }
 
   // Makes no sense to offer this
