@@ -330,7 +330,7 @@ $(document).ready(function() {
   var targetNodes         = $(".DutyRosterItem td:first-child");
   var MutationObserver    = window.MutationObserver || window.WebKitMutationObserver;
   var myObserver          = new MutationObserver (mutationHandler);
-  var obsConfig           = { childList: true, characterData: true, attributes: false, subtree: true };
+  var obsConfig           = { childList: true, characterData: false, attributes: false, subtree: false };
 
   targetNodes.each ( function () {
     myObserver.observe (this, obsConfig);
@@ -339,7 +339,6 @@ $(document).ready(function() {
   function mutationHandler (mutationRecords) {
 
     mutationRecords.forEach ( function (mutation) {
-
       var mutationDienstID = $(mutation.target).closest("tr").attr("id");
       setTimeout(function() {
         if(!$("tr#" + mutationDienstID).html().includes("progress.gif"))
