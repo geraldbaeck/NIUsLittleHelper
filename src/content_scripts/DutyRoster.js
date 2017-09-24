@@ -137,6 +137,8 @@ $(document).ready(function() {
       $('tr#' + dienstID).attr('permanenzBS', permanenzBS);
       $('tr#' + dienstID).attr('dienstLaenge', dienstLaenge);
       $('tr#' + dienstID).attr('isMyDienst', isMyDienst);
+      $('tr#' + dienstID).attr('dienstID', dienstID);
+
       for (k in isMeldableAs) {
         $('tr#' + dienstID).attr('isMeldableAs_' + isMeldableAs[k].toString(), true);
       }
@@ -321,5 +323,28 @@ $(document).ready(function() {
   $('.hideSelectors').click(function() {
     selectorToggle();
   });
+
+  var targetNodes         = $(".DutyRosterItem td:first-child");
+  var MutationObserver    = window.MutationObserver || window.WebKitMutationObserver;
+  var myObserver          = new MutationObserver (mutationHandler);
+  var obsConfig           = { childList: true, characterData: true, attributes: false, subtree: true };
+
+//--- Add a target node to the observer. Can only add one node at a time.
+targetNodes.each ( function () {
+    myObserver.observe (this, obsConfig);
+} );
+
+function mutationHandler (mutationRecords) {
+
+    mutationRecords.forEach ( function (mutation) {
+        console.log (mutation.target);
+        console.log($(mutation.target).closest("tr").attr("dienstID"));
+        var mutationDienstID = $(mutation.target).closest("tr").attr("dienstID");
+        setTimeout(function() { alert("now"); $('#exportCal_' + mutationDienstID).show(); }, 5000);
+
+        // Problem: exportCal existiert nach Ajax-Request nicht mehr, Zeile wird neu geschrieben
+        
+    } );
+}
 
 });
