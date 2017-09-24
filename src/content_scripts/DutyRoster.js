@@ -1,3 +1,5 @@
+var exportDict = {};
+
 $(document).ready(function() {
 
   // sucht eigene NIU IDs
@@ -137,7 +139,6 @@ $(document).ready(function() {
       $('tr#' + dienstID).attr('permanenzBS', permanenzBS);
       $('tr#' + dienstID).attr('dienstLaenge', dienstLaenge);
       $('tr#' + dienstID).attr('isMyDienst', isMyDienst);
-      $('tr#' + dienstID).attr('dienstID', dienstID);
 
       for (k in isMeldableAs) {
         $('tr#' + dienstID).attr('isMeldableAs_' + isMeldableAs[k].toString(), true);
@@ -167,8 +168,10 @@ $(document).ready(function() {
       var cal = createCalElement(dienst);
       $('tr#' + dienstID).find('td:last').append('<div id="exportCal_' + dienst.id + '" hidden></div>');
       $('#exportCal_' + dienst.id).append(cal);
+      exportDict[dienst.id] = $('#exportCal_' + dienst.id)[0].outerHTML;
+
       if (isMyDienst) {
-        $('tr#' + dienstID).css('background-color', '#a5c7ea');
+        //$('tr#' + dienstID).css('background-color', '#a5c7ea');
         $('#exportCal_' + dienst.id).show();
       }
     });
@@ -329,22 +332,25 @@ $(document).ready(function() {
   var myObserver          = new MutationObserver (mutationHandler);
   var obsConfig           = { childList: true, characterData: true, attributes: false, subtree: true };
 
-//--- Add a target node to the observer. Can only add one node at a time.
-targetNodes.each ( function () {
+  targetNodes.each ( function () {
     myObserver.observe (this, obsConfig);
-} );
+  } );
 
-function mutationHandler (mutationRecords) {
+  function mutationHandler (mutationRecords) {
 
     mutationRecords.forEach ( function (mutation) {
-        console.log (mutation.target);
-        console.log($(mutation.target).closest("tr").attr("dienstID"));
-        var mutationDienstID = $(mutation.target).closest("tr").attr("dienstID");
-        setTimeout(function() { alert("now"); $('#exportCal_' + mutationDienstID).show(); }, 5000);
 
-        // Problem: exportCal existiert nach Ajax-Request nicht mehr, Zeile wird neu geschrieben
-        
+      var mutationDienstID = $(mutation.target).closest("tr").attr("id");
+      setTimeout(function() {
+        if(!$("tr#" + mutationDienstID).html().includes("progress.gif"))
+        {
+          if (isSelf($("tr#" + mutationDienstID).html(), getOwnIDs()))
+          {
+            $("tr#" + mutationDienstID).children(".noprint").append(exportDict[mutationDienstID]);
+            $('#exportCal_' + mutationDienstID).show();
+          }
+        }
+      }, 1500);
     } );
-}
-
+  }
 });
