@@ -39,7 +39,7 @@ $(document).ready(function() {
       DRCComment: getHeaderNumber($('.DutyRosterHeader'), 'DRCComment')
     };
 
-    $table.find('tr').each(function(key, val) {
+    $table.find('tr').each(function() {
 
       // create placeholder vars
       var dienstID = $(this).attr('id');
@@ -59,17 +59,17 @@ $(document).ready(function() {
       var dienstLaenge;
       var employees = [];
 
-      $(this).find('td').each(function(key, val) {
-        val = val.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
+      $(this).find('td').each(function(rowNr, rawTdContent) {
+        tdContent = rawTdContent.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
         var openIndikator = 'title="Melden"';
-        switch (key) {
+        switch (rowNr) {
           case headerNr['DRCDate']: // Datum
-            currentDateString = val;
+            currentDateString = tdContent;
             break;
 
           case headerNr['DRCTime']: // Uhrzeit
-            currentDurationString = val;
-            dienstLaenge = getDurationFromTimeString(currentDateString, val);
+            currentDurationString = tdContent;
+            dienstLaenge = getDurationFromTimeString(currentDateString, tdContent);
             // $(this).after('<td>' + dienstLaenge + '</td>');  // Stunden einblenden nicht nötig
             var typeCode = $(this).attr('class');
             if (typeCode.includes('Short')) {
@@ -95,7 +95,7 @@ $(document).ready(function() {
             break;
 
           case headerNr['DRCComment']: // Bemerkung
-            if (val.includes('NKTW') || val.includes('N-KTW') || val.includes('Notfall-KTW')) {
+            if (tdContent.includes('NKTW') || tdContent.includes('N-KTW') || tdContent.includes('Notfall-KTW')) {
               isNKTW = true;
               rtrn.NKTW = true;
             }
@@ -106,25 +106,25 @@ $(document).ready(function() {
         }
 
         // muss außerhalb des switch statements erledigt werden, weil es auch
-        // dienste mit nur 2 Funktionen gibts
-        if (key.toString() in duties) {
-          if (val && !val.includes(openIndikator)) {
+        // dienste mit nur 2 Funktionen gibt
+        if (rowNr.toString() in duties) {
+          if (tdContent && !tdContent.includes(openIndikator)) {
             isEmpty = false;
           }
 
-          if (val.includes(openIndikator)) {
+          if (tdContent.includes(openIndikator)) {
             isNotMeldable = false;
-            isMeldableAs.push(key);
-            rtrn.isMeldableAs[key.toString()] = duties[key];
+            isMeldableAs.push(rowNr);
+            rtrn.isMeldableAs[rowNr.toString()] = duties[rowNr];
           }
 
-          if (isSelf(val, ownIDs)) {
+          if (isSelf(tdContent, ownIDs)) {
             isMyDienst = true;
             rtrn.myDienst = true;
           }
 
-          var employee = getEmployeeDataFromLink(val);
-          employee['dienstFunktion'] = duties[key];
+          var employee = getEmployeeDataFromLink(tdContent);
+          employee['dienstFunktion'] = duties[rowNr];
           employees.push(employee);
         }
       });
@@ -203,10 +203,6 @@ $(document).ready(function() {
         }
       });
     }
-
-    // if ($('#DutyRosterFilterMeldable').is(':checked')) {
-    //   $('tr[isMeldable=false]').hide();
-    // }
 
     if ($('#DutyRosterFilterNKTW').is(':checked')) {
       $('tr[isNKTW=false]').hide();
@@ -303,7 +299,7 @@ $(document).ready(function() {
   $('#rdColumnDienste').append(plcDiv + '<select id="permanenzBSsel" name="permanenzBS" class="TableHack" style="margin-right:0.3em;vertical-align:middle;"><option value="-">-</option><option value="ha">nur HA Permanenzen</option><option value="west">nur West Permanenzen</option><option value="ddl">nur DDL Permanenzen</option><option value="vs">nur VS Permanenzen</option><option value="nord">nur Nord Permanenzen</option><option value="bvs">nur BVS Permanenzen</option></div>');
 
   // Nur meldbare Dienste als
-  if (tbl.isMeldableAs !== {}) {
+  if (!$.isEmptyObject(tbl.isMeldableAs)) {
     $('div.whitebox:not([id])').append('<div id="chkColumnMeldbar" style="float:left;font-weight:bold;padding:5px;">Nur meldbare Dienste als:</div>');  // div box for radio buttons
     for (var f in tbl.isMeldableAs) {
       $('#chkColumnMeldbar').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterMeldable_' + f + '" value="' + f + '" class="TableHack" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;">' + duties[f] + '</div>');
@@ -327,29 +323,29 @@ $(document).ready(function() {
     selectorToggle();
   });
 
-  var targetNodes         = $(".DutyRosterItem td:first-child");
+  var targetNodes         = $('.DutyRosterItem td:first-child');
   var MutationObserver    = window.MutationObserver || window.WebKitMutationObserver;
   var myObserver          = new MutationObserver (mutationHandler);
-  var obsConfig           = { childList: true, characterData: false, attributes: false, subtree: false };
+  var obsConfig           = {childList: true, characterData: false, attributes: false, subtree: false};
 
-  targetNodes.each ( function () {
+  targetNodes.each (function () {
     myObserver.observe (this, obsConfig);
-  } );
+  });
 
   function mutationHandler (mutationRecords) {
 
-    mutationRecords.forEach ( function (mutation) {
-      var mutationDienstID = $(mutation.target).closest("tr").attr("id");
+    mutationRecords.forEach (function (mutation) {
+      var mutationDienstID = $(mutation.target).closest('tr').attr('id');
       setTimeout(function() {
-        if(!$("tr#" + mutationDienstID).html().includes("progress.gif"))
+        if (!$('tr#' + mutationDienstID).html().includes('progress.gif'))
         {
-          if (isSelf($("tr#" + mutationDienstID).html(), getOwnIDs()))
+          if (isSelf($('tr#' + mutationDienstID).html(), getOwnIDs()))
           {
-            $("tr#" + mutationDienstID).children(".noprint").append(exportDict[mutationDienstID]);
+            $('tr#' + mutationDienstID).children('.noprint').append(exportDict[mutationDienstID]);
             $('#exportCal_' + mutationDienstID).show();
           }
         }
       }, 1500);
-    } );
+    });
   }
 });
