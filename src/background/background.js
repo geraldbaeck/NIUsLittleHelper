@@ -1,9 +1,17 @@
-// 0.48.2 silent update
-//chrome.runtime.onInstalled.addListener(function (object) {
-//    chrome.tabs.create({url: chrome.extension.getURL("src/webcontent/welcome.html")}, function (tab) {
-//        console.log("Launching splash website due to event: " + object.reason);
-//    });
-//});
+chrome.runtime.onInstalled.addListener(function (object) {
+   var thisVersion = chrome.runtime.getManifest().version;
+   const regex = /[0-9].[0-9][0-9].[0-9]*/g;
+   console.log("--> Testing if version " + thisVersion + " is full update.")
+
+   if(!regex.test(thisVersion))
+   {
+       console.log("--> " + thisVersion + " is full update - showing splash screen.")
+       chrome.tabs.create({url: chrome.extension.getURL("src/webcontent/welcome.html")}, function (tab) {
+       console.log("Launching splash website due to event: " + object.reason);
+   });
+  }
+  else { console.log("--> " + thisVersion + " is not full update - not showing splash screen.")}
+});
 
 const filesInDirectory = dir => new Promise (resolve =>
 
