@@ -1,16 +1,20 @@
 chrome.runtime.onInstalled.addListener(function (object) {
    var thisVersion = chrome.runtime.getManifest().version;
    const regex = /[0-9].[0-9][0-9].[0-9]*/g;
-   console.log("--> Testing if version " + thisVersion + " is full update.")
+   console.log("--> Testing if version " + thisVersion + " is a full update/new install.")
 
-   if(!regex.test(thisVersion))
+   if(!regex.test(thisVersion) && object.reason === "update")
    {
-       console.log("--> " + thisVersion + " is full update - showing splash screen.")
-       chrome.tabs.create({url: chrome.extension.getURL("src/webcontent/welcome.html")}, function (tab) {
-       console.log("Launching splash website due to event: " + object.reason);
-   });
+       console.log("--> " + thisVersion + " is a full update.")
+       chrome.tabs.create({url: chrome.extension.getURL("src/webcontent/welcome-update.html")}, function (tab) { console.log("--> Launching splash website due to event: " + object.reason); });
   }
-  else { console.log("--> " + thisVersion + " is not full update - not showing splash screen.")}
+  else if (object.reason === "install") {
+    console.log("--> " + thisVersion + " was just installed.");
+    chrome.tabs.create({url: chrome.extension.getURL("src/webcontent/welcome-install.html")}, function (tab) { console.log("--> Launching splash website due to event: " + object.reason); });
+  }
+  else {
+    console.log("--> " + thisVersion + " is not a full update/new install - not showing splash screen.");
+  }
 });
 
 const filesInDirectory = dir => new Promise (resolve =>
