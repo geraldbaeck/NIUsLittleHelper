@@ -327,10 +327,10 @@ function getEmployeeDataSheetNotCached(args)
   $(data).find(".PermissionRow").each(function() {
 
     var permDict = {};
-    
+
     permDict["typ"] = $(this).find(".PermissionType").text();
     permDict["permission"] = $(this).find(".PermissionName").text();
-    
+
     permDict["revoked"] = $(this).find(".PermissionCheckbox").find("input").is(':checked');
 
     permArray.push(permDict);
@@ -751,6 +751,71 @@ function calculateDutyStatisticNonCached(args) {
 
   }); // letzter .then block
 
+}
+
+
+function getOperableDNRsNotCached()
+{
+  return new Promise(function(resolve, reject) {
+    $.get("https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx", function(data) {
+      console.log("getOperableDNRsNotCached --> parse get request data");
+
+      var maArray = [];
+      var UID = Math.floor((Math.random() * 100000) + 1);
+
+      $(data).find('#m_ddlEmployee option').each(function(index,element) {
+        var searchString = $(element).text();
+        maArray.push(searchString);
+      });
+      resolve(maArray);
+    });
+  });
+}
+
+function getOperableDNRs()
+{
+  return getFromCache("operableDNRs", "", null, getOperableDNRsNotCached);
+}
+
+function convertDFField(input, DNRs)
+{
+  var UID = Math.random().toString(36).substring(7);
+  try {
+    input.hide();
+
+    input.after("<input id='person_autocompleteDF" + UID + "'></input>");
+    $("#person_autocompleteDF" + UID).on( "autocompletecreate", function( event, ui ) {
+      console.log("filling autocomplete with pre-filled value: " + $(input).val() );
+      $("#person_autocompleteDF" + UID).val($(input).val());
+    } );
+    $("#person_autocompleteDF" + UID).autocomplete({
+      source: DNRs
+    });
+    $("#person_autocompleteDF" + UID).on("autocompleteselect", function(event, ui) {
+
+      var regexpr = /\((.*?)\)/;
+
+      var searchStringDNR = encodeURI(ui.item.value);
+      var foundDNR = regexpr.exec(searchStringDNR);
+      console.log("aut " + ui.item.value + " --> " + parseInt(foundDNR[1]));
+      input.val(parseInt(foundDNR[1]));
+
+    });
+    $("#person_autocompleteDF" + UID).on( "autocompletechange", function( event, ui )
+    {
+      if(ui.item == null)
+      {
+        console.log("none selected, filling with val --> " + $("#person_autocompleteDF" + UID).val() );
+        $(input).val($("#person_autocompleteDF" + UID).val());
+      }
+    } );
+
+  }
+  catch(err)
+  {
+    input.show();
+    $("#person_autocompleteDF" + UID).hide();
+  }
 }
 
 function checkCourseAttendance(empID, courseDict) {

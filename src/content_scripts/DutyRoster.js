@@ -333,19 +333,31 @@ $(document).ready(function() {
   });
 
   function mutationHandler (mutationRecords) {
-
-    mutationRecords.forEach (function (mutation) {
-      var mutationDienstID = $(mutation.target).closest('tr').attr('id');
-      setTimeout(function() {
-        if (!$('tr#' + mutationDienstID).html().includes('progress.gif'))
-        {
-          if (isSelf($('tr#' + mutationDienstID).html(), getOwnIDs()))
+    try {
+      mutationRecords.forEach (function (mutation) {
+        var mutationDienstID = $(mutation.target).closest('tr').attr('id');
+        setTimeout(function() {
+          if (!$('tr#' + mutationDienstID).html().includes('progress.gif'))
           {
-            $('tr#' + mutationDienstID).children('.noprint').append(exportDict[mutationDienstID]);
-            $('#exportCal_' + mutationDienstID).show();
+            if (isSelf($('tr#' + mutationDienstID).html(), getOwnIDs()))
+            {
+              $('tr#' + mutationDienstID).children('.noprint').append(exportDict[mutationDienstID]);
+              $('#exportCal_' + mutationDienstID).show();
+            }
+            if($('tr#' + mutationDienstID).html().includes("reEditShifts"))
+            {
+              getOperableDNRs().then(function(result) {
+                $('tr#' + mutationDienstID + " input[name*='reEditShifts']").each(function()
+                {
+                  var targetCell = $(this);
+                  convertDFField(targetCell, result);
+                });
+              });
+            }
           }
-        }
-      }, 1500);
-    });
+        }, 1500);
+      });
+    }
+    catch(err) { }
   }
 });
