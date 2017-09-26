@@ -346,15 +346,21 @@ $(document).ready(function() {
             }
             if($('tr#' + mutationDienstID).html().includes("reEditShifts"))
             {
-              getOperableDNRs().then(function(result) {
-                $('tr#' + mutationDienstID + " input[name*='reEditShifts']").each(function()
+              expDFActive().then(function(isActive)
+              {
+                if (!isActive) { return Promise.reject("DF ist ausgeschalten!"); }
+                return getOperableDNRs();
+              })
+                .then(function(result)
                 {
-                  var targetCell = $(this);
-                  convertDFField(targetCell, result);
+                  $('tr#' + mutationDienstID + " input[name*='reEditShifts']").each(function()
+                  {
+                    var targetCell = $(this);
+                    convertDFField(targetCell, result);
+                  });
                 });
-              });
+              }
             }
-          }
         }, 1500);
       });
     }

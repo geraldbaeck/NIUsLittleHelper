@@ -24,6 +24,18 @@ function experimentalActivated() {
   });
 }
 
+var expDFActive = function expDFActive() {
+  console.log("expDFActive --> called");
+  var load = {};
+  load[STORAGE_KEY_DF_EXP] = DEFAULT_DF_EXP;
+  return new Promise(function(resolve, reject) {
+    chrome.storage.sync.get(STORAGE_KEY_DF_EXP, function(item) {
+      console.log("expDFActive --> DF is " + item[STORAGE_KEY_DF_EXP]);
+      resolve(item[STORAGE_KEY_DF_EXP]);
+    });
+  });
+}
+
 function funktionaerActivated() {
   var load = {};
   load[STORAGE_KEY_FUNKTIONAERS_FEATURES_ON] = DEFAULT_FUNKTIONAERS_FEATURES_ON;
