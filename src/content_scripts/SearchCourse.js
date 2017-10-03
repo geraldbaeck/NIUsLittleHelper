@@ -384,7 +384,6 @@ $(document).ready(function() {
   $( ".mail_link" ).click(function() {
       var $tr = $(this).closest('tr');
       var data = datatable.row($tr).data();
-      var linkText = $(this).text();
 
       getOwnDNRs().then(function(DNRarray) {
 
