@@ -1,8 +1,3 @@
-
-
-
-
-
 var kursauswahl;
 var kurssuche;
 var activeFilters = {}; //ul menüleiste, die wählbare suchfilter enthält
@@ -127,29 +122,6 @@ $(document).ready(function() {
     });
   }
 
-
-  var mail = "stephan@spindler.priv.at";
-  function generateMailLink(data, type, full, meta) {
-    //TODO: hole korrekte mailadresse!
-
-      //TODO: wer bin ich?
-      //TODO: welche ausbildung brauche ich?
-
-    var mailto = "mailto:" + mail + "?" + $.param({
-      subject : "Anmeldung Kurs " + data,
-      body: "Bitte um Anmeldung zu " + data
-    });
-
-    experimentalActivated().then(function(activated){
-      if (activated) {
-        return "<a href='" + mailto + "'>anmelden</a>";
-      } else {
-        return "";
-      }
-    });
-
-  }
-
   //suchfilterleiste erzeugen
   tabelle.before("<div class='Whitebox suchfilter'><ul id='suchfilter'></ul></div>");
   suchfilter = $('#suchfilter');
@@ -171,19 +143,24 @@ $(document).ready(function() {
     title: "Anmeldestatus"
   }
 
- //stellt einen mailto Link zur Anmeldung zur Verfügung, siehe Funktion generateMailLink
-  col_anmeldelink = {
-      data: "abznr",
-      render: generateMailLink,
-  }
-
   columns = [
     {
       data: "abznr",
       targets : -1,
       render: function(data, type, full, meta) {
-        return '<a class="open_course_link" href="/Kripo/Kufer/CourseDetail.aspx?CourseID=' + data + '">open</a>';
+        return '<a class="open_course_link" href="/Kripo/Kufer/CourseDetail.aspx?CourseID=' + data + '">&ouml;ffnen</a>';
       }
+    },
+
+    {
+      data: "kursstatus",
+        render: function(data, type, full, meta) {
+          if(data.includes("Offen") && !window.location.href.includes("DisplaySelf") && !window.location.href.includes("Employee") ) { return '<a class="mail_link" href="#">anmelden</a>'; }
+          else if(data.includes("Offen") && window.location.href.includes("Employee")) { return ''; }
+          else if(data.includes("Offen") && window.location.href.includes("DisplaySelf")) { return '<a class="mail_link" href="#">abmelden</a>'; }
+          else { return ''; }
+        },
+        name: "maillink"
     },
 
     {
@@ -403,5 +380,34 @@ $(document).ready(function() {
   addSuchfilter(datatable, "kurs_pflichtf", "Nur Pflichtfortbildungen", ["kurs"], function(searchData, index, rowData, counter) {
       return  searchData.kurs.includes("RD-Fortbildung");
   });
+
+  $( ".mail_link" ).click(function() {
+      var $tr = $(this).closest('tr');
+      var data = datatable.row($tr).data();
+      var linkText = $(this).text();
+
+      getOwnDNRs().then(function(DNRarray) {
+
+      var primaryDNR = parseInt(DNRarray[0]);
+      var ausbMail = "";
+      var reqAction = "";
+
+      if(primaryDNR > 1000 && primaryDNR < 2000 ) { ausbMail = "west-ausbildung@w.roteskreuz.at"; }
+      else if(primaryDNR > 2000 && primaryDNR < 3000 ) { ausbMail = "vs-ausbildung@w.roteskreuz.at"; }
+      else if(primaryDNR > 7000 && primaryDNR < 8000 ) { ausbMail = "ddl-ausb@w.roteskreuz.at"; }
+      else if(primaryDNR > 3000 && primaryDNR < 4000 ) { ausbMail = "bvs-ausbildung@w.roteskreuz.at"; }
+      else if(primaryDNR > 8000 && primaryDNR < 9000 ) { ausbMail = "nord-ausbildung@w.roteskreuz.at"; }
+
+      if(data["anmeldestatus"] === "Angemeldet") { reqAction = "Abmeldung"; }
+      else { reqAction = "Anmeldung"; }
+
+      var mailtoLink = "mailto:" + ausbMail + "?Subject=" + encodeURIComponent(reqAction) + "%20Kurs%20" + encodeURI(data["abznr"]) + "&Body=Liebe%20Ausbildung%2C%0A%0ABitte%20um%20" + encodeURIComponent(reqAction) + "%20bei%20folgendem%20Kurs%3A%0A%0AABZ%20Nr%3A%20" + encodeURIComponent(data["abznr"]) + "%0AKurs%20Name%3A%20" + encodeURIComponent(data["kurs"]) + "%0AKurs%20Datum%3A%20" + encodeURIComponent(data["von"]) + "%0A%0ADanke%20und%20LG%2C%0A%0ADienstnummer%20" + encodeURIComponent(primaryDNR) + "";
+
+      if(data["anmeldestatus"] === "Storno") { alert("Sie wurden bereits von diesem Kurs abgemeldet!"); }
+      else { window.open(mailtoLink, '_blank'); }
+
+      });
+ });
+
 
 });

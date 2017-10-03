@@ -16,14 +16,6 @@ function getKuerzel() {
     });
 }
 
-function experimentalActivated() {
-  var load = {};
-  load[STORAGE_KEY_EXPERIMENTAL] = DEFAULT_EXPERIMENTAL;
-  chrome.storage.sync.get(STORAGE_KEY_EXPERIMENTAL, function(item) {
-    return item[STORAGE_KEY_EXPERIMENTAL];
-  });
-}
-
 var expDFActive = function expDFActive() {
   console.log("expDFActive --> called");
   var load = {};
@@ -32,16 +24,6 @@ var expDFActive = function expDFActive() {
     chrome.storage.sync.get(STORAGE_KEY_DF_EXP, function(item) {
       console.log("expDFActive --> DF is " + item[STORAGE_KEY_DF_EXP]);
       resolve(item[STORAGE_KEY_DF_EXP]);
-    });
-  });
-}
-
-function funktionaerActivated() {
-  var load = {};
-  load[STORAGE_KEY_FUNKTIONAERS_FEATURES_ON] = DEFAULT_FUNKTIONAERS_FEATURES_ON;
-  return new Promise(function(resolve, reject) {
-    chrome.storage.sync.get(STORAGE_KEY_FUNKTIONAERS_FEATURES_ON, function(item) {
-      resolve(item[STORAGE_KEY_FUNKTIONAERS_FEATURES_ON]);
     });
   });
 }

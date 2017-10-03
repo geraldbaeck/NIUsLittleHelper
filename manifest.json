@@ -151,6 +151,7 @@
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
+        "js/pouchdb/pouchdb-6.1.2.js",
         "js/datatable/jquery.dataTables.min.js",
         "js/moment/moment.min.js",
         "js/moment/datetime-moment.js",

@@ -6,19 +6,11 @@ var STORAGE_KEY_SEARCH_COURSE_ALWAYS_SEARCH = "niu_search_course_always_search";
 var STORAGE_KEY_SEARCH_COURSE_HIDE_SEARCH = "niu_search_course_hide_search";
 var STORAGE_KEY_SEARCH_COURSE_HIDE_CHOOSE = "niu_search_course_hide_choose";
 
-
 var STORAGE_KEY_CACHE_ACTIVE = "addon_cache_active";
 var STORAGE_KEY_MAX_CACHE_TIME = "addon_cache_max_cache_time";
 
-var STORAGE_KEY_EXPERIMENTAL = "addon_experimental_features_active";
-var DEFAULT_EXPERIMENTAL = false;
-
 var STORAGE_KEY_DF_EXP = "addon_df_expfeatures_on"
 var DEFAULT_DF_EXP = false;
-
-var STORAGE_KEY_FUNKTIONAERS_FEATURES_ON = "addon_funktionars_features_on";
-
-var DEFAULT_FUNKTIONAERS_FEATURES_ON = true;
 
 var DEFAULT_SEARCH_COURSE_ALWAYS_SEARCH = true;
 
