@@ -381,14 +381,15 @@ $(document).ready(function() {
       return  searchData.kurs.includes("RD-Fortbildung");
   });
 
-  $( ".mail_link" ).click(function() {
+  $( ".mail_link" ).each(function() {
+      var currentElem = $(this);
       var $tr = $(this).closest('tr');
       var data = datatable.row($tr).data();
 
       getOwnDNRs().then(function(DNRarray) {
 
       var primaryDNR = parseInt(DNRarray[0]);
-      var ausbMail = "";
+      var ausbMail = "LRK-Ausbildung@w.roteskreuz.at";
       var reqAction = "";
 
       if(primaryDNR > 1000 && primaryDNR < 2000 ) { ausbMail = "west-ausbildung@w.roteskreuz.at"; }
@@ -403,7 +404,7 @@ $(document).ready(function() {
       var mailtoLink = "mailto:" + ausbMail + "?Subject=" + encodeURIComponent(reqAction) + "%20Kurs%20" + encodeURI(data["abznr"]) + "&Body=Liebe%20Ausbildung%2C%0A%0ABitte%20um%20" + encodeURIComponent(reqAction) + "%20bei%20folgendem%20Kurs%3A%0A%0AABZ%20Nr%3A%20" + encodeURIComponent(data["abznr"]) + "%0AKurs%20Name%3A%20" + encodeURIComponent(data["kurs"]) + "%0AKurs%20Datum%3A%20" + encodeURIComponent(data["von"]) + "%0A%0ADanke%20und%20LG%2C%0A%0ADienstnummer%20" + encodeURIComponent(primaryDNR) + "";
 
       if(data["anmeldestatus"] === "Storno") { alert("Sie wurden bereits von diesem Kurs abgemeldet!"); }
-      else { window.open(mailtoLink, '_blank'); }
+      else { currentElem.attr("href", mailtoLink); }
 
       });
  });
