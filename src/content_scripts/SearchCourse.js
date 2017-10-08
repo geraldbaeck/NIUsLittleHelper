@@ -381,22 +381,22 @@ $(document).ready(function() {
       return  searchData.kurs.includes("RD-Fortbildung");
   });
 
+  getOwnDNRs().then(function(DNRarray) {
   $( ".mail_link" ).each(function() {
       var currentElem = $(this);
       var $tr = $(this).closest('tr');
       var data = datatable.row($tr).data();
 
-      getOwnDNRs().then(function(DNRarray) {
 
       var primaryDNR = parseInt(DNRarray[0]);
       var ausbMail = "LRK-Ausbildung@w.roteskreuz.at";
       var reqAction = "";
 
-      if(primaryDNR > 1000 && primaryDNR < 2000 ) { ausbMail = "west-ausbildung@w.roteskreuz.at"; }
-      else if(primaryDNR > 2000 && primaryDNR < 3000 ) { ausbMail = "vs-ausbildung@w.roteskreuz.at"; }
-      else if(primaryDNR > 7000 && primaryDNR < 8000 ) { ausbMail = "ddl-ausb@w.roteskreuz.at"; }
-      else if(primaryDNR > 3000 && primaryDNR < 4000 ) { ausbMail = "bvs-ausbildung@w.roteskreuz.at"; }
-      else if(primaryDNR > 8000 && primaryDNR < 9000 ) { ausbMail = "nord-ausbildung@w.roteskreuz.at"; }
+      if(primaryDNR >= 1000 && primaryDNR < 2000 ) { ausbMail = "west-ausbildung@w.roteskreuz.at"; }
+      else if(primaryDNR >= 2000 && primaryDNR < 3000 ) { ausbMail = "vs-ausbildung@w.roteskreuz.at"; }
+      else if(primaryDNR >= 7000 && primaryDNR < 8000 ) { ausbMail = "ddl-ausb@w.roteskreuz.at"; }
+      else if(primaryDNR >= 3000 && primaryDNR < 4000 ) { ausbMail = "bvs-ausbildung@w.roteskreuz.at"; }
+      else if(primaryDNR >= 8000 && primaryDNR < 9000 ) { ausbMail = "nord-ausbildung@w.roteskreuz.at"; }
 
       if(data["anmeldestatus"] === "Angemeldet") { reqAction = "Abmeldung"; }
       else { reqAction = "Anmeldung"; }
