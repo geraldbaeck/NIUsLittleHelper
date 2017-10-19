@@ -155,9 +155,9 @@ $(document).ready(function() {
     {
       data: "kursstatus",
         render: function(data, type, full, meta) {
-          if(data.includes("Offen") && !window.location.href.includes("DisplaySelf") && !window.location.href.includes("Employee") ) { return '<a class="mail_link" href="#">anmelden</a>'; }
+          if(data.includes("Offen") && !window.location.href.includes("DisplaySelf") && !window.location.href.includes("Employee") ) { return '<a class="mail_link" href="#" target="_blank">anmelden</a>'; }
           else if(data.includes("Offen") && window.location.href.includes("Employee")) { return ''; }
-          else if(data.includes("Offen") && window.location.href.includes("DisplaySelf")) { return '<a class="mail_link" href="#">abmelden</a>'; }
+          else if(data.includes("Offen") && window.location.href.includes("DisplaySelf")) { return '<a class="mail_link" href="#" target="_blank">abmelden</a>'; }
           else { return ''; }
         },
         name: "maillink"
