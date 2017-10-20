@@ -23,6 +23,46 @@ $(document).ready(function() {
       return ambulance;
     };
 
-    console.log(scrapeAmbulance());
+    var scrapeMembers = function(ambulance) {
+      var requests = Array();
+      var members = Array();
+      $('a[href^="Javascript:SEmpFID"]').each(function() {
+        var member = getEmployeeDataFromLink(this, 'EmployeeID');
+        members.push(member);
+        requests.push($.get(member.url));
+      });
+
+      var defer = $.when.apply($, requests);
+      defer.done(function(){
+          // This is executed only after every ajax request has been completed
+          var emails = Array();
+          $.each(arguments, function(index, responseData){
+              // "responseData" will contain an array of response information for each specific request
+              var employee = scrapeEmployee($.parseHTML(responseData[0]), members[index].url);
+              console.log(employee)
+              //"Fred Foo"<foo@example.com>
+              var propertyNames = Object.keys(employee).filter(function (propertyName) {
+                  if(propertyName.indexOf("EMAIL") === 0) {
+                    emails.push('"' + members[index]['displayName'] + '"<' + employee[propertyName] + '>');
+                  }
+              });
+          });
+          var bcc = emails.join(',');
+          var subject = ambulance.title + " am " + moment(ambulance.start).format('dd, D.M.YY');
+          var body = 'Liebe KollegInnen,\n\n'
+          var link = 'mailto:?bcc=' + encodeURIComponent(bcc) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+          window.open(link, target='_blank');
+      });
+    }
+
+    var ambulance = scrapeAmbulance();
+
+    $('h1').append('<a id="spamspamspam"><img height="19" src="' + chrome.extension.getURL("/img/ic_mail_outline_black_24dp_2x.png") + '" />SPAM</a>')
+
+    $("#spamspamspam").click(function() {
+      scrapeMembers(ambulance);
+    });
+
+
 
   });

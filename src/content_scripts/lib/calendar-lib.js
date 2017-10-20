@@ -13,7 +13,7 @@ function cleanName(name) {
 
 // extrahiert Mitarbeiterdaten aus dem Link
 // eg. <a href="javascript:SEmpFNRID('0ba9916e-e305-4df6-b318-a671013118a1');">Bäck (7822)</a>
-function getEmployeeDataFromLink(link) {
+function getEmployeeDataFromLink(link, link_identifier='EmployeeNumberID') {
   var employeeData = {
     displayName: cleanName($(link).text()),
     id: undefined,
@@ -22,7 +22,7 @@ function getEmployeeDataFromLink(link) {
   var rawID = $(link).attr('href');
   if (rawID != undefined) {
     employeeData.id = rawID.substring(rawID.indexOf('\'') + 1,rawID.lastIndexOf('\''));
-    employeeData.url = 'https://niu.wrk.at/Kripo/Employee/shortemployee.aspx?EmployeeNumberID=' + employeeData.id;
+    employeeData.url = 'https://niu.wrk.at/Kripo/Employee/shortemployee.aspx?' + link_identifier + '=' + employeeData.id;
   }
   return employeeData;
 }
