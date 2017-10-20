@@ -812,6 +812,81 @@ function convertDFField(input, DNRs)
   }
 }
 
+function getEmployeeCourses(empID, UID, dateFrom, dateTo, statusFilter) {
+return getFromCache("empCourses_", empID + UID, { 'empID' : empID, 'dateFrom' : dateFrom, 'dateTo' : dateTo, 'statusFilter' : statusFilter}, getEmployeeCoursesNotCached);
+}
+
+function getEmployeeCoursesNotCached(args)
+{
+  var empID = args.empID;
+  var dateFrom = args.dateFrom;
+  var dateTo = args.dateTo;
+
+  var todaysDate = new Date();
+  var todaysDatePlus = todaysDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
+  var todaysDateString = todaysDate.getDate() + "." + todaysDatePlus + "." + todaysDate.getFullYear();
+
+  if(!args.dateTo) { dateTo = todaysDateString; }
+
+  return new Promise(function(resolve, reject) {
+    var post = {};
+
+    $.get("https://niu.wrk.at/Kripo/Kufer/SearchCourse.aspx?EmployeeId=" + empID, function(data) {
+      var jData = $(data);
+      var keyPostfix = jData.find("#__KeyPostfix").val();
+      var eventvalidation = jData.find("#__EVENTVALIDATION").val();
+
+      post["__KeyPostfix"] = keyPostfix;
+      post["__EVENTVALIDATION"] = eventvalidation;
+      post["__VIEWSTATE"] = "";
+      post["__EVENTARGUMENT"] = "";
+      post["__EVENTTARGET"] = "ctl00$main$m_Search";
+      post["ctl00$main$m_From$m_Textbox"] = dateFrom;
+      post["ctl00$main$m_Until$m_Textbox"] = dateTo;
+      post["ctl00$main$m_Options$0"] = "on";
+      post["ctl00$main$m_Options$4"] = "on";
+      post["ctl00$main$m_Options$5"] = "on";
+      post["ctl00$main$m_CourseName"] = "";
+
+      $.ajax({
+        url: "https://niu.wrk.at/Kripo/Kufer/SearchCourse.aspx?EmployeeId=" + empID,
+        data: post,
+        type: "POST",
+        success: function(data, status) {
+
+          var allCourses = [];
+
+          $(data).find("#ctl00_main_m_CourseList__CourseTable > tbody > tr").each(function(index, element) {
+
+            var singleCourseDict = {};
+
+            if($(element).find(".CourseTitel").length > 0) // filtern der nicht-kurs-zeilen
+            {
+              singleCourseDict.abzID = $('td:eq(0)', element).text().trim();
+              singleCourseDict.titel = $('td:eq(1)', element).text().trim();
+              singleCourseDict.dateFrom = $('td:eq(2)', element).text().trim();
+              singleCourseDict.dateTo = $('td:eq(3)', element).text().trim();
+              singleCourseDict.location = $('td:eq(4)', element).text().trim();
+              singleCourseDict.courseStatus = $('td:eq(5)', element).text().trim();
+              singleCourseDict.tnStatus = $('td:eq(6)', element).text().trim();
+              singleCourseDict.receivedQual = $('td:eq(7)', element).text().trim();
+              singleCourseDict.receivedHours = $('td:eq(8)', element).text().trim();
+
+              if(args.statusFilter) {
+                if(singleCourseDict.tnStatus.includes(args.statusFilter)) { allCourses.push(singleCourseDict); }
+              }
+              else {
+                allCourses.push(singleCourseDict);
+              }
+            }
+          });
+          resolve(allCourses);
+        }
+      });
+    });
+  });
+}
+
 function checkCourseAttendance(empID, courseDict) {
 return getFromCache("courseattend_", empID + courseDict.UID, { 'empID' : empID, 'courseDict' : courseDict}, checkCourseAttendanceNotCached);
 }

@@ -579,7 +579,26 @@ $(document).ready(function() {
         });
 
      });
-     
+
+     addCalculationHandler("#noshows", [{calcname : "noshows", uiname : "No-Shows"}], function(dnr, name) {
+       //verkettete Promises...
+
+       return dnrToIdentifier(dnr)
+       .then(function(result) {
+         console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+         return getEmployeeCourses(result.EID, "noshowUID", "01.01.1900", null, "Nicht erschienen")
+       }).then( function(allCourses)
+       {
+         var alertString = "";
+         for(var singleCourse in allCourses) {
+           var singleString = allCourses[singleCourse].titel + " (" + allCourses[singleCourse].dateFrom + ")\\n";
+           alertString += singleString;
+         }
+         return '<a href="javascript:alert(\'' + encodeURIComponent(alertString) + '\')">' + allCourses.length + ' No-Shows</a>';
+       });
+
+     });
+
         addCalculationHandler("#sanber", [{calcname : "sanber", uiname : "SAN-Berechtigung"}], function(dnr, name) {
        //verkettete Promises...
 
