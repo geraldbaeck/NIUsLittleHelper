@@ -147,8 +147,8 @@ function scrapeEmployee(jqObj, employeeLink) {
       case 'WRK':
         key += 'TYPE=work;';
         break;
-      case 'private':
-        key += 'TYPE=home';
+      case 'privat':
+        key += 'TYPE=home;';
         break;
       default:
         break;
@@ -157,6 +157,8 @@ function scrapeEmployee(jqObj, employeeLink) {
       employee[key.substring(0, key.length - 1)] = $($(this).find('span[id]')[1]).text().trim();
     }
   });
+
+  console.log(employee);
 
   // Funktionen/Berechtigungen
   $('.PermissionRow').each(function () {
