@@ -34,6 +34,16 @@ $(document).ready(function() {
       return emails;
     }
 
+    function _getPhoneFromVcard(vcard) {
+      var fon;
+      var propertyNames = Object.keys(vcard).filter(function (propertyName) {
+        if(propertyName.indexOf("TEL;TYPE=cell") === 0) {
+          fon = vcard[propertyName];
+        }
+      });
+      return fon;
+    }
+
     function _createAndOpenEmail(emails, ambulance, body='Liebe KollegInnen,\n\n') {
       var bcc = emails.join(',');
       var subject = ambulance.title + " am " + moment(ambulance.start).format('dd, D.M.YY');
@@ -64,7 +74,11 @@ $(document).ready(function() {
               Array.prototype.push.apply(emails, _getEmailsFromVcard(employee, members[index]['displayName']));
           });
 
-          _createAndOpenEmail(emails, ambulance);
+          if (emails.length > 0) {
+            _createAndOpenEmail(emails, ambulance);
+          } else {
+            alert("Leider wurden keine Emails gefunden.");
+          }
 
           spinner.stop();
       });
@@ -74,11 +88,12 @@ $(document).ready(function() {
       var spinner = new Spinner().spin()  // options see http://spin.js.org
       $('body').after(spinner.el);
 
-      var member = getEmployeeDataFromLink($(e).prev(), 'EmployeeID');
+      var member = getEmployeeDataFromLink($(e).parent().find('a').first(), 'EmployeeID');
       console.log(member);
       $.get(member.url, function(data) {
         var employee = scrapeEmployee($.parseHTML(data), member.url);
         var emails = _getEmailsFromVcard(employee, member['displayName']);
+
         if (emails.length > 0) {
           var body = 'Hallo ' + employee['N'].split(';')[1] + ',\n\n'
           _createAndOpenEmail(emails, ambulance, body);
@@ -86,19 +101,41 @@ $(document).ready(function() {
           alert("Leider wurde für " + member['displayName'] + " keine Email gefunden.");
         }
 
+        spinner.stop();
       })
+    }
 
-      spinner.stop();
+    var textToSomeone = function(ambulance, e) {
+      var spinner = new Spinner().spin()  // options see http://spin.js.org
+      $('body').after(spinner.el);
+
+      var member = getEmployeeDataFromLink($(e).parent().find('a').first(), 'EmployeeID');
+      console.log(member);
+      $.get(member.url, function(data) {
+        var employee = scrapeEmployee($.parseHTML(data), member.url);
+        var fon = _getPhoneFromVcard(employee);
+
+        if (fon) {
+          window.open("https://api.whatsapp.com/send?phone=" + fon.replace(/[^0-9]/g, ''))
+        } else {
+          alert("Leider wurde für " + member['displayName'] + " keine Telefonnummer gefunden.");
+        }
+
+        spinner.stop();
+      })
     }
 
     var ambulance = scrapeAmbulance();
 
     var mailImage = '<img style="vertical-align:middle;opacity:.65;" height="19" src="' + chrome.extension.getURL("/img/ic_mail_outline_black_24dp_2x.png") + '" />';
+    var whatsappImage = '<img style="vertical-align:middle;filter:grayscale(75%);margin-left:0.2em;" height="18" src="' + chrome.extension.getURL("/img/whatsapp-logo.png") + '" />';
 
     $('h1').append('<a href="#" id="spamspamspam">' + mailImage + '<span style="position:relative;top:1px;left:1px;">Mail an Alle</span></a>')
 
     $('a[href^="Javascript:SEmpFID"]').each(function() {
-      $(this).after('<a href="#" style="float: right;" class="mailToSomeone">' + mailImage + '</a>')
+      $(this)
+        .after('<a href="#" style="float: right;" class="mailToSomeone">' + mailImage + '</a>')
+        .after('<a href="#" style="float: right;" class="textToSomeone">' + whatsappImage + '</a>')
     });
 
     $("#spamspamspam").click(function(e) {
@@ -109,6 +146,11 @@ $(document).ready(function() {
     $(".mailToSomeone").click(function(e) {
       e.preventDefault();
       mailToSomeone(ambulance, this);
+    })
+
+    $(".textToSomeone").click(function(e) {
+      e.preventDefault();
+      textToSomeone(ambulance, this);
     })
 
   });
