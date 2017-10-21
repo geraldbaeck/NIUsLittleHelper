@@ -23,7 +23,10 @@ $(document).ready(function() {
       return ambulance;
     };
 
-    var scrapeMembers = function(ambulance) {
+    var spamEveryone = function(ambulance) {
+      var spinner = new Spinner().spin()
+      $('body').after(spinner.el);
+
       var requests = Array();
       var members = Array();
       $('a[href^="Javascript:SEmpFID"]').each(function() {
@@ -52,15 +55,17 @@ $(document).ready(function() {
           var body = 'Liebe KollegInnen,\n\n'
           var link = 'mailto:?bcc=' + encodeURIComponent(bcc) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
           window.open(link, target='_blank');
+          
+          spinner.stop();
       });
     }
 
     var ambulance = scrapeAmbulance();
 
-    $('h1').append('<a id="spamspamspam"><img height="19" src="' + chrome.extension.getURL("/img/ic_mail_outline_black_24dp_2x.png") + '" />SPAM</a>')
+    $('h1').append('<a id="spamspamspam"><img style="vertical-align:middle;opacity:.65;" height="19" src="' + chrome.extension.getURL("/img/ic_mail_outline_black_24dp_2x.png") + '" /><span style="position:relative;top:1px;left:1px;">Mail an Alle</span></a>')
 
     $("#spamspamspam").click(function() {
-      scrapeMembers(ambulance);
+      spamEveryone(ambulance);
     });
 
 
