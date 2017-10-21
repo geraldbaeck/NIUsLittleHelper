@@ -23,8 +23,26 @@ $(document).ready(function() {
       return ambulance;
     };
 
+    function _getEmailsFromVcard(vcard, displayName) {
+      var emails = Array();
+      //"Fred Foo"<foo@example.com>
+      var propertyNames = Object.keys(vcard).filter(function (propertyName) {
+          if(propertyName.indexOf("EMAIL") === 0) {
+            emails.push('"' + displayName + '"<' + vcard[propertyName] + '>');
+          }
+      });
+      return emails;
+    }
+
+    function _createAndOpenEmail(emails, ambulance, body='Liebe KollegInnen,\n\n') {
+      var bcc = emails.join(',');
+      var subject = ambulance.title + " am " + moment(ambulance.start).format('dd, D.M.YY');
+      var link = 'mailto:?bcc=' + encodeURIComponent(bcc) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      window.open(link, target='_blank');
+    }
+
     var spamEveryone = function(ambulance) {
-      var spinner = new Spinner().spin()
+      var spinner = new Spinner().spin()  // options see http://spin.js.org
       $('body').after(spinner.el);
 
       var requests = Array();
@@ -38,36 +56,59 @@ $(document).ready(function() {
       var defer = $.when.apply($, requests);
       defer.done(function(){
           // This is executed only after every ajax request has been completed
+
           var emails = Array();
           $.each(arguments, function(index, responseData){
               // "responseData" will contain an array of response information for each specific request
               var employee = scrapeEmployee($.parseHTML(responseData[0]), members[index].url);
-              console.log(employee)
-              //"Fred Foo"<foo@example.com>
-              var propertyNames = Object.keys(employee).filter(function (propertyName) {
-                  if(propertyName.indexOf("EMAIL") === 0) {
-                    emails.push('"' + members[index]['displayName'] + '"<' + employee[propertyName] + '>');
-                  }
-              });
+              Array.prototype.push.apply(emails, _getEmailsFromVcard(employee, members[index]['displayName']));
           });
-          var bcc = emails.join(',');
-          var subject = ambulance.title + " am " + moment(ambulance.start).format('dd, D.M.YY');
-          var body = 'Liebe KollegInnen,\n\n'
-          var link = 'mailto:?bcc=' + encodeURIComponent(bcc) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-          window.open(link, target='_blank');
-          
+
+          _createAndOpenEmail(emails, ambulance);
+
           spinner.stop();
       });
     }
 
+    var mailToSomeone = function(ambulance, e) {
+      var spinner = new Spinner().spin()  // options see http://spin.js.org
+      $('body').after(spinner.el);
+
+      var member = getEmployeeDataFromLink($(e).prev(), 'EmployeeID');
+      console.log(member);
+      $.get(member.url, function(data) {
+        var employee = scrapeEmployee($.parseHTML(data), member.url);
+        var emails = _getEmailsFromVcard(employee, member['displayName']);
+        if (emails.length > 0) {
+          var body = 'Hallo ' + employee['N'].split(';')[1] + ',\n\n'
+          _createAndOpenEmail(emails, ambulance, body);
+        } else {
+          alert("Leider wurde für " + member['displayName'] + " keine Email gefunden.");
+        }
+
+      })
+
+      spinner.stop();
+    }
+
     var ambulance = scrapeAmbulance();
 
-    $('h1').append('<a id="spamspamspam"><img style="vertical-align:middle;opacity:.65;" height="19" src="' + chrome.extension.getURL("/img/ic_mail_outline_black_24dp_2x.png") + '" /><span style="position:relative;top:1px;left:1px;">Mail an Alle</span></a>')
+    var mailImage = '<img style="vertical-align:middle;opacity:.65;" height="19" src="' + chrome.extension.getURL("/img/ic_mail_outline_black_24dp_2x.png") + '" />';
 
-    $("#spamspamspam").click(function() {
+    $('h1').append('<a href="#" id="spamspamspam">' + mailImage + '<span style="position:relative;top:1px;left:1px;">Mail an Alle</span></a>')
+
+    $('a[href^="Javascript:SEmpFID"]').each(function() {
+      $(this).after('<a href="#" style="float: right;" class="mailToSomeone">' + mailImage + '</a>')
+    });
+
+    $("#spamspamspam").click(function(e) {
+      e.preventDefault();
       spamEveryone(ambulance);
     });
 
-
+    $(".mailToSomeone").click(function(e) {
+      e.preventDefault();
+      mailToSomeone(ambulance, this);
+    })
 
   });
