@@ -44,10 +44,10 @@ $(document).ready(function() {
       return fon;
     }
 
-    function _createAndOpenEmail(emails, ambulance, body='Liebe KollegInnen,\n\n') {
+    function _createAndOpenEmail(emails, ambulance, body='Liebe KollegInnen,\n\n', focus='bcc') {
       var bcc = emails.join(',');
       var subject = ambulance.title + " am " + moment(ambulance.start).format('dd, D.M.YY');
-      var link = 'mailto:?bcc=' + encodeURIComponent(bcc) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      var link = 'mailto:?' + focus + '=' + encodeURIComponent(bcc) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
       window.open(link, target='_blank');
     }
 
@@ -96,7 +96,7 @@ $(document).ready(function() {
 
         if (emails.length > 0) {
           var body = 'Hallo ' + employee['N'].split(';')[1] + ',\n\n'
-          _createAndOpenEmail(emails, ambulance, body);
+          _createAndOpenEmail(emails, ambulance, body, 'to');
         } else {
           alert("Leider wurde für " + member['displayName'] + " keine Email gefunden.");
         }
