@@ -5,6 +5,11 @@ $(document).ready(function() {
     var dienstAggregate = {};
     dienstAggregate['KTW'] = new RegExp('KTW|Tag |Nacht ');
     dienstAggregate['RTW'] = new RegExp('RKL|RKS|RKP');
+    dienstAggregate['KHD'] = new RegExp('KHD Einsatz|KHD Mitarbeit|KAT ');
+    dienstAggregate['BT-SAN'] = new RegExp('KHD Bereitschaft SAN');
+    dienstAggregate['Ausbildung'] = new RegExp('Ausbildung');
+    dienstAggregate['Ambulanzen'] = new RegExp('Ambulanz');
+    dienstAggregate['Sonstiges'] = new RegExp('Mitarbeit LV');
     var dienstSum = {};
 
 
@@ -12,7 +17,8 @@ $(document).ready(function() {
     var ztable = $("<table class='standard'> <tr> <th>Dienstart</th><th>Funktion</th><th>Anz.Dienst</th><th>Dauer</th><th>Ausfahrten</th><th>Nachtausfahrt</th><th>Blaulicht</th></tr></table>");
     $("h3:contains('Dienste nach Dienstart und Funktion:')")
         .before("<h3>Gruppiert nach Funktion und Dienstart:</h3>")
-        .before(ztable);
+        .before(ztable)
+        .before('<br />');
 
 
 
@@ -46,9 +52,9 @@ $(document).ready(function() {
                 }
                 var funktion = $(this).find("td:eq(1)").text();
                 console.log("funktion ist: <" + funktion + ">");
-                if (funktion == " ") {
+                if (funktion == " " || funktion == "-") {
                     console.log("funktion ist leer");
-                    funktion = "keine";
+                    funktion = "";
                 }
                 var anz = parseInt($(this).find("td:eq(2)").text());
                 var dauer = $(this).find("td:eq(3)").text();
