@@ -55,7 +55,7 @@ var getCourses = function() {
       },
       data: c
     });
-    $('#' + courseID).append('<td class="MessageBody" id="exportCal_' + courseID + '"></td>');
+    $('#' + courseID).append('<td class="MessageBodyLeftBorder" style="border-right:1px solid gray;" id="exportCal_' + courseID + '"></td>');
     $('#exportCal_' + courseID).append(calDienst);
   }
   return courses.length;
