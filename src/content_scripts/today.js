@@ -29,6 +29,11 @@ function _queryEmployee(detailUri, employeeID) {
 
 var getCourses = function() {
   var courses = $('#ctl00_main_m_CourseList__CourseTable').find('tr').slice(2)
+  if(courses) {
+    // add blank header row for styling to courses table
+    $('#ctl00_main_m_CourseList__CourseTable').find('tr').first()
+      .append('<td class="MessageHeaderCenter">&nbsp;</td>');
+  }
   for (course of courses) {
     var cols = $(course).find('td');
     var datePattern = /(\d{2})\.(\d{2})\.(\d{4})\ (\d{2})\:(\d{2})/;
@@ -55,7 +60,7 @@ var getCourses = function() {
       },
       data: c
     });
-    $('#' + courseID).append('<td class="MessageBodyLeftBorder" style="border-right:1px solid gray;" id="exportCal_' + courseID + '"></td>');
+    $('#' + courseID).append('<td class="MessageBodyLeftBorder" style="border-right:1px solid gray;" width="63" id="exportCal_' + courseID + '"></td>');
     $('#exportCal_' + courseID).append(calDienst);
   }
   return courses.length;
