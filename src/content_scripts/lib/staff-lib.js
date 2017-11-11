@@ -227,7 +227,18 @@ function writeMemo(MemoObj)
 
 }
 
-
+/*
+  verwandelt ein javascript Datum: Date in
+  den üblicherweise vom Niu verwendeten Datumstring: dd.MM.YYYY
+  date - das datum als Date object
+  return - der DatumsString
+*/
+function getNiuDateString(date) {
+  var todaysDate = date;
+  var todaysDatePlus = todaysDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
+  var todaysDateString = todaysDate.getDate() + "." + todaysDatePlus + "." + todaysDate.getFullYear();
+  return todaysDateString;
+}
 
 /*
  * verwandelt die dienstnummer in die EmployeeId von NIU,
@@ -346,6 +357,67 @@ function getEmployeeDataSheetNotCached(args)
   });
 
 
+}
+
+function getLastDuty(empNID) {
+return getFromCache("lastDuty_", empNID, { 'empNID' : empNID}, getLastDutyNotCached);
+}
+
+function getLastDutyNotCached(args)
+{
+  var empID = args.empNID;
+  var post = {};
+  console.log("getLastDutyNotCached --> start");
+
+  return $.get("https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + empID)
+  .then( function(data) {
+      console.log("getLastDutyNotCached --> rcv from get EmployeDutyStatistic.aspx");
+
+      var jData = $(data);
+
+      var keyPostfix = jData.find("#__KeyPostfix").val();
+      var eventvalidation = jData.find("#__EVENTVALIDATION").val();
+
+      var reqDate = new Date();
+      reqDate.setMonth(reqDate.getMonth() - 12);
+
+      var reqDateString = getNiuDateString(reqDate);
+
+      var todaysDateString = getNiuDateString(new Date());
+
+      console.log("getLastDutyNotCached --> request dates FROM: " + reqDateString + " // TO: " + todaysDateString);
+
+      post["__KeyPostfix"] = keyPostfix;
+      post["__EVENTVALIDATION"] = eventvalidation;
+      post["__VIEWSTATE"] = "";
+      post["__EVENTARGUMENT"] = "";
+      post["__EVENTTARGET"] = "ctl00$main$m_Submit";
+      post["ctl00$main$m_From$m_Textbox"] = reqDateString;
+      post["ctl00$main$m_Until$m_Textbox"] = todaysDateString;
+      post["&ctl00$main$m_JoinBrokenDuties"] = "on";
+
+      return $.ajax({
+          url: "https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx?EmployeeNumberID=" + empID,
+          data: post,
+          type: "POST",
+      });
+  }).then( function(data) {
+
+    var dateCollection = [];
+    const myRegexp = /<td.*?>([0-9][0-9].[0-9][0-9].[0-9][0-9][0-9][0-9])</g;
+    match = myRegexp.exec(data);
+    while (match != null) {
+      dateCollection.push(match[1]);
+      match = myRegexp.exec(data);
+    }
+
+    if(dateCollection.length === 0) { return "> 12 Monate / keine"; }
+
+    var recentDate = new Date(Math.max.apply(null, dateCollection.map(function(e) { var from = e.split(".");  return new Date(from[2], from[1] - 1, from[0]); })));
+
+    return getNiuDateString(recentDate);
+
+  });
 }
 
 function calculateDutyStatistic(empID, reqtype, reqStartDate, reqEndDate) {
@@ -495,18 +567,7 @@ class DutyCount {
 }
 
 
-/*
-  verwandelt ein javascript Datum: Date in
-  den üblicherweise vom Niu verwendeten Datumstring: dd.MM.YYYY
-  date - das datum als Date object
-  return - der DatumsString
-*/
-function getNiuDateString(date) {
-  var todaysDate = date;
-  var todaysDatePlus = todaysDate.getMonth() + 1; // Weil im Datumsobjekt Januar = 0
-  var todaysDateString = todaysDate.getDate() + "." + todaysDatePlus + "." + todaysDate.getFullYear();
-  return todaysDateString;
-}
+
 
 /*
   berechnet diverse statistiken wie

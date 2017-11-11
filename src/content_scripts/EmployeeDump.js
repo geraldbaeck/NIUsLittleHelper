@@ -538,7 +538,7 @@ $(document).ready(function() {
         });
 
      });
-     
+
      addCalculationHandler("#niuzugang", [{calcname : "niuzugang", uiname : "AD-Benutzer"}], function(dnr, name) {
        //verkettete Promises...
 
@@ -552,7 +552,20 @@ $(document).ready(function() {
         });
 
      });
-     
+
+     addCalculationHandler("#letztedienstleistung", [{calcname : "letztedienstleistung", uiname : "Letzte Dienstleistung"}], function(dnr, name) {
+       //verkettete Promises...
+
+        return dnrToIdentifier(dnr)
+        .then(function(result) {
+          console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
+          return getLastDuty(result.ENID)
+        }).then( function(result) {
+          return result;
+        });
+
+     });
+
      addCalculationHandler("#shortcuts", [{calcname : "shortcuts", uiname : "Kommando"}], function(dnr, name) {
        //verkettete Promises...
 
@@ -621,7 +634,7 @@ $(document).ready(function() {
         });
 
      });
-     
+
      addCalculationHandler("#fsdber", [{calcname : "fsdber", uiname : "FSD-Berechtigung"}], function(dnr, name) {
        //verkettete Promises...
 
@@ -643,7 +656,7 @@ $(document).ready(function() {
         });
 
      });
-     
+
       addCalculationHandler("#fahrber", [{calcname : "fahrber", uiname : "Fahrer-Berechtigung"}], function(dnr, name) {
        //verkettete Promises...
 
@@ -665,7 +678,7 @@ $(document).ready(function() {
         });
 
      });
-     
+
       addCalculationHandler("#alleber", [{calcname : "alleber", uiname : "Berechtigungen"}], function(dnr, name) {
        //verkettete Promises...
 
