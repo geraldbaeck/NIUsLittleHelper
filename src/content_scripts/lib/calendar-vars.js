@@ -14,7 +14,7 @@ var dienststellenKuerzel = {
   West:'West',
   Nord:'Nord',
   KSS:'KSS',
-  VS:'Nodo',
+  VS:'VS',
   BVS:'BvS',
   RD:'Nodo'
 };
