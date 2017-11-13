@@ -83,6 +83,7 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.45* FunktionärInnenfeatures: Kommando-Funktionen für den jeweiligen Mitarbeiter sind nun ebenfalls in "Memo LAST" aufrufbar.
 + *0.46* Das Spezialdienst-Formular wird nun mit den Standardinformationen vorausgefüllt. (Datum, Enduhrzeit, Bez.-Funktionär)
 + *0.48* Dienste auf der Startseite lassen sich nun in diverse Kalenderprogramme exportieren. (Google, iCal etc..)
++ *0.50* Mitarbeiter bei Ambulanzdiensten lassen sich nun direkt per WhatsApp kontaktieren.
 
 ## Built With
 * [Atom](https://github.com/atom/atom)
@@ -99,7 +100,7 @@ Always welcome just fork and request. Join us on [Slack](https://niuslittlehelpe
 
 ## [Authors](https://github.com/geraldbaeck/NIUsLittleHelper/graphs/contributors)
 * **Gerald Bäck** - [github](https://github.com/geraldbaeck) - [blog](http://dev.baeck.at/)
-* **Sebastian Kuttnig** - [github](https://github.com/dersebbel)
+* **Sebastian Kuttnig** - [github](https://github.com/sebastiankuttnig)
 * **Stephan Spindler** - [github](https://github.com/spind42)
 * **Daniel Steiner** - [github](https://github.com/danielsteiner) - [web](https://danielsteiner.net)
 

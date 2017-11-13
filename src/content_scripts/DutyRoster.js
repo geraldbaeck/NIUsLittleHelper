@@ -95,7 +95,7 @@ $(document).ready(function() {
             break;
 
           case headerNr['DRCComment']: // Bemerkung
-            if (tdContent.includes('NKTW') || tdContent.includes('N-KTW') || tdContent.includes('Notfall-KTW')) {
+            if (tdContent.includes('NKTW') || tdContent.includes('N-KTW') || tdContent.includes('Notfall-KTW') || tdContent.includes('RKK') || tdContent.includes('rkk')) {
               isNKTW = true;
               rtrn.NKTW = true;
             }
