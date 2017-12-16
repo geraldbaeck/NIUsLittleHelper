@@ -323,9 +323,9 @@ $(document).ready(function() {
   addSuchfilter(datatable, "frei", "Nur Kurse mit freien Plätzen", ["kursstatus"], function(searchData, index, rowData, counter) {
       //https://datatables.net/reference/api/column().search() todo: verwende regexpr
       //console.log("calling suchfilter function freie plätze --> searchData: " + searchData.kursstatus);
-      var re = new RegExp("Offen \\([0-9]*[1-9]/[0-9]+\\)");
+      const regex = /Offen(?! \(0)/g;
       //console.log("addSuchfilter --> suchfilter function freie plätze --> matches: [" + searchData.kursstatus + "] regex: " + re.toString() + " result: " + re.test(searchData.kursstatus));
-      if (re.test(searchData.kursstatus)) {
+      if (regex.test(searchData.kursstatus)) {
         return true;
       }
       return false;
