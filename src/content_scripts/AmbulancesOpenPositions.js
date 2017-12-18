@@ -46,7 +46,6 @@ $(document).ready(function() {
     }
   }
 
-  console.log('hello ambulanzis');
   tbl = prepareTable();
 
   // add selectors
@@ -58,5 +57,7 @@ $(document).ready(function() {
   $('.TableHack').change(function() {
     filterTable();
   });
+
+  $('a[id^="ctl00_main_rAmbulances_ctl"]').attr('target','_blank');
 
 });
