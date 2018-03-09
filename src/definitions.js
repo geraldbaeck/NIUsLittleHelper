@@ -18,3 +18,6 @@ var POUCHDB_DB_NAME = "niuhelperdb1";
 
 var DEFAULT_MAX_CACHE_TIME = 100 * 60 * 60 * 24; //24 Stunden cache zeit
 var DEFAULT_CACHE_ACTIVE = true;
+
+var STORAGE_KEY_DEKRET_ALERT = "niu_dekret_alert";
+var DEFAULT_DEKRET_ALERT = true;
