@@ -82,48 +82,92 @@ function getHeaderNumber(header, className) {
   return nr;
 }
 
+// erstellt die fertige VCard
+function createVCard(employee) {
+  function addVCardEntry(k, v) {
+    vCard += k + ":" + v + "\n";
+  }
+
+  var vCard = 'BEGIN:VCARD\nVERSION:3.0\n';
+  vCard += "ORG:Österreichisches Rotes Kreuz - Landesverband Wien\n";
+  vCard += "PROFILE:VCARD\n";
+  vCard += "TZ:+0100\n";
+  vCard += "CATEGORIES:WRK,ÖRK\n";
+  addVCardEntry("FN", employee.nameFull);
+  addVCardEntry("N", employee.nameLast + ';' + employee.nameFirst + ';;;')
+  addVCardEntry("URL", employee.url);
+  addVCardEntry("REV", new Date().toISOString());
+  addVCardEntry("PHOTO;TYPE=PNG", employee.imageUrl);
+  addVCardEntry("UID", 'urn:uuid:' + employee.uid);
+  addVCardEntry("NOTE", employee.notes);
+  
+  console.log(employee.contacts);
+  $.each(employee.contacts, function() {
+    addVCardEntry(this.k, this.v);
+  });
+  vCard += 'END:VCARD\n'
+  return vCard;
+}
+
+
 // holt die verfügbaren MitarbeiterInnenDaten
 function scrapeEmployee(jqObj, employeeLink) {
+  var employee = {};
 
   // Name
   var nameString = $(jqObj).find('#ctl00_main_shortEmpl_EmployeeName').text().trim();
-  var nameFull = nameString.substring(0, nameString.indexOf('(')).trim();
-  var nameArr = nameFull.split(/\s+/);
-  var nameFirst = nameArr.slice(0, -1).join(' ');
-  var nameLast = nameArr.pop();
-  var dienstnummer = nameString.substring(nameString.indexOf('(') + 1, nameString.indexOf(')'));
+  employee.nameFull = nameString.substring(0, nameString.indexOf('(')).trim();
+  var nameArr = employee.nameFull.split(/\s+/);
+  employee.nameFirst = nameArr.slice(0, -1).join(' ');
+  employee.nameLast = nameArr.pop();
+  employee.dienstnummer = nameString.substring(nameString.indexOf('(') + 1, nameString.indexOf(')'));
 
-  var employee = {
-    FN: nameFull,
-    N: nameLast + ';' + nameFirst + ';;;',
-    ORG: 'Österreichisches Rotes Kreuz - Landesverband Wien',
-    PROFILE: 'VCARD',
-    TZ: '+0100',
-    URL: window.location.href,
-    REV: new Date().toISOString(),
-    CATEGORIES: 'WRK,ÖRK',
-    NOTE: 'WRK Dienstnummer: ' + dienstnummer,
-  }
-
-  console.log('Scraped:' + employee.FN + '(' + dienstnummer + ')');
+  console.log('Scraped:' + employee.FN + '(' + employee.dienstnummer + ')');
 
   // Foto
-  var imageSrc = new URL($($(jqObj).find('#ctl00_main_shortEmpl_EmployeeImage')[0]).attr('src'), employeeLink);
-  employee['PHOTO;TYPE=PNG'] = imageSrc.href;  // photo with url
+  employee.imageUrl = new URL($($(jqObj).find('#ctl00_main_shortEmpl_EmployeeImage')[0]).attr('src'), employeeLink).href;
+  employee.url = employeeLink;
 
-  // query url for the UID
-  $.urlParam = function () {
-    var name = 'EmployeeID';
-    if (employeeLink.includes('EmployeeNumberID')) {
-      name = 'EmployeeNumberID';
-    }
-    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(employeeLink);
-    return results[1] || 0;
+  employee.uid = getUID(employeeLink);
+
+  // Funktionen/Berechtigungen Notizen
+  employee.notes = 'WRK Dienstnummer: ' + employee.dienstnummer;
+  $('.PermissionRow').each(function () {
+    employee.notes += '\\n' + $(this).find('.PermissionType').text().trim() + ': ' + $(this).find('.PermissionName').text().trim();
+  });
+
+  employee.contacts = scrapeContactPoint(jqObj, "ctl00_main_shortEmpl_contacts_m_tblPersonContactMain");
+
+  console.log(employee);
+
+  return employee;
+}
+
+function createVCFDownloadLink(employee, vCard) {
+  var file = new Blob([vCard]);
+  var a = document.createElement('a');
+  a.href = window.URL.createObjectURL(file);
+  $(a).append('<img alt="Download VCF" style="margin:7px;" src="' + chrome.extension.getURL('/img/vcf32.png') + '">');
+  a.download = employee.nameFull.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.vcf';  // set a safe file name
+  a.id = 'vcfLink';
+  return a;
+}
+
+// query url for the UID
+function getUID(url) {
+  var name = 'EmployeeID';
+  if (url.includes('EmployeeNumberID')) {
+    name = 'EmployeeNumberID';
   }
-  employee.UID = 'urn:uuid:' + $.urlParam();
+  var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(url);
+  return results[1] || 0;
+}
 
-  // Kontaktmöglichkeiten
-  $(jqObj).find('table#ctl00_main_shortEmpl_contacts_m_tblPersonContactMain tbody tr[id]').each(function () {
+// Kontaktmöglichkeiten
+function scrapeContactPoint(jqObj, tid) {
+  var contactPoints = [];
+  var values = [];
+  $(jqObj).find('table#'+ tid + ' tbody tr[id]').each(function () {
     var key;
     switch ($($(this).find('span[id]')[0]).text().split(' ')[0]) {
       case 'Telefon':
@@ -154,23 +198,16 @@ function scrapeEmployee(jqObj, employeeLink) {
         break;
     }
     if (key) {  // ignore Notruf Pager
-      employee[key.substring(0, key.length - 1)] = $($(this).find('span[id]')[1]).text().trim();
+      var point = {};
+      var value = $($(this).find('span[id]')[1]).text().trim();
+      if($.inArray(value, values)<0) {  // deduplication
+        point['k'] = key.substring(0, key.length - 1);
+        point['v'] = value;
+        contactPoints.push(point);
+        values.push(value);
+      }
     }
   });
-
-  console.log(employee);
-
-  // Funktionen/Berechtigungen
-  $('.PermissionRow').each(function () {
-    employee.NOTE += '\\n' + $(this).find('.PermissionType').text().trim() + ': ' + $(this).find('.PermissionName').text().trim();
-  });
-
-  // store employee locally
-  var obj = {};
-  obj[employeeLink] = employee;
-  chrome.storage.local.set(obj, function() {
-    console.log(employeeLink + ' locally stored.');
-  });
-
-  return employee;
+  return contactPoints;
 }
+
