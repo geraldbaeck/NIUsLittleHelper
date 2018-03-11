@@ -53,40 +53,54 @@ $(document).ready(function() {
     employee.organigram.push(organigramElement);
   });
 
-  employee.imageSrc = new URL($('img#ctl00_main_m_ccEmployeeMain__picture').attr('src'), window.location.href);
+  employee.imageUrl = new URL($('img#ctl00_main_m_ccEmployeeMain__picture').attr('src'), window.location.href).href;
   employee.url = window.location.href;
+  employee.uid = getUID(window.location.href);
+
+  employee.contacts = scrapeContactPoint($('body'), "ctl00_main_m_ccPersonContact_m_tblPersonContactMain");
+  
+  // Funktionen/Berechtigungen Notizen
+  employee.permissions = [];
+  $('.PermissionRow').each(function () {
+    var permission = {};
+    permission.type = $(this).find('.PermissionType').text().trim();
+    permission.name = $(this).find('.PermissionName').text().trim();
+    employee.permissions.push(permission);
+  });
+
+  // create notes for vCard
+  employee.notes = "";
+  $.each(employee.dienstnummern, function() {
+    if(this.Status === "AKTIV") {
+      employee.notes += "WRK Dienstnummer " + this.Dnr + " seit " + this.von + "\\n";
+    }
+  });
+  $.each(employee.permissions, function() {
+    employee.notes += this.type + ": " + this.name + "\\n";
+  });
+  $.each(employee.organigram, function() {
+    employee.notes += this.text + "\\n";
+  });
   
   console.log(employee);
-  
-  
-  
-  //var dienstnummer = nameString.substring(nameString.indexOf('(') + 1, nameString.indexOf(')'));
 
-  var vCard = 'BEGIN:VCARD\nVERSION:3.0\n';
-  Object.keys(employee).forEach(function(key) {
-    vCard += key + ':' + employee[key] + '\n';
-  });
-  vCard += 'END:VCARD\n'
+  var vCard = createVCard(employee);
   console.log(vCard);
 
   // create file object
-  file = new Blob([vCard]); //we used to need to check for 'WebKitBlobBuilder' here - but no need anymore
-  // file.append(vCard); //populate the file with whatever text it is that you want
-  // console.log(file);
-
-  // create download link
-  var a = document.createElement('a');
-  a.href = window.URL.createObjectURL(file);
-  $(a).append('<img alt="Download VCF" style="margin:7px;" src="' + chrome.extension.getURL('/img/vcf32.png') + '">');
-  a.download = employee.FN.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.vcf';  // set a safe file name
-  a.id = 'vcfLink';
+  var a = createVCFDownloadLink(employee, vCard);
+  file = new Blob([vCard]);
   document.body.appendChild(a);
-  $('#ctl00_main_shortEmpl_permissions_ctl00').after(a);
-
-  // create download link
-  var a = document.createElement('a');
-  a.href = $('#ctl00_main_shortEmpl_EmployeeImage')[0].src;
-  a.download = employee.FN.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.png';  // set a safe file name
-  $('#ctl00_main_shortEmpl_EmployeeImage').wrap(a);
+  $(a).find("img").first().css("width", "24px");
+  $(a).find("img").first().css("margin", "0px 10px");
+  $('h1').css("display", "inline");
+  $('h1').css("vertical-align", "top");  
+  $('h1').after(a);
+  
+// create download link for image
+var a = document.createElement('a');
+a.href = $('#ctl00_main_m_ccEmployeeMain__picture')[0].src;
+a.download = employee.nameFull.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.png';  // set a safe file name
+$('#ctl00_main_m_ccEmployeeMain__picture').wrap(a);
 
 });
