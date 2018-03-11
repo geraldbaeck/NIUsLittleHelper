@@ -155,12 +155,13 @@ function createVCFDownloadLink(employee, vCard) {
 
 // query url for the UID
 function getUID(url) {
-  var name = 'EmployeeID';
-  if (url.includes('EmployeeNumberID')) {
-    name = 'EmployeeNumberID';
+  url = url.toLowerCase();
+  var param = 'employeeid';
+  if (url.includes('employeenumberid')) {
+    param = 'employeenumberid';
   }
-  var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(url);
-  return results[1] || 0;
+  var u = new URL(url);
+  return u.searchParams.get(param);
 }
 
 // Kontaktmöglichkeiten
