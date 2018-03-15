@@ -136,6 +136,8 @@ var getAmbulanceDuty = function() {
 // "normale Dienste"
 var getDuty = function() {
   var dienste_count = 0;
+  var requests = Array();
+  var employees = {};
   $('<td style="text-align:center;width:80px;"></td>').appendTo('.DutyRosterHeader');
   $('.MultiDutyRoster table').each(function(key, dutyTable) {
     var dutyType = $(dutyTable).find('.MessageHeader').html();
@@ -175,13 +177,25 @@ var getDuty = function() {
         }
       });
 
+      
       var description = '';
       var currentDutyFunctions = getDuties($(dutyTable).find('.DutyRosterHeader'));
       for (i in currentDutyFunctions) {
         description += currentDutyFunctions[i] + ': ';
-        var employeeData = getEmployeeDataFromLink($(parts[i]).find('a'));
+        var employeeLink = $(parts[i]).find('a');
+        var employeeData = getEmployeeDataFromLink(employeeLink);
+        employeeLink.addClass(employeeData.id);
+        employeeLink.closest("td").addClass("td_" + employeeData.id);  
+        if(employeeLink.closest("td").text().includes("Wunschmeldung")) {
+          employeeLink.closest("td").find('em').each(function() {
+            $(this).html(employeeLink);
+            employeeLink.addClass("Wunschmeldung");
+            employeeLink.closest("td").addClass("Wunschmeldung");
+          });
+        }    
         if (employeeData.url != undefined) {
           description += '<a href="' + employeeData.url + '">' + employeeData.displayName + '</a>';
+          employees[employeeData.id] = employeeData;
         } else {
           description += employeeData.displayName;
         }
@@ -210,5 +224,58 @@ var getDuty = function() {
 
     });
   });
+
+  employees = Object.keys(employees).map(function (key) { return employees[key]; });
+  requests = employees.map(a => $.get(a.url));
+
+  var defer = $.when.apply($, requests);
+  defer.done(function(){
+      // This is executed only after every ajax request has been completed
+
+      $.each(arguments, function(index, responseData){
+          // "responseData" will contain an array of response information for each specific request
+          var employee = scrapeEmployee($.parseHTML(responseData[0]), employees[index].url);
+          var img = $('<img>', { 
+            src: employee.imageUrl,
+            alt: employee.nameFull,
+            height: "40px",
+            style: "float:left;height:40px;margin-right:5px",
+          });
+
+          var name = employee.nameFull;
+          if(name.length >= 20) {
+            name = employee.nameFirst.charAt(0) + ". " + employee.nameLast;
+          }
+          if(name.length >= 20) {
+            name = employee.nameLast;
+          }
+
+          $("." + employees[index].id).parent().append(img);
+          $("." + employees[index].id).text(name);
+          $("." + employees[index].id).append("<br /><span style='font-size:10px;'>" + "(" + employee.dienstnummer + ")</span>")
+          $("." + employees[index].id).css("white-space", "pre-wrap");
+          $("." + employees[index].id).css("display", "inline-block");
+          $("." + employees[index].id).css("font-size", "11px");
+
+          $("a.Wunschmeldung").css("color", "#86aed7");
+          $("a.Wunschmeldung").css("font-style", "italic");
+          $("td.Wunschmeldung").css("font-size", "9px");
+          $("<style>td.Wunschmeldung:after {content: 'Wunschmeldung';}</style>" ).appendTo( "head" );
+
+          /* var div = $("<div>", {
+            style: "display:block;"
+          })
+          var aMail = $("<a>", {
+            href: "mailto:xxx",
+          }).append(mailImage);
+          var aWhatsApp = $("<a>", {
+            href: "http://xxx",
+          }).append(whatsappImage);
+          div.append(aMail);
+          div.append(aWhatsApp);
+          $("." + employees[index].id).parent().append(div); */
+      });
+  });
+
   return dienste_count;
 };
