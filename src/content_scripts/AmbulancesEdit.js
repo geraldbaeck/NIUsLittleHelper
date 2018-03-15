@@ -23,14 +23,15 @@ $(document).ready(function() {
       return ambulance;
     };
 
-    function _getEmailsFromVcard(vcard, displayName) {
+    function _getEmailsfromEmployeeData(employee, displayName) {
       var emails = Array();
-      //"Fred Foo"<foo@example.com>
-      var propertyNames = Object.keys(vcard).filter(function (propertyName) {
-          if(propertyName.indexOf("EMAIL") === 0) {
-            emails.push('"' + displayName + '"<' + vcard[propertyName] + '>');
-          }
+      // email Format: "Fred Foo"<foo@example.com>
+      $.each(employee.contacts, function() {
+        if(this.k.indexOf("EMAIL") === 0) {
+          emails.push('"' + displayName + '"<' + this.v + '>');
+        }
       });
+      console.log(emails);
       return emails;
     }
 
@@ -71,7 +72,7 @@ $(document).ready(function() {
           $.each(arguments, function(index, responseData){
               // "responseData" will contain an array of response information for each specific request
               var employee = scrapeEmployee($.parseHTML(responseData[0]), members[index].url);
-              Array.prototype.push.apply(emails, _getEmailsFromVcard(employee, members[index]['displayName']));
+              Array.prototype.push.apply(emails, _getEmailsfromEmployeeData(employee, members[index]['displayName']));
           });
 
           if (emails.length > 0) {
@@ -92,10 +93,10 @@ $(document).ready(function() {
       console.log(member);
       $.get(member.url, function(data) {
         var employee = scrapeEmployee($.parseHTML(data), member.url);
-        var emails = _getEmailsFromVcard(employee, member['displayName']);
+        var emails = _getEmailsfromEmployeeData(employee, member['displayName']);
 
         if (emails.length > 0) {
-          var body = 'Hallo ' + employee['N'].split(';')[1] + ',\n\n'
+          var body = 'Hallo ' + employee.nameFirst + ',\n\n'
           _createAndOpenEmail(emails, ambulance, body, 'to');
         } else {
           alert("Leider wurde für " + member['displayName'] + " keine Email gefunden.");
