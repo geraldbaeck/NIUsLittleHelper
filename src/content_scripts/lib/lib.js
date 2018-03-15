@@ -114,31 +114,33 @@ function createVCard(employee) {
 function scrapeEmployee(jqObj, employeeLink) {
   var employee = {};
 
-  // Name
-  var nameString = $(jqObj).find('#ctl00_main_shortEmpl_EmployeeName').text().trim();
-  employee.nameFull = nameString.substring(0, nameString.indexOf('(')).trim();
-  var nameArr = employee.nameFull.split(/\s+/);
-  employee.nameFirst = nameArr.slice(0, -1).join(' ');
-  employee.nameLast = nameArr.pop();
-  employee.dienstnummer = nameString.substring(nameString.indexOf('(') + 1, nameString.indexOf(')'));
+  if($(jqObj).find("title").first() !== "Error") {
+    // Name
+    var nameString = $(jqObj).find('#ctl00_main_shortEmpl_EmployeeName').text().trim();
+    employee.nameFull = nameString.substring(0, nameString.indexOf('(')).trim();
+    var nameArr = employee.nameFull.split(/\s+/);
+    employee.nameFirst = nameArr.slice(0, -1).join(' ');
+    employee.nameLast = nameArr.pop();
+    employee.dienstnummer = nameString.substring(nameString.indexOf('(') + 1, nameString.indexOf(')'));
 
-  console.log('Scraped:' + employee.FN + '(' + employee.dienstnummer + ')');
+    console.log('Scraped:' + employee.FN + '(' + employee.dienstnummer + ')');
 
-  // Foto
-  employee.imageUrl = new URL($($(jqObj).find('#ctl00_main_shortEmpl_EmployeeImage')[0]).attr('src'), employeeLink).href;
-  employee.url = employeeLink;
+    // Foto
+    employee.imageUrl = new URL($($(jqObj).find('#ctl00_main_shortEmpl_EmployeeImage')[0]).attr('src'), employeeLink).href;
+    employee.url = employeeLink;
 
-  employee.uid = getUID(employeeLink);
+    employee.uid = getUID(employeeLink);
 
-  // Funktionen/Berechtigungen Notizen
-  employee.notes = 'WRK Dienstnummer: ' + employee.dienstnummer;
-  $('.PermissionRow').each(function () {
-    employee.notes += '\\n' + $(this).find('.PermissionType').text().trim() + ': ' + $(this).find('.PermissionName').text().trim();
-  });
+    // Funktionen/Berechtigungen Notizen
+    employee.notes = 'WRK Dienstnummer: ' + employee.dienstnummer;
+    $('.PermissionRow').each(function () {
+      employee.notes += '\\n' + $(this).find('.PermissionType').text().trim() + ': ' + $(this).find('.PermissionName').text().trim();
+    });
 
-  employee.contacts = scrapeContactPoint(jqObj, "ctl00_main_shortEmpl_contacts_m_tblPersonContactMain");
+    employee.contacts = scrapeContactPoint(jqObj, "ctl00_main_shortEmpl_contacts_m_tblPersonContactMain");
 
-  console.log(employee);
+    console.log(employee);
+  }
 
   return employee;
 }

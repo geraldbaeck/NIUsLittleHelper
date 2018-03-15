@@ -135,6 +135,11 @@ var getAmbulanceDuty = function() {
 
 // "normale Dienste"
 var getDuty = function() {
+  $("a.Wunschmeldung").css("color", "#86aed7");
+  $("a.Wunschmeldung").css("font-style", "italic");
+  $("td.Wunschmeldung").css("font-size", "9px");
+  $("<style>td.Wunschmeldung:after {content: 'Wunschmeldung';}</style>" ).appendTo( "head" );
+
   var dienste_count = 0;
   var requests = Array();
   var employees = {};
@@ -233,8 +238,10 @@ var getDuty = function() {
       // This is executed only after every ajax request has been completed
 
       $.each(arguments, function(index, responseData){
-          // "responseData" will contain an array of response information for each specific request
-          var employee = scrapeEmployee($.parseHTML(responseData[0]), employees[index].url);
+        // "responseData" will contain an array of response information for each specific request
+        var employee = scrapeEmployee($.parseHTML(responseData[0]), employees[index].url);
+
+        if(employee.nameFirst != undefined) {
           var img = $('<img>', { 
             src: employee.imageUrl,
             alt: employee.nameFull,
@@ -257,11 +264,7 @@ var getDuty = function() {
           $("." + employees[index].id).css("display", "inline-block");
           $("." + employees[index].id).css("font-size", "11px");
 
-          $("a.Wunschmeldung").css("color", "#86aed7");
-          $("a.Wunschmeldung").css("font-style", "italic");
-          $("td.Wunschmeldung").css("font-size", "9px");
-          $("<style>td.Wunschmeldung:after {content: 'Wunschmeldung';}</style>" ).appendTo( "head" );
-
+          // currently too much icons => design overkill
           /* var div = $("<div>", {
             style: "display:block;"
           })
@@ -274,6 +277,7 @@ var getDuty = function() {
           div.append(aMail);
           div.append(aWhatsApp);
           $("." + employees[index].id).parent().append(div); */
+        }
       });
   });
 
