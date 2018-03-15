@@ -38,8 +38,8 @@
         "js/pouchdb/pouchdb-6.1.2.js",
         "js/moment/moment.min.js",
         "js/ouical/ouical.js",
-        "src/content_scripts/lib/calendar-vars.js",
-        "src/content_scripts/lib/calendar-lib.js",
+        "src/content_scripts/lib/var.js",
+        "src/content_scripts/lib/lib.js",
         "src/content_scripts/lib/staff-lib.js",
         "src/content_scripts/DutyRoster.js"
       ],
@@ -87,7 +87,8 @@
         "js/moment/moment.min.js",
         "js/ouical/ouical.js",
         "js/spin/spin.min.js",
-        "src/content_scripts/lib/calendar-lib.js",
+        "src/content_scripts/lib/lib.js",
+        "src/content_scripts/lib/var.js",
         "src/content_scripts/AmbulancesEdit.js"
       ],
       "all_frames": true,
@@ -120,7 +121,7 @@
       "js": [
         "js/jquery/jquery.js",
         "js/chart/chartist.min.js",
-        "src/content_scripts/lib/calendar-lib.js",
+        "src/content_scripts/lib/lib.js",
         "src/content_scripts/EmployeeDutyStatistic.js"
       ],
       "all_frames": true,
@@ -130,7 +131,7 @@
       "matches": ["https://niu.wrk.at/Kripo/Employee/shortemployee.aspx*"],
       "js": [
         "js/jquery/jquery.js",
-        "src/content_scripts/lib/calendar-lib.js",
+        "src/content_scripts/lib/lib.js",
         "src/content_scripts/shortemployee.js"
       ],
       "all_frames": true,
@@ -140,7 +141,7 @@
       "matches": ["https://niu.wrk.at/Kripo/Employee/summaryemployee.aspx*"],
       "js": [
         "js/jquery/jquery.js",
-        "src/content_scripts/lib/calendar-lib.js",
+        "src/content_scripts/lib/lib.js",
         "src/content_scripts/summaryemployee.js"
       ],
       "all_frames": true,
@@ -194,7 +195,7 @@
         "js/pouchdb/pouchdb-6.1.2.js",
         "js/datatable/jquery.dataTables.min.js",
         "js/vex/vex.combined.min.js",
-        "src/content_scripts/lib/calendar-lib.js",
+        "src/content_scripts/lib/lib.js",
         "src/content_scripts/lib/staff-lib.js",
         "src/content_scripts/EmployeeDump.js"
       ],
@@ -224,8 +225,8 @@
         "js/ics.js/ics.deps.min.js",
         "js/ics.js/ics.js",
         "js/ouical/ouical.js",
-        "src/content_scripts/lib/calendar-vars.js",
-        "src/content_scripts/lib/calendar-lib.js",
+        "src/content_scripts/lib/var.js",
+        "src/content_scripts/lib/lib.js",
         "src/content_scripts/lib/staff-lib.js",
         "src/content_scripts/today.js"
       ],
@@ -241,7 +242,7 @@
         "js/jquery-ui/jquery-ui.js",
         "js/pouchdb/pouchdb-6.1.2.js",
         "js/datatable/jquery.dataTables.min.js",
-        "src/content_scripts/lib/calendar-lib.js",
+        "src/content_scripts/lib/lib.js",
         "src/content_scripts/lib/staff-lib.js",
         "src/content_scripts/newEmployee.js"],
       "css" : ["src/css/style.css", "js/datatable/jquery.dataTables.min.css"],
