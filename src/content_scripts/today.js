@@ -232,8 +232,11 @@ var getDuty = function() {
 
   employees = Object.keys(employees).map(function (key) { return employees[key]; });
   requests = employees.map(a => $.get(a.url));
+  console.log(employees);
 
-  var defer = $.when.apply($, requests);
+  // extrahiert alle Daten von der KollegInnen
+  // vorerst deaktiviert
+  /* var defer = $.when.apply($, requests);
   defer.done(function(){
       // This is executed only after every ajax request has been completed
 
@@ -241,7 +244,7 @@ var getDuty = function() {
         // "responseData" will contain an array of response information for each specific request
         var employee = scrapeEmployee($.parseHTML(responseData[0]), employees[index].url);
 
-        if(employee.nameFirst != undefined) {
+        if(employee.nameFirst != "") {
           var img = $('<img>', { 
             src: employee.imageUrl,
             alt: employee.nameFull,
@@ -265,7 +268,7 @@ var getDuty = function() {
           $("." + employees[index].id).css("font-size", "11px");
 
           // currently too much icons => design overkill
-          /* var div = $("<div>", {
+          var div = $("<div>", {
             style: "display:block;"
           })
           var aMail = $("<a>", {
@@ -276,10 +279,10 @@ var getDuty = function() {
           }).append(whatsappImage);
           div.append(aMail);
           div.append(aWhatsApp);
-          $("." + employees[index].id).parent().append(div); */
+          $("." + employees[index].id).parent().append(div); 
         }
       });
-  });
+  }); */
 
   return dienste_count;
 };
