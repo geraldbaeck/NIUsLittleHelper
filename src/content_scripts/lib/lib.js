@@ -11,6 +11,10 @@ function cleanName(name) {
   return name;
 }
 
+function sanitize(str) {
+  return str.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+}
+
 // extrahiert Mitarbeiterdaten aus dem Link
 // eg. <a href="javascript:SEmpFNRID('0ba9916e-e305-4df6-b318-a671013118a1');">Bäck (7822)</a>
 function getEmployeeDataFromLink(link, link_identifier='EmployeeNumberID') {
