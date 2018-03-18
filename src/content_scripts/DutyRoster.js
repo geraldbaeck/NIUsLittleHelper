@@ -108,7 +108,7 @@ $(document).ready(function() {
         // muss außerhalb des switch statements erledigt werden, weil es auch
         // dienste mit nur 2 Funktionen gibt
         if (rowNr.toString() in duties) {
-          if (tdContent && !tdContent.includes(openIndikator)) {
+          if (tdContent && (!tdContent.includes(openIndikator) || tdContent.includes("Wunschmeldung"))) {
             isEmpty = false;
           }
 
