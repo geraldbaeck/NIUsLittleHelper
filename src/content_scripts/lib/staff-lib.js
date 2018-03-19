@@ -949,7 +949,7 @@ function getEmployeeCoursesNotCached(args)
 }
 
 function checkCourseAttendance(empID, courseDict) {
-return getFromCache("courseattend_", empID + courseDict.UID, { 'empID' : empID, 'courseDict' : courseDict}, checkCourseAttendanceNotCached);
+return getFromCache("courseattend2_", empID + courseDict.UID, { 'empID' : empID, 'courseDict' : courseDict}, checkCourseAttendanceNotCached);
 }
 
 //TODO: $.get liefert schon ein promise zurück, somit ist das new Promise unnötig

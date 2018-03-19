@@ -512,7 +512,8 @@ $(document).ready(function() {
                            UID : "grk2",
                            kurs1 : { "Name" : "BAS - Ausbildung - Das Rote Kreuz - Auch du bist ein Teil davon! (QM)", "altName1" : "BAS - Ausbildung - Das Rote Kreuz - auch du bist ein Teil davon!", "altName2" : "", "courseID" : "", "tnStatus" : "nein" },
                            kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "courseID" : "", "tnStatus" : "nein" },
-                           kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "courseID" : "", "tnStatus" : "nein" }
+                           kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "courseID" : "", "tnStatus" : "nein" },
+                           kurs4 : { "Name" : "SAN - Ausbildung - San1-Seminar", "altName1" : "SAN - Ausbildung - SAN1-Seminar", "altName2" : "", "courseID" : "", "tnStatus" : "nein" }
                          };
 
         return dnrToIdentifier(dnr)
@@ -520,7 +521,7 @@ $(document).ready(function() {
           console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
           return checkCourseAttendance(result.EID, grundkurse)
         }).then( function(resultDict) {
-          return ("Das RK: " + resultDict.kurs1.tnStatus + "<br />AmbSem: " + resultDict.kurs2.tnStatus + "<br />KHD-SD: " + resultDict.kurs3.tnStatus);
+          return ("Das RK: " + resultDict.kurs1.tnStatus + "<br />KHD-SD: " + resultDict.kurs3.tnStatus + "<br />SAN1-Seminar: " + resultDict.kurs4.tnStatus + "<br />AmbSem (alt): " + resultDict.kurs2.tnStatus);
         });
 
      });
