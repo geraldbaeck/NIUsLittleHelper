@@ -15,8 +15,6 @@ function addSuchfilter(table, key, uiname, column_names, callback) {
       }
       table.draw(); //redraw um suche erneut auszuführen!
   });
-
-
 }
 
 
@@ -383,30 +381,39 @@ $(document).ready(function() {
 
   getOwnDNRs().then(function(DNRarray) {
   $( ".mail_link" ).each(function() {
-      var currentElem = $(this);
-      var $tr = $(this).closest('tr');
-      var data = datatable.row($tr).data();
+    var currentElem = $(this);
+    var $tr = $(this).closest('tr');
+    var data = datatable.row($tr).data();
+    var courseUrl = new URL($tr.find('a').first().attr('href'), window.location.href).href;
 
+    var primaryDNR = parseInt(DNRarray[0]);
+    var ausbMail = "LRK-Ausbildung@w.roteskreuz.at";
+    var reqAction = "";
 
-      var primaryDNR = parseInt(DNRarray[0]);
-      var ausbMail = "LRK-Ausbildung@w.roteskreuz.at";
-      var reqAction = "";
+    if(primaryDNR >= 1000 && primaryDNR < 2000 ) { ausbMail = "west-ausbildung@w.roteskreuz.at"; }
+    else if(primaryDNR >= 2000 && primaryDNR < 3000 ) { ausbMail = "vs-ausbildung@w.roteskreuz.at"; }
+    else if(primaryDNR >= 7000 && primaryDNR < 8000 ) { ausbMail = "ddl-ausb@w.roteskreuz.at"; }
+    else if(primaryDNR >= 3000 && primaryDNR < 4000 ) { ausbMail = "bvs-ausbildung@w.roteskreuz.at"; }
+    else if(primaryDNR >= 8000 && primaryDNR < 9000 ) { ausbMail = "nord-ausbildung@w.roteskreuz.at"; }
 
-      if(primaryDNR >= 1000 && primaryDNR < 2000 ) { ausbMail = "west-ausbildung@w.roteskreuz.at"; }
-      else if(primaryDNR >= 2000 && primaryDNR < 3000 ) { ausbMail = "vs-ausbildung@w.roteskreuz.at"; }
-      else if(primaryDNR >= 7000 && primaryDNR < 8000 ) { ausbMail = "ddl-ausb@w.roteskreuz.at"; }
-      else if(primaryDNR >= 3000 && primaryDNR < 4000 ) { ausbMail = "bvs-ausbildung@w.roteskreuz.at"; }
-      else if(primaryDNR >= 8000 && primaryDNR < 9000 ) { ausbMail = "nord-ausbildung@w.roteskreuz.at"; }
+    if(data["anmeldestatus"] === "Angemeldet") { reqAction = "Abmeldung"; }
+    else { reqAction = "Anmeldung"; }
 
-      if(data["anmeldestatus"] === "Angemeldet") { reqAction = "Abmeldung"; }
-      else { reqAction = "Anmeldung"; }
-
-      var mailtoLink = "mailto:" + ausbMail + "?Subject=" + encodeURIComponent(reqAction) + "%20Kurs%20" + encodeURI(data["abznr"]) + "&Body=Liebe%20Ausbildung%2C%0A%0ABitte%20um%20" + encodeURIComponent(reqAction) + "%20bei%20folgendem%20Kurs%3A%0A%0AABZ%20Nr%3A%20" + encodeURIComponent(data["abznr"]) + "%0AKurs%20Name%3A%20" + encodeURIComponent(data["kurs"]) + "%0AKurs%20Datum%3A%20" + encodeURIComponent(data["von"]) + "%0A%0ADanke%20und%20LG%2C%0A%0ADienstnummer%20" + encodeURIComponent(primaryDNR) + "";
-
-      if(data["anmeldestatus"] === "Storno") { alert("Sie wurden bereits von diesem Kurs abgemeldet!"); }
-      else { currentElem.attr("href", mailtoLink); }
-
-      });
+    var subject = encodeURIComponent(`${reqAction} Kurs ${data.abznr} für DNr ${primaryDNR}`);
+    var mailto = encodeURIComponent(ausbMail);
+    var body = encodeURIComponent(`Liebe KollegInnen,\n\nBitte um ${reqAction} bei folgendem Kurs:\n\n`);
+    body += encodeURIComponent(`ABZ Nr:\t${data.abznr}\n`);
+    body += encodeURIComponent(`Titel:\t${data.kurs}\n`);
+    body += encodeURIComponent(`Datum:\t${data.von}\n`);
+    body += encodeURIComponent(`Link:\t${courseUrl}\n\n`);
+    body += encodeURIComponent(`Danke und liebe Grüße,\nDienstnummer ${primaryDNR}`)
+    var mailtoLink = `mailto:${mailto}?Subject=${subject}&Body=${body}`;
+    if(data["anmeldestatus"] === "Storno") { 
+      alert("Sie wurden bereits von diesem Kurs abgemeldet!"); 
+    } else { 
+      currentElem.attr("href", mailtoLink); 
+    }
+  });
  });
 
 
