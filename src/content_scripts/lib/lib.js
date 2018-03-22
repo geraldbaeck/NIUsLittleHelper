@@ -12,7 +12,7 @@ function cleanName(name) {
 }
 
 function sanitize(str) {
-  return str.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  return str.replace(/[^a-z0-9\.]/gi, '_').toLowerCase();
 }
 
 // extrahiert Mitarbeiterdaten aus dem Link
@@ -26,7 +26,14 @@ function getEmployeeDataFromLink(link, link_identifier='EmployeeNumberID') {
   var rawID = $(link).attr('href');
   if (rawID != undefined) {
     employeeData.id = rawID.substring(rawID.indexOf('\'') + 1,rawID.lastIndexOf('\''));
+    employeeData.id_identifier = link_identifier;
     employeeData.url = 'https://niu.wrk.at/Kripo/Employee/shortemployee.aspx?' + link_identifier + '=' + employeeData.id;
+  }
+  var nameParts = employeeData.displayName.split(' ');
+  employeeData.dNr = parseInt(nameParts[nameParts.length -1].replace('(', '').replace(')', '').trim());
+  employeeData.lastName = nameParts[0];
+  if(nameParts.length >= 3) {
+    employeeData.firstName = nameParts.slice(1, nameParts.length -1).join(' ');
   }
   return employeeData;
 }

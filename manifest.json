@@ -85,6 +85,9 @@
       "js": [
         "js/jquery/jquery.js",
         "js/moment/moment.min.js",
+        "js/moment/locale/de.js",
+        "js/sheetjs/xlsx.full.min.js",
+        "js/sheetjs/FileSaver.js",
         "js/ouical/ouical.js",
         "js/spin/spin.min.js",
         "src/content_scripts/lib/lib.js",
