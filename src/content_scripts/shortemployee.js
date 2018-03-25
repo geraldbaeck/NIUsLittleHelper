@@ -4,12 +4,8 @@ $(document).ready(function() {
   var employee = scrapeEmployee($obj, window.location.href);
 
   var vCard = createVCard(employee);
-  console.log(vCard);
 
   var a = createVCFDownloadLink(employee, vCard);
-
-  // create file object
-  file = new Blob([vCard]);
   document.body.appendChild(a);
   $('#ctl00_main_shortEmpl_permissions_ctl00').after(a);
   
