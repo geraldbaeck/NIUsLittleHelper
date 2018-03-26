@@ -112,12 +112,42 @@ function createVCard(employee) {
   addVCardEntry("UID", 'urn:uuid:' + employee.uid);
   addVCardEntry("NOTE", employee.notes);
   
-  console.log(employee.contacts);
   $.each(employee.contacts, function() {
     addVCardEntry(this.k, this.v);
   });
   vCard += 'END:VCARD\n'
   return vCard;
+}
+
+// jquery parseHTML function without image loading and stuff
+function parseHTMLOnly(html) {
+  return $.parseHTML(html.replace(/<\s*(script|iframe)[^>]*>(?:[^<]*<)*?\/\1>/g, "").replace(/(<(\b(img|style|head|link)\b)(([^>]*\/>)|([^\7]*(<\/\2[^>]*>)))|(<\bimg\b)[^>]*>|(\b(background|style)\b=\s*"[^"]*"))/g, ""));
+}
+
+// liefert die erste Telefonnummer zurück
+// TODO: eventuell logik für bevorzugte Nummern einfügen
+function getDefaultPhone(contactPoints) {
+  var phone = undefined;
+  $.each(contactPoints, function() {
+    if (this.k.startsWith("TEL")) {
+      phone = this.v;
+      return false;
+    }
+  });
+  return phone;
+}
+
+// liefert die erste Email zurück
+// TODO: eventuell logik für bevorzugte Email einfügen
+function getDefaultEmail(contactPoints) {
+  var email = undefined;
+  $.each(contactPoints, function() {
+    if (this.k.startsWith("EMAIL")) {
+      email = this.v;
+      return false;
+    }
+  });
+  return email;
 }
 
 
@@ -134,24 +164,28 @@ function scrapeEmployee(jqObj, employeeLink) {
     employee.nameLast = nameArr.pop();
     employee.dienstnummer = nameString.substring(nameString.indexOf('(') + 1, nameString.indexOf(')'));
 
-    console.log('Scraped:' + employee.FN + '(' + employee.dienstnummer + ')');
-
     // Foto
     employee.imageUrl = new URL($($(jqObj).find('#ctl00_main_shortEmpl_EmployeeImage')[0]).attr('src'), employeeLink).href;
     employee.url = employeeLink;
 
     employee.uid = getUID(employeeLink);
 
-    // Funktionen/Berechtigungen Notizen
+    employee.permissions = {};
+    $(jqObj).find('.PermissionRow').each(function () {
+      employee.permissions[$(this).find('.PermissionType').text().trim()] = $(this).find('.PermissionName').text().trim();
+    });
+
+    // Funktionen/Berechtigungen Notizen für VCF Export
     employee.notes = 'WRK Dienstnummer: ' + employee.dienstnummer;
-    $('.PermissionRow').each(function () {
+    $(jqObj).find('.PermissionRow').each(function () {
       employee.notes += '\\n' + $(this).find('.PermissionType').text().trim() + ': ' + $(this).find('.PermissionName').text().trim();
     });
 
     employee.contacts = scrapeContactPoint(jqObj, "ctl00_main_shortEmpl_contacts_m_tblPersonContactMain");
-
-    console.log(employee);
   }
+
+  console.log('Scraped: ' + employee.nameFull + ' (' + employee.dienstnummer + ')');
+  console.log(employee);
 
   return employee;
 }
