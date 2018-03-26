@@ -83,8 +83,10 @@
     },
     {
       "matches": ["https://niu.wrk.at/Kripo/Ambulances/AmbulancesEdit.aspx*"],
+      "css": ["js/jquery-modal/jquery.modal.min.css"],
       "js": [
         "js/jquery/jquery.js",
+        "js/jquery-modal/jquery.modal.min.js",
         "js/moment/moment.min.js",
         "js/moment/locale/de.js",
         "js/sheetjs/xlsx.full.min.js",
