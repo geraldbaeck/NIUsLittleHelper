@@ -21,3 +21,4 @@ var dienststellenKuerzel = {
 
 var mailImage = '<img style="vertical-align:middle;opacity:.65;" height="19" src="' + chrome.extension.getURL("/img/ic_mail_outline_black_24dp_2x.png") + '" />';
 var whatsappImage = '<img style="vertical-align:middle;filter:grayscale(75%);margin-left:0.2em;" height="18" src="' + chrome.extension.getURL("/img/whatsapp-logo.png") + '" />';
+var xlsxImage = '<img style="vertical-align:middle;opacity:.65;" height="19" src="' + chrome.extension.getURL("/img/xlsx_icon.png") + '" />';
