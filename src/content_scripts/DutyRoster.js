@@ -211,7 +211,14 @@ $(document).ready(function() {
       });
     }
 
-    var days = $("#DutyRosterFilterDay").val();
+    var days = [];
+	$("[id^='label_nlh_day_filter']").css("font-weight", "normal");
+
+    $("[name='nlh_day_filter[]']:checked").each(function(){
+    	var val = $(this).val();
+    	days.push(val);
+    	$("#label_nlh_day_filter_" + val).css("font-weight", "bold");
+    });
 
     if (days && days.length)
     {
@@ -374,26 +381,39 @@ $(document).ready(function() {
       }
     ];
 
-    var $DateSelector = $("<select>")
-        .attr("multiple", true)
-        .attr("id", "DutyRosterFilterDay")
-        .css({height: "120px"})
-        .addClass("TableHack");
+    var $FilterDay = $("<div/>")
+	    .append("<hr/>")
+	    .append("<div style='font-weight:bold;'>Nur Dienste an folgenden Tagen:</div>")
+	    .css({float: "none", clear: "both"});
 
     for (var dayIndex in days)
     {
         var day = days[dayIndex];
-        //console.log(day);
-        $DateSelector.append($("<option/>").attr("value", day.short).text(day.name));
+        var id = "nlh_day_filter_" + day.short;
+
+        var $FilterItem = $("<div/>")
+	        .css('float','left')
+	        .css('padding-right', "7px");
+
+	    $("<input/>")
+		    .attr("type", "checkbox")
+		    .attr("name", "nlh_day_filter[]")
+		    .attr("id", id)
+		    .addClass('TableHack')
+		    .val(day.short)
+		    .appendTo($FilterItem);
+
+	    $("<label/>")
+		    .attr("for", id)
+		    .attr("id", "label_" + id)
+		    .html(day.name)
+		    .css("vertical-align", "top")
+		    .appendTo($FilterItem);
+
+	    $FilterDay.append($FilterItem);
     }
 
-    $NLHContainer.append(
-        $("<div/>")
-          .append("<hr/>")
-          .append("<div style='font-weight:bold;'>Nur Dienste an folgenden Tagen:</div>")
-          .append("<div style='font-style: italic; ;'>(Tip: Mit Strg Taste kann man mehrere Tage wählen.)</div>")
-          .css({float: "none", clear: "both"}).append($DateSelector)
-    );
+    $NLHContainer.append($FilterDay);
 
     $('.TableHack').change(function() {
         filterTable();
