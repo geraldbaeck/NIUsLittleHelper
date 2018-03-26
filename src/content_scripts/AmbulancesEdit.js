@@ -19,8 +19,7 @@ $(document).ready(function() {
 
       /* var headers = $('table[id=ctl00_main_m_AmbulanceDayInfo_ctl00_m_Table] tr.DutyRosterHeader').find('td').map(function() { 
         return $(this).text().trim();
-      }).get();
-      console.log(headers); */
+      }).get(); */
 
       ambulance.employees = [];
       $("table[id^='ctl00_main_m_AmbulanceDayInfo_ctl'][id$='_m_AmbulanceFunctionDisplay_m_Table']").each(function() {
@@ -57,7 +56,6 @@ $(document).ready(function() {
           emails.push('"' + displayName + '"<' + this.v + '>');
         }
       });
-      console.log(emails);
       return emails;
     }
 
@@ -117,7 +115,6 @@ $(document).ready(function() {
       $('body').after(spinner.el);
 
       var member = getEmployeeDataFromLink($(e).parent().find('a').first(), 'EmployeeID');
-      console.log(member);
       $.get(member.url, function(data) {
         var employee = scrapeEmployee($.parseHTML(data), member.url);
         var emails = _getEmailsfromEmployeeData(employee, member['displayName']);
@@ -138,7 +135,6 @@ $(document).ready(function() {
       $('body').after(spinner.el);
 
       var member = getEmployeeDataFromLink($(e).parent().find('a').first(), 'EmployeeID');
-      console.log(member);
       $.get(member.url, function(data) {
         var employee = scrapeEmployee($.parseHTML(data), member.url);
         var fon = _getPhoneFromVcard(employee);
@@ -154,6 +150,8 @@ $(document).ready(function() {
     }
 
     var createSheet = function(ambulance, e) {
+
+      $.modal.close();
 
       var spinner = new Spinner().spin()  // options see http://spin.js.org
       $('body').after(spinner.el);
@@ -178,9 +176,6 @@ $(document).ready(function() {
         return buf;    
       }
 
-      console.log(ambulance);
-      console.log($("#excelExportModal input:checkbox:checked").length)
-
       // create Workbook
       var wb = XLSX.utils.book_new();
       wb.Props = {
@@ -195,9 +190,6 @@ $(document).ready(function() {
 
         // create download links
         $.each(ambulance.employees, function(index, amb_mitarbeiter) {
-          console.log(index);
-          //console.log(amb_mitarbeiter);
-          console.log(amb_mitarbeiter.Name.url);
           requests.push($.get(amb_mitarbeiter.Name.url));
         });
 
@@ -217,8 +209,25 @@ $(document).ready(function() {
             }
           });
 
-          // create sheet data
-          var ws_data = [];
+
+          // create sheet header
+          var ws_header = [
+            "Position",
+            "Funktion",
+            "dNr",
+            "Nachname",
+            "Vorname",
+          ];
+          if ($('#chk_handy:checkbox:checked').length > 0)  ws_header.push("tel");          
+          if ($('#chk_email:checkbox:checked').length > 0) ws_header.push("Email");          
+          if ($('#chk_einsatzverwendung:checkbox:checked').length > 0)  ws_header.push("Einsatzverwendung");          
+          if ($('#chk_san:checkbox:checked').length > 0)  ws_header.push("SAN");          
+          if ($('#chk_sang:checkbox:checked').length > 0)  ws_header.push("SanG");          
+          if ($('#chk_fahrerrd:checkbox:checked').length > 0)  ws_header.push("Fahrer RD"); 
+          ws_header = ws_header.concat(["Url", "Ort", "Zeitpunkt", "Anmerkung"]);
+          var ws_data = [ws_header];
+
+          // add sheet data
           $.each(ambulance.employees, function() {
             var ws_row = [];
             ws_row.push(this.Position);
@@ -226,22 +235,21 @@ $(document).ready(function() {
             ws_row.push(this.dNr);
             ws_row.push(this.Name.lastName);
             ws_row.push(this.Name.firstName);
-            ws_row.push(this.phone);
-            ws_row.push(this.email);
+            if ($('#chk_handy:checkbox:checked').length > 0) ws_row.push(this.phone);
+            if ($('#chk_email:checkbox:checked').length > 0) ws_row.push(this.email);
             if (this.permissions == undefined) {
               this.permissions = {};
             }
-            ws_row.push(this.permissions.Einsatzverwendung);
-            ws_row.push(this.permissions.SAN);
-            ws_row.push(this.permissions.SanG);            
-            ws_row.push(this.permissions["Fahrer RD"]);        
-            ws_row.push(this.email);
-            ws_row.push(this.email);
-            ws_row.push(this.email);            
+            if ($('#chk_einsatzverwendung:checkbox:checked').length > 0) ws_row.push(this.permissions.Einsatzverwendung);
+            if ($('#chk_san:checkbox:checked').length > 0) ws_row.push(this.permissions.SAN);
+            if ($('#chk_sang:checkbox:checked').length > 0) ws_row.push(this.permissions.SanG);            
+            if ($('#chk_fahrerrd:checkbox:checked').length > 0) ws_row.push(this.permissions["Fahrer RD"]);                    
             ws_row.push(this.Name.url);
             ws_row.push(this.Abfahrt.Ort);
+            console.log(this.Abfahrt.Zeitpunkt);
             ws_row.push(this.Abfahrt.Zeitpunkt);
             ws_row.push(this.Anmerkung);
+            ws_row.push({ Target:"http://sheetjs.com", Tooltip:"Find us @ SheetJS.com!" });
             ws_data.push(ws_row);
           });
 
@@ -249,6 +257,7 @@ $(document).ready(function() {
           var sheetName = "Subtag " + ambulance.sub; // creates Subtag Sheet
           wb.SheetNames.push(sheetName);
           var ws = XLSX.utils.aoa_to_sheet(ws_data);
+          console.log(ws);
           wb.Sheets[sheetName] = ws;
           
           // Save Sheet as File
