@@ -17,10 +17,10 @@ $(document).ready(function() {
       ambulance.start = moment($('#ctl00_main_m_AmbulanceDayDisplay_m_StartWork', '').text().split(',')[1].trim(), 'D.M.YYYY H:mm', 'de').toDate();
       ambulance.end = moment($('#ctl00_main_m_AmbulanceDayDisplay_m_EndWork').text().split(',')[1].trim(), 'D.M.YYYY H:mm', 'de').toDate();
 
-      var headers = $('table[id=ctl00_main_m_AmbulanceDayInfo_ctl00_m_Table] tr.DutyRosterHeader').find('td').map(function() { 
+      /* var headers = $('table[id=ctl00_main_m_AmbulanceDayInfo_ctl00_m_Table] tr.DutyRosterHeader').find('td').map(function() { 
         return $(this).text().trim();
       }).get();
-      console.log(headers);
+      console.log(headers); */
 
       ambulance.employees = [];
       $("table[id^='ctl00_main_m_AmbulanceDayInfo_ctl'][id$='_m_AmbulanceFunctionDisplay_m_Table']").each(function() {
@@ -154,6 +154,10 @@ $(document).ready(function() {
     }
 
     var createSheet = function(ambulance, e) {
+
+      var spinner = new Spinner().spin()  // options see http://spin.js.org
+      $('body').after(spinner.el);
+
       var saveData = (function () {
         var a = document.createElement("a");
         document.body.appendChild(a);
@@ -166,9 +170,6 @@ $(document).ready(function() {
             window.URL.revokeObjectURL(url);
         };
       }());
-      
-      var spinner = new Spinner().spin()  // options see http://spin.js.org
-      $('body').after(spinner.el);
 
       function s2ab(s) { 
         var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
@@ -178,6 +179,7 @@ $(document).ready(function() {
       }
 
       console.log(ambulance);
+      console.log($("#excelExportModal input:checkbox:checked").length)
 
       // create Workbook
       var wb = XLSX.utils.book_new();
@@ -188,42 +190,86 @@ $(document).ready(function() {
         CreatedDate: new Date(),
       };
 
-      // create sheet data
-      var ws_data = [];
-      $.each(ambulance.employees, function() {
-        console.log(this);
-        var ws_row = [];
-        ws_row.push(this.Position);
-        ws_row.push(this.Funktion);
-        ws_row.push(this.dNr);
-        ws_row.push(this.Name.firstName);
-        ws_row.push(this.Name.lastName);
-        ws_row.push(this.Abfahrt.Ort);
-        ws_row.push(this.Abfahrt.Zeitpunkt);
-        ws_row.push(this.Anmerkung);
-        ws_data.push(ws_row);
-      });
+      var requests = Array();
+      if($("#excelExportModal input:checkbox:checked").length > 0) {
 
-      // Add sheet to workbook
-      var sheetName = "Subtag " + ambulance.sub; // creates Subtag Sheet
-      wb.SheetNames.push(sheetName);
-      var ws = XLSX.utils.aoa_to_sheet(ws_data);
-      wb.Sheets[sheetName] = ws;
-      
-      // Save Sheet as File
-      var fileName = sanitize(`${ambulance.title}_${ambulance.id_original}.xlsx`);
-      var wbout = XLSX.write(wb, {bookType:'xlsx',  type: 'binary'});
-      var blob = new Blob([s2ab(wbout)],{type:"application/octet-stream"});
-      saveData(blob, fileName);
+        // create download links
+        $.each(ambulance.employees, function(index, amb_mitarbeiter) {
+          console.log(index);
+          //console.log(amb_mitarbeiter);
+          console.log(amb_mitarbeiter.Name.url);
+          requests.push($.get(amb_mitarbeiter.Name.url));
+        });
 
-      spinner.stop();
+        // download all member data
+        var defer = $.when.apply($, requests);
+
+        // executed after all downloads completed
+        defer.done(function() {
+          $.each(arguments, function(index, responseData){
+            // "responseData" will contain an array of response information for each specific request
+            if(responseData !== undefined && ambulance.employees[index].Name.url !== undefined) {
+              var employee = scrapeEmployee(parseHTMLOnly(responseData[0]), ambulance.employees[index].Name.url);
+              ambulance.employees[index].permissions = employee.permissions;
+              ambulance.employees[index].contacts = employee.contacts;
+              ambulance.employees[index].phone = getDefaultPhone(employee.contacts);
+              ambulance.employees[index].email = getDefaultEmail(employee.contacts);
+            }
+          });
+
+          // create sheet data
+          var ws_data = [];
+          $.each(ambulance.employees, function() {
+            var ws_row = [];
+            ws_row.push(this.Position);
+            ws_row.push(this.Funktion);
+            ws_row.push(this.dNr);
+            ws_row.push(this.Name.lastName);
+            ws_row.push(this.Name.firstName);
+            ws_row.push(this.phone);
+            ws_row.push(this.email);
+            // TODO permissions
+            ws_row.push(this.Name.url);
+            ws_row.push(this.Abfahrt.Ort);
+            ws_row.push(this.Abfahrt.Zeitpunkt);
+            ws_row.push(this.Anmerkung);
+            ws_data.push(ws_row);
+          });
+
+          // Add sheet to workbook
+          var sheetName = "Subtag " + ambulance.sub; // creates Subtag Sheet
+          wb.SheetNames.push(sheetName);
+          var ws = XLSX.utils.aoa_to_sheet(ws_data);
+          wb.Sheets[sheetName] = ws;
+          
+          // Save Sheet as File
+          var fileName = sanitize(`${ambulance.title}_${ambulance.id_original}.xlsx`);
+          var wbout = XLSX.write(wb, {bookType:'xlsx',  type: 'binary'});
+          var blob = new Blob([s2ab(wbout)],{type:"application/octet-stream"});
+          saveData(blob, fileName);
+
+          spinner.stop();
+        });
+      }
     }
 
     var ambulance = scrapeAmbulance();
 
-    $('h1').append('<a href="#" id="spamspamspam">' + mailImage + '<span style="position:relative;top:1px;left:1px;">Mail an Alle</span></a>')
+    // Hidden Modal for Excel export
+    $('body').append("<div id='excelExportModal' class='modal'></div>");
+    $('div#excelExportModal').append('<h2>Excel Export Optionen</h2>');
+    $('div#excelExportModal').append('<input type="checkbox" id="chk_einsatzverwendung" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;" checked>Einsatzverwendung</input><br/>');
+    $('div#excelExportModal').append('<input type="checkbox" id="chk_san" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;" checked>SAN</input><br/>');
+    $('div#excelExportModal').append('<input type="checkbox" id="chk_sang" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;" checked>SanG</input><br/>');
+    $('div#excelExportModal').append('<input type="checkbox" id="chk_fahrerrd" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;" checked>Fahrer RD</input><br/>');
+    $('div#excelExportModal').append('<input type="checkbox" id="chk_handy" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;" checked>Handy</input><br/>');
+    $('div#excelExportModal').append('<input type="checkbox" id="chk_email" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;" checked>Email</input><br/>');
+    $('div#excelExportModal').append('<a href="#" id="createSheet" class="button">Download</a>');
+    
 
-    $('h1').append('<br /><a href="#" id="createSheet"><span style="position:relative;top:1px;left:1px;">In Excel Exportieren</span></a>')
+    $('h1').append('<a href="#" id="spamspamspam">' + mailImage + '<span style="position:relative;top:1px;left:1px;">Kalender</span></a>')
+
+    $('h1').append('<br /><a href="#excelExportModal" rel="modal:open">' + xlsxImage + '<span style="position:relative;top:1px;left:1px;">Excel</span></a>')
 
     $('a[href^="Javascript:SEmpFID"]').each(function() {
       $(this)
@@ -250,6 +296,5 @@ $(document).ready(function() {
       e.preventDefault();
       createSheet(ambulance, this);
     })
-
 
   });
