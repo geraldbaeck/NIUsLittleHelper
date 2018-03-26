@@ -154,6 +154,19 @@ $(document).ready(function() {
     }
 
     var createSheet = function(ambulance, e) {
+      var saveData = (function () {
+        var a = document.createElement("a");
+        document.body.appendChild(a);
+        a.style = "display: none";
+        return function (blob, fileName) {
+            var url = window.URL.createObjectURL(blob);
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        };
+      }());
+      
       var spinner = new Spinner().spin()  // options see http://spin.js.org
       $('body').after(spinner.el);
 
@@ -166,6 +179,7 @@ $(document).ready(function() {
 
       console.log(ambulance);
 
+      // create Workbook
       var wb = XLSX.utils.book_new();
       wb.Props = {
         Title: ambulance.title + " " + ambulance.id_original,
@@ -174,9 +188,7 @@ $(document).ready(function() {
         CreatedDate: new Date(),
       };
 
-      var sheetName = "Subtag " + ambulance.sub; // creates Subtag Sheet
-      wb.SheetNames.push(sheetName);
-
+      // create sheet data
       var ws_data = [];
       $.each(ambulance.employees, function() {
         console.log(this);
@@ -191,13 +203,18 @@ $(document).ready(function() {
         ws_row.push(this.Anmerkung);
         ws_data.push(ws_row);
       });
-      var ws = XLSX.utils.aoa_to_sheet(ws_data);
-      
 
-      var fileName = sanitize(`${ambulance.title}_${ambulance.id_original}.xlsx`);
+      // Add sheet to workbook
+      var sheetName = "Subtag " + ambulance.sub; // creates Subtag Sheet
+      wb.SheetNames.push(sheetName);
+      var ws = XLSX.utils.aoa_to_sheet(ws_data);
       wb.Sheets[sheetName] = ws;
+      
+      // Save Sheet as File
+      var fileName = sanitize(`${ambulance.title}_${ambulance.id_original}.xlsx`);
       var wbout = XLSX.write(wb, {bookType:'xlsx',  type: 'binary'});
-      saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), fileName)
+      var blob = new Blob([s2ab(wbout)],{type:"application/octet-stream"});
+      saveData(blob, fileName);
 
       spinner.stop();
     }
