@@ -228,7 +228,16 @@ $(document).ready(function() {
             ws_row.push(this.Name.firstName);
             ws_row.push(this.phone);
             ws_row.push(this.email);
-            // TODO permissions
+            if (this.permissions == undefined) {
+              this.permissions = {};
+            }
+            ws_row.push(this.permissions.Einsatzverwendung);
+            ws_row.push(this.permissions.SAN);
+            ws_row.push(this.permissions.SanG);            
+            ws_row.push(this.permissions["Fahrer RD"]);        
+            ws_row.push(this.email);
+            ws_row.push(this.email);
+            ws_row.push(this.email);            
             ws_row.push(this.Name.url);
             ws_row.push(this.Abfahrt.Ort);
             ws_row.push(this.Abfahrt.Zeitpunkt);
