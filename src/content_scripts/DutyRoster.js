@@ -30,19 +30,22 @@ $(document).ready(function() {
   function prepareTable() {
     var ownIDs = getOwnIDs();
     var rtrn = {NKTW: false, Kurzdienst: false, Permanenz: false, myDienst: false, isMeldableAs: {}};
+    var $header = $('.DutyRosterHeader');
     var $table = $('table#DutyRosterTable tbody');
-    var duties = getDuties($('.DutyRosterHeader'));
+    var duties = getDuties($header);
     var headerNr = {
-      DRCDate: getHeaderNumber($('.DutyRosterHeader'), 'DRCDate'),
-      DRCTime: getHeaderNumber($('.DutyRosterHeader'), 'DRCTime'),
-      DRCDivision: getHeaderNumber($('.DutyRosterHeader'), 'DRCDivision'),
-      DRCComment: getHeaderNumber($('.DutyRosterHeader'), 'DRCComment')
+      DRCDay: getHeaderNumber($header, 'DRCDay'),
+      DRCDate: getHeaderNumber($header, 'DRCDate'),
+      DRCTime: getHeaderNumber($header, 'DRCTime'),
+      DRCDivision: getHeaderNumber($header, 'DRCDivision'),
+      DRCComment: getHeaderNumber($header, 'DRCComment')
     };
 
     $table.find('tr').each(function() {
 
       // create placeholder vars
       var dienstID = $(this).attr('id');
+	  var $DienstRow = $('tr#' + dienstID);
       var dienstOrt = 'DDL';
       var isEmpty = true;
       var isNotMeldable = true;
@@ -60,9 +63,13 @@ $(document).ready(function() {
       var employees = [];
 
       $(this).find('td').each(function(rowNr, rawTdContent) {
-        tdContent = rawTdContent.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
+        var tdContent = rawTdContent.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
         var openIndikator = 'title="Melden"';
         switch (rowNr) {
+          case headerNr['DRCDay']:
+            var day = tdContent.toLowerCase();
+            $DienstRow.attr("data-day", day);
+            break;
           case headerNr['DRCDate']: // Datum
             currentDateString = tdContent;
             break;
@@ -129,19 +136,19 @@ $(document).ready(function() {
         }
       });
 
-      $('tr#' + dienstID).attr('isEmpty', isEmpty);
-      $('tr#' + dienstID).attr('isMeldable', !isNotMeldable);
-      $('tr#' + dienstID).attr('isNKTW', isNKTW);
-      $('tr#' + dienstID).attr('isKurzdienst', isKurzdienst);
-      $('tr#' + dienstID).attr('isTagdienst', isTagdienst);
-      $('tr#' + dienstID).attr('isNachtdienst', isNachtdienst);
-      $('tr#' + dienstID).attr('isPermanenz', isPermanenz);
-      $('tr#' + dienstID).attr('permanenzBS', permanenzBS);
-      $('tr#' + dienstID).attr('dienstLaenge', dienstLaenge);
-      $('tr#' + dienstID).attr('isMyDienst', isMyDienst);
+      $DienstRow.attr('isEmpty', isEmpty);
+      $DienstRow.attr('isMeldable', !isNotMeldable);
+      $DienstRow.attr('isNKTW', isNKTW);
+      $DienstRow.attr('isKurzdienst', isKurzdienst);
+      $DienstRow.attr('isTagdienst', isTagdienst);
+      $DienstRow.attr('isNachtdienst', isNachtdienst);
+      $DienstRow.attr('isPermanenz', isPermanenz);
+      $DienstRow.attr('permanenzBS', permanenzBS);
+      $DienstRow.attr('dienstLaenge', dienstLaenge);
+      $DienstRow.attr('isMyDienst', isMyDienst);
 
       for (k in isMeldableAs) {
-        $('tr#' + dienstID).attr('isMeldableAs_' + isMeldableAs[k].toString(), true);
+        $DienstRow.attr('isMeldableAs_' + isMeldableAs[k].toString(), true);
       }
 
       // dienst object zum späteren Cal export
@@ -166,12 +173,12 @@ $(document).ready(function() {
 
       // Termin export in die letzte Spalte
       var cal = createCalElement(dienst);
-      $('tr#' + dienstID).find('td:last').append('<div id="exportCal_' + dienst.id + '" hidden></div>');
+      $DienstRow.find('td:last').append('<div id="exportCal_' + dienst.id + '" hidden></div>');
       $('#exportCal_' + dienst.id).append(cal);
       exportDict[dienst.id] = $('#exportCal_' + dienst.id)[0].outerHTML;
 
       if (isMyDienst) {
-        //$('tr#' + dienstID).css('background-color', '#a5c7ea');
+        //$DienstRow.css('background-color', '#a5c7ea');
         $('#exportCal_' + dienst.id).show();
       }
     });
@@ -202,6 +209,29 @@ $(document).ready(function() {
           $('tr[isMeldableAs_' + $(this).val() + '=true]').show();
         }
       });
+    }
+
+    var days = [];
+	$("[id^='label_nlh_day_filter']").css("font-weight", "normal");
+
+    $("[name='nlh_day_filter[]']:checked").each(function(){
+    	var val = $(this).val();
+    	days.push(val);
+    	$("#label_nlh_day_filter_" + val).css("font-weight", "bold");
+    });
+
+    if (days && days.length)
+    {
+	  $("[data-day]").hide();
+	  for (var i = 0; i < days.length;i++)
+      {
+        var dayShort = days[i];
+        $("[data-day='"+dayShort+"']").show();
+      }
+    }
+    else
+    {
+      $("[data-day]").show();
     }
 
     if ($('#DutyRosterFilterNKTW').is(':checked')) {
@@ -258,79 +288,154 @@ $(document).ready(function() {
     chrome.storage.sync.set(val)
   }
 
-  // hide dienstführungstabelle
-  $('.DFTable').parent().parent().hide();
+  doMagic();
 
-  // hide show top menu
-  $('h1').before('<a href="#" style="font-size:8px;margin-left:2em;float:right;" id="DFToggle">DF einblenden</a>');
-  $('h1').before('<a href="#" style="font-size:8px;margin-left:2em;float:right;" id="SelToggle" class="hideSelectors">Suchoptionen einblenden</a>');
-  $('#SelToggle').hide();
+  function doMagic(){
+    // hide dienstführungstabelle
+    $('.DFTable').parent().parent().hide();
 
-  $('.DutyRoster').css('max-width', '100%');
+    // hide show top menu
+    $('h1').before('<a href="#" style="font-size:8px;margin-left:2em;float:right;" id="DFToggle">DF einblenden</a>');
+    $('h1').before('<a href="#" style="font-size:8px;margin-left:2em;float:right;" id="SelToggle" class="hideSelectors">Suchoptionen einblenden</a>');
+    $('#SelToggle').hide();
 
-  tbl = prepareTable();
+    $('.DutyRoster').css('max-width', '100%');
 
-  // add selectors
-  $('div.whitebox:not([id])').append('<div id="chkColumn" style="float:left;font-weight:bold;padding:5px;"></div>');  // div box for checkboxes
-  var plcDiv = '<div style="vert-align:middle;">';
-  $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterEmpty" class="TableHack" style="margin-right:0.3em;vertical-align:middle;top:0.005em;">Leerzeilen filtern</div>');
-  //$('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterMeldable" class="TableHack" style="margin-right:0.3em;vertical-align:middle;top:0.005em;">nur meldbare Dienste</div>');
-  if (tbl.NKTW) {
-    $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterNKTW" class="TableHack" style="margin-right:0.3em;vertical-align:middle;top:0.005em;">nur NKTW</div>');
-  }
-  if (tbl.Kurzdienst) {
-    $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterKurzdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur Kurzdienste</div>');
-  }
-  if (tbl.myDienst) {
-    $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFiltermyDienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur eigene Dienste</div>');
-    $('td.DRCCommands').css('width', '90px');
-  }
+    tbl = prepareTable();
 
-  // Makes no sense to offer this
-  // if (tbl.Permanenz) {
-  //   $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterPermanenz" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur Permanenzen</div>');
-  // }
+    // add selectors
+    var $Whitebox = $('div.whitebox:not([id])');
+    var $NLHContainer = $("<div>").attr("id", "NiusLittleHelperFilters").css("float", "left").appendTo($Whitebox);
 
-  // Dienstselektion (Tagdienst, Nachtdienst, egal)
-  $('div.whitebox:not([id])').append('<div id="rdColumnDienste" style="float:left;font-weight:bold;padding:5px;"></div>');  // div box for radio buttons
-  $('#rdColumnDienste').append(plcDiv + '<input type="radio" name="dienstTyp" value="isTagdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">Tagdienste</div>');
-  $('#rdColumnDienste').append(plcDiv + '<input type="radio" name="dienstTyp" value="isNachtdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">Nachtdienste</div>');
-  $('#rdColumnDienste').append(plcDiv + '<input type="radio" name="dienstTyp" value="alle" class="TableHack" style="margin-right:0.3em;vertical-align:middle;" checked>Alle Dienste</div>');
-  $('#rdColumnDienste').append(plcDiv + '<select id="permanenzBSsel" name="permanenzBS" class="TableHack" style="margin-right:0.3em;vertical-align:middle;"><option value="-">-</option><option value="ha">nur HA Permanenzen</option><option value="west">nur West Permanenzen</option><option value="ddl">nur DDL Permanenzen</option><option value="vs">nur VS Permanenzen</option><option value="nord">nur Nord Permanenzen</option><option value="bvs">nur BVS Permanenzen</option></div>');
-
-  // Nur meldbare Dienste als
-  if (!$.isEmptyObject(tbl.isMeldableAs)) {
-    $('div.whitebox:not([id])').append('<div id="chkColumnMeldbar" style="float:left;font-weight:bold;padding:5px;">Nur meldbare Dienste als:</div>');  // div box for radio buttons
-    for (var f in tbl.isMeldableAs) {
-      $('#chkColumnMeldbar').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterMeldable_' + f + '" value="' + f + '" class="TableHack" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;">' + duties[f] + '</div>');
+    $NLHContainer.append('<div id="chkColumn"' +
+        ' style="float:left;font-weight:bold;padding:5px;"></div>');  // div box for checkboxes
+    var plcDiv = '<div style="vert-align:middle;">';
+    var $ChkColumn = $('#chkColumn');
+    $ChkColumn.append(plcDiv + '<input type="checkbox" id="DutyRosterFilterEmpty" class="TableHack" style="margin-right:0.3em;vertical-align:middle;top:0.005em;">Leerzeilen filtern</div>');
+    //$('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterMeldable" class="TableHack" style="margin-right:0.3em;vertical-align:middle;top:0.005em;">nur meldbare Dienste</div>');
+    if (tbl.NKTW) {
+        $ChkColumn.append(plcDiv + '<input type="checkbox" id="DutyRosterFilterNKTW" class="TableHack" style="margin-right:0.3em;vertical-align:middle;top:0.005em;">nur NKTW</div>');
     }
+    if (tbl.Kurzdienst) {
+        $ChkColumn.append(plcDiv + '<input type="checkbox" id="DutyRosterFilterKurzdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur Kurzdienste</div>');
+    }
+    if (tbl.myDienst) {
+        $ChkColumn.append(plcDiv + '<input type="checkbox" id="DutyRosterFiltermyDienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur eigene Dienste</div>');
+        $('td.DRCCommands').css('width', '90px');
+    }
+
+    // Makes no sense to offer this
+    // if (tbl.Permanenz) {
+    //   $('#chkColumn').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterPermanenz" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur Permanenzen</div>');
+    // }
+
+    // Dienstselektion (Tagdienst, Nachtdienst, egal)
+    $NLHContainer.append('<div id="rdColumnDienste" style="float:left;font-weight:bold;padding:5px;"></div>');  // div box for radio buttons
+    $('#rdColumnDienste').append(plcDiv + '<input type="radio" name="dienstTyp" value="isTagdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">Tagdienste</div>');
+    $('#rdColumnDienste').append(plcDiv + '<input type="radio" name="dienstTyp" value="isNachtdienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">Nachtdienste</div>');
+    $('#rdColumnDienste').append(plcDiv + '<input type="radio" name="dienstTyp" value="alle" class="TableHack" style="margin-right:0.3em;vertical-align:middle;" checked>Alle Dienste</div>');
+    $('#rdColumnDienste').append(plcDiv + '<select id="permanenzBSsel" name="permanenzBS" class="TableHack" style="margin-right:0.3em;vertical-align:middle;"><option value="-">-</option><option value="ha">nur HA Permanenzen</option><option value="west">nur West Permanenzen</option><option value="ddl">nur DDL Permanenzen</option><option value="vs">nur VS Permanenzen</option><option value="nord">nur Nord Permanenzen</option><option value="bvs">nur BVS Permanenzen</option></div>');
+
+    // Nur meldbare Dienste als
+    if (!$.isEmptyObject(tbl.isMeldableAs)) {
+        $NLHContainer.append('<div id="chkColumnMeldbar" style="float:left;font-weight:bold;padding:5px;">Nur meldbare Dienste' +
+            ' als:</div>');  // div box for radio buttons
+        for (var f in tbl.isMeldableAs) {
+            $('#chkColumnMeldbar').append(plcDiv + '<input type="checkbox" id="DutyRosterFilterMeldable_' + f + '" value="' + f + '" class="TableHack" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;">' + duties[f] + '</div>');
+        }
+    }
+
+    if ($('#ctl00_main_ddDutyType option:selected').text().indexOf('RK') === -1) { $('#permanenzBSsel').hide(); }
+
+    // add hide selector
+    $NLHContainer.append('<div style="float:right;padding-right:3px;"><a class="hideSelectors">&#10006;</a></div>');  // div box
+
+    var days = [
+      {
+          short: 'mo',
+          name: 'Montag',
+      },
+      {
+          short: 'di',
+          name: 'Dienstag',
+      },
+      {
+          short: 'mi',
+          name: 'Mittwoch',
+      },
+      {
+          short: 'do',
+          name: 'Donnerstag',
+      },
+      {
+          short: 'fr',
+          name: 'Freitag',
+      },
+      {
+          short: 'sa',
+          name: 'Samstag',
+      },
+      {
+          short: 'so',
+          name: 'Sonntag',
+      }
+    ];
+
+    var $FilterDay = $("<div/>")
+	    .append("<hr/>")
+	    .append("<div style='font-weight:bold;'>Nur Dienste an folgenden Tagen:</div>")
+	    .css({float: "none", clear: "both"});
+
+    for (var dayIndex in days)
+    {
+        var day = days[dayIndex];
+        var id = "nlh_day_filter_" + day.short;
+
+        var $FilterItem = $("<div/>")
+	        .css('float','left')
+	        .css('padding-right', "7px");
+
+	    $("<input/>")
+		    .attr("type", "checkbox")
+		    .attr("name", "nlh_day_filter[]")
+		    .attr("id", id)
+		    .addClass('TableHack')
+		    .val(day.short)
+		    .appendTo($FilterItem);
+
+	    $("<label/>")
+		    .attr("for", id)
+		    .attr("id", "label_" + id)
+		    .html(day.name)
+		    .css("vertical-align", "top")
+		    .appendTo($FilterItem);
+
+	    $FilterDay.append($FilterItem);
+    }
+
+    $NLHContainer.append($FilterDay);
+
+    $('.TableHack').change(function() {
+        filterTable();
+    });
+
+    $('#DFToggle').click(function() {
+        dfToggle();
+    });
+
+    $('.hideSelectors').click(function() {
+        selectorToggle();
+    });
+
+    var targetNodes         = $('.DutyRosterItem td:first-child');
+    var MutationObserver    = window.MutationObserver || window.WebKitMutationObserver;
+    var myObserver          = new MutationObserver (mutationHandler);
+    var obsConfig           = {childList: true, characterData: false, attributes: false, subtree: false};
+
+    targetNodes.each (function () {
+        myObserver.observe (this, obsConfig);
+    });
   }
-
-  if ($('#ctl00_main_ddDutyType option:selected').text().indexOf('RK') === -1) { $('#permanenzBSsel').hide(); }
-
-  // add hide selector
-  $('div.whitebox:not([id])').append('<div style="float:right;padding-right:3px;"><a class="hideSelectors">&#10006;</a></div>');  // div box for checkboxes
-
-  $('.TableHack').change(function() {
-    filterTable();
-  });
-
-  $('#DFToggle').click(function() {
-    dfToggle();
-  });
-
-  $('.hideSelectors').click(function() {
-    selectorToggle();
-  });
-
-  var targetNodes         = $('.DutyRosterItem td:first-child');
-  var MutationObserver    = window.MutationObserver || window.WebKitMutationObserver;
-  var myObserver          = new MutationObserver (mutationHandler);
-  var obsConfig           = {childList: true, characterData: false, attributes: false, subtree: false};
-
-  targetNodes.each (function () {
-    myObserver.observe (this, obsConfig);
-  });
 
   function mutationHandler (mutationRecords) {
     try {
