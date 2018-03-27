@@ -246,10 +246,8 @@ $(document).ready(function() {
             if ($('#chk_fahrerrd:checkbox:checked').length > 0) ws_row.push(this.permissions["Fahrer RD"]);                    
             ws_row.push(this.Name.url);
             ws_row.push(this.Abfahrt.Ort);
-            console.log(this.Abfahrt.Zeitpunkt);
             ws_row.push(this.Abfahrt.Zeitpunkt);
             ws_row.push(this.Anmerkung);
-            ws_row.push({ Target:"http://sheetjs.com", Tooltip:"Find us @ SheetJS.com!" });
             ws_data.push(ws_row);
           });
 
@@ -257,6 +255,15 @@ $(document).ready(function() {
           var sheetName = "Subtag " + ambulance.sub; // creates Subtag Sheet
           wb.SheetNames.push(sheetName);
           var ws = XLSX.utils.aoa_to_sheet(ws_data);
+          $.each(Object.keys(ws).filter(function (cellName) {return cellName.indexOf("N") === 0;}), function() {
+            ws[this].z = "m.d.yy hh:mm";
+          });
+          // Verlinkung funktioniert nicht
+          /* $.each(Object.keys(ws).filter(function (cellName) {return cellName.indexOf("L") === 0;}), function() {
+            if(this!=="L1") {
+              ws[this].l = { Target:ws[this].v, Tooltip:"Link zum NiU Profil" };
+            } 
+          }); */
           console.log(ws);
           wb.Sheets[sheetName] = ws;
           
@@ -282,7 +289,7 @@ $(document).ready(function() {
     $('div#excelExportModal').append('<input type="checkbox" id="chk_fahrerrd" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;" checked>Fahrer RD</input><br/>');
     $('div#excelExportModal').append('<input type="checkbox" id="chk_handy" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;" checked>Handy</input><br/>');
     $('div#excelExportModal').append('<input type="checkbox" id="chk_email" style="margin-left:1.5em;margin-right:0.2em;vertical-align:middle;" checked>Email</input><br/>');
-    $('div#excelExportModal').append('<a href="#" id="createSheet" class="button">Download</a>');
+    $('div#excelExportModal').append('<button id="createSheet" style="font-weight:bold;margin-top:5px">Download</button>');
     
 
     $('h1').append('<a href="#" id="spamspamspam">' + mailImage + '<span style="position:relative;top:1px;left:1px;">Kalender</span></a>')
