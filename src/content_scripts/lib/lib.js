@@ -259,7 +259,7 @@ function scrapeContactPoint(jqObj, tid) {
     if (key) {  // ignore Notruf Pager
       var point = {};
       var value = $($(this).find('span[id]')[1]).text().trim();
-      if($.inArray(value, values)<0) {  // deduplication
+      if($.inArray(value, values)<0 && /\d/.test(value)) {  // deduplication && and very stupid validation
         point['k'] = key.substring(0, key.length - 1);
         point['v'] = value;
         contactPoints.push(point);
