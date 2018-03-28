@@ -126,10 +126,10 @@ function parseHTMLOnly(html) {
 
 // liefert die erste Telefonnummer zurück
 // TODO: eventuell logik für bevorzugte Nummern einfügen
-function getDefaultPhone(contactPoints) {
+function getDefaultPhone(contactPoints, type="cell") {
   var phone = undefined;
   $.each(contactPoints, function() {
-    if (this.k.startsWith("TEL")) {
+    if (this.k.startsWith("TEL") && this.k.includes(`TYPE=${type}`) && this.default) {
       phone = this.v;
       return false;
     }
@@ -142,7 +142,7 @@ function getDefaultPhone(contactPoints) {
 function getDefaultEmail(contactPoints) {
   var email = undefined;
   $.each(contactPoints, function() {
-    if (this.k.startsWith("EMAIL")) {
+    if (this.k.startsWith("EMAIL") && this.default) {
       email = this.v;
       return false;
     }
@@ -259,9 +259,10 @@ function scrapeContactPoint(jqObj, tid) {
     if (key) {  // ignore Notruf Pager
       var point = {};
       var value = $($(this).find('span[id]')[1]).text().trim();
-      if($.inArray(value, values)<0 && /\d/.test(value)) {  // deduplication && and very stupid validation
+      if($.inArray(value, values)<0 && (!key.startsWith("TEL") || /\d/.test(value))) {  // deduplication && and very stupid validation
         point['k'] = key.substring(0, key.length - 1);
         point['v'] = value;
+        point['default'] = $(this).find('input[type=radio]').first().is(':checked');
         contactPoints.push(point);
         values.push(value);
       }
