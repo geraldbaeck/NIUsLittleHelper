@@ -150,6 +150,17 @@ function getDefaultEmail(contactPoints) {
   return email;
 }
 
+function getAllEmails(contactPoints, displayName) {
+  var emails = Array();
+  // email Format: "Fred Foo"<foo@example.com>
+  $.each(contactPoints, function() {
+    if(this.k.indexOf("EMAIL") === 0) {
+      emails.push('"' + displayName + '"<' + this.v + '>');
+    }
+  });
+  return emails;
+}
+
 
 // holt die verfügbaren MitarbeiterInnenDaten
 function scrapeEmployee(jqObj, employeeLink) {

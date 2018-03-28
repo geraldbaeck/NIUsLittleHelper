@@ -48,27 +48,6 @@ $(document).ready(function() {
       return ambulance;
     };
 
-    function _getEmailsfromEmployeeData(employee, displayName) {
-      var emails = Array();
-      // email Format: "Fred Foo"<foo@example.com>
-      $.each(employee.contacts, function() {
-        if(this.k.indexOf("EMAIL") === 0) {
-          emails.push('"' + displayName + '"<' + this.v + '>');
-        }
-      });
-      return emails;
-    }
-
-    function _getPhoneFromVcard(vcard) {
-      var fon;
-      var propertyNames = Object.keys(vcard).filter(function (propertyName) {
-        if(propertyName.indexOf("TEL;TYPE=cell") === 0) {
-          fon = vcard[propertyName];
-        }
-      });
-      return fon;
-    }
-
     function _createAndOpenEmail(emails, ambulance, body='Liebe KollegInnen,\n\n', focus='bcc') {
       var bcc = emails.join(',');
       moment().locale('de');
@@ -117,7 +96,7 @@ $(document).ready(function() {
       var member = getEmployeeDataFromLink($(e).parent().find('a').first(), 'EmployeeID');
       $.get(member.url, function(data) {
         var employee = scrapeEmployee($.parseHTML(data), member.url);
-        var emails = _getEmailsfromEmployeeData(employee, member['displayName']);
+        var emails = getAllEmails(employee.contacts, member['displayName']);
 
         if (emails.length > 0) {
           var body = 'Hallo ' + employee.nameFirst + ',\n\n'
@@ -137,7 +116,8 @@ $(document).ready(function() {
       var member = getEmployeeDataFromLink($(e).parent().find('a').first(), 'EmployeeID');
       $.get(member.url, function(data) {
         var employee = scrapeEmployee($.parseHTML(data), member.url);
-        var fon = _getPhoneFromVcard(employee);
+        console.log(getDefaultPhone(employee.contacts));
+        var fon = getDefaultPhone(employee.contacts);
 
         if (fon) {
           window.open("https://api.whatsapp.com/send?phone=" + fon.replace(/[^0-9]/g, ''))
