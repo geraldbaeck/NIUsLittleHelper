@@ -211,26 +211,22 @@ $(document).ready(function() {
       });
     }
 
-    var days = [];
+  var hideDays = [];
 	$("[id^='label_nlh_day_filter']").css("font-weight", "normal");
 
-    $("[name='nlh_day_filter[]']:checked").each(function(){
+    $("[name='nlh_day_filter[]']").not(":checked").each(function(){
     	var val = $(this).val();
-    	days.push(val);
+    	hideDays.push(val);
     	$("#label_nlh_day_filter_" + val).css("font-weight", "bold");
     });
 
-    if (days && days.length)
-    {
-	  $("[data-day]").hide();
-	  for (var i = 0; i < days.length;i++)
+    if (hideDays && hideDays.length) {
+	  for (var i = 0; i < hideDays.length;i++)
       {
-        var dayShort = days[i];
-        $("[data-day='"+dayShort+"']").show();
+        var hideDayShort = hideDays[i];
+        $("[data-day='"+hideDayShort+"']").hide();
       }
-    }
-    else
-    {
+    } else {
       $("[data-day]").show();
     }
 
@@ -398,7 +394,8 @@ $(document).ready(function() {
 	    $("<input/>")
 		    .attr("type", "checkbox")
 		    .attr("name", "nlh_day_filter[]")
-		    .attr("id", id)
+        .attr("id", id)
+        .attr("checked", true)
 		    .addClass('TableHack')
 		    .val(day.short)
 		    .appendTo($FilterItem);
