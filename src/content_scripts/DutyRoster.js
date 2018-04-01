@@ -211,13 +211,22 @@ $(document).ready(function() {
       });
     }
 
-  var hideDays = [];
-	$("[id^='label_nlh_day_filter']").css("font-weight", "normal");
+    var hideDays = [];
 
-    $("[name='nlh_day_filter[]']").not(":checked").each(function(){
-    	var val = $(this).val();
-    	hideDays.push(val);
-    	$("#label_nlh_day_filter_" + val).css("font-weight", "bold");
+    $("[name='nlh_day_filter[]']").each(function(){
+      var $this = $(this);
+      var val = $this.val();
+      var $label = $("#label_nlh_day_filter_" + val);
+
+      if (!$this.prop("checked"))
+      {
+          hideDays.push(val);
+          $label.css("font-weight", "normal");
+      }
+      else
+      {
+        $label.css("font-weight", "bold");
+      }
     });
 
     if (hideDays && hideDays.length) {
@@ -226,8 +235,6 @@ $(document).ready(function() {
         var hideDayShort = hideDays[i];
         $("[data-day='"+hideDayShort+"']").hide();
       }
-    } else {
-      $("[data-day]").show();
     }
 
     if ($('#DutyRosterFilterNKTW').is(':checked')) {
@@ -405,6 +412,7 @@ $(document).ready(function() {
 		    .attr("id", "label_" + id)
 		    .html(day.name)
 		    .css("vertical-align", "top")
+		    .css("font-weight", "bold")
 		    .appendTo($FilterItem);
 
 	    $FilterDay.append($FilterItem);
