@@ -70,7 +70,7 @@ $(document).ready(function () {
 
       if ($this.prop("checked")) {
         switch ($this.attr("id")) {
-          case "day_range_id":
+          case "day_range_all":
             $(".DayRangeSelector").prop("disabled", true);
             break;
 
