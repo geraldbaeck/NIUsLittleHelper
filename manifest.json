@@ -3,7 +3,7 @@
   "short_name": "NIU++",
   "author": "Gerald Baeck",
   "description": "Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz (NIU).",
-  "version": "0.52.8",
+  "version": "0.52.9",
   "homepage_url": "http://baeck.at",
   "options_ui" : {
     "page" : "src/options.html",
@@ -17,7 +17,9 @@
   "incognito": "not_allowed",
   "permissions": [
     "downloads",
-    "https://niu.wrk.at/*",
+    "*://*/*",
+    "http://niu/*",
+    "https://niu/*",
     "storage",
     "webRequest",
     "webRequestBlocking"
@@ -31,7 +33,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://niu.wrk.at/Kripo/DutyRosterNH/DutyRoster.aspx*"],
+      "matches": ["*://*/Kripo/DutyRosterNH/DutyRoster.aspx*"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
@@ -48,7 +50,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/df/memo/memo_last.asp*", "https://niu.wrk.at/df/memo/Memo_last.asp*"],
+      "matches": ["*://*/df/memo/memo_last.asp*", "*://*/df/memo/Memo_last.asp*"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
@@ -60,7 +62,7 @@
       "run_at": "document_end"
     },
 	{
-      "matches": ["https://niu.wrk.at/df/memo/memo_erinnerung.asp*"],
+      "matches": ["*://*/df/memo/memo_erinnerung.asp*"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
@@ -72,7 +74,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/TNG/SpezialdienstErfassung/Spezialdiensteingabe.asp"],
+      "matches": ["*://*/TNG/SpezialdienstErfassung/Spezialdiensteingabe.asp"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
@@ -82,7 +84,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Ambulances/AmbulancesEdit.aspx*"],
+      "matches": ["*://*/Kripo/Ambulances/AmbulancesEdit.aspx*"],
       "css": ["js/jquery-modal/jquery.modal.min.css"],
       "js": [
         "js/jquery/jquery.js",
@@ -100,7 +102,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Ambulances/AmbulancesOpenPositions.aspx*"],
+      "matches": ["*://*/Kripo/Ambulances/AmbulancesOpenPositions.aspx*"],
       "js": [
         "js/jquery/jquery.js",
         "src/content_scripts/AmbulancesOpenPositions.js"
@@ -109,7 +111,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Employee/detailEmployee.aspx*"],
+      "matches": ["*://*/Kripo/Employee/detailEmployee.aspx*"],
       "css": ["js/pnotify/pnotify.custom.min.css"],
       "js": [
         "src/definitions.js",
@@ -121,7 +123,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/DutyRoster/EmployeeDutyStatistic.aspx*"],
+      "matches": ["*://*/Kripo/DutyRoster/EmployeeDutyStatistic.aspx*"],
       "css": ["js/chart/chartist.min.css"],
       "js": [
         "js/jquery/jquery.js",
@@ -133,7 +135,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Employee/shortemployee.aspx*"],
+      "matches": ["*://*/Kripo/Employee/shortemployee.aspx*"],
       "js": [
         "js/jquery/jquery.js",
         "src/content_scripts/lib/lib.js",
@@ -143,7 +145,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Employee/summaryemployee.aspx*"],
+      "matches": ["*://*/Kripo/Employee/summaryemployee.aspx*"],
       "js": [
         "js/jquery/jquery.js",
         "src/content_scripts/lib/lib.js",
@@ -153,7 +155,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Employee/LVStatistic.aspx*"],
+      "matches": ["*://*/Kripo/Employee/LVStatistic.aspx*"],
       "js": [
         "js/jquery/jquery.js",
         "src/content_scripts/LVStatistic.js"
@@ -162,7 +164,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Kufer/CourseDetail.aspx*"],
+      "matches": ["*://*/Kripo/Kufer/CourseDetail.aspx*"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
@@ -176,7 +178,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Kufer/SearchCourse.aspx*"],
+      "matches": ["*://*/Kripo/Kufer/SearchCourse.aspx*"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
@@ -192,7 +194,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Employee/EmployeeDump.aspx*"],
+      "matches": ["*://*/Kripo/Employee/EmployeeDump.aspx*"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
@@ -209,7 +211,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/external/ControlCenterHead.aspx"],
+      "matches": ["*://*/Kripo/external/ControlCenterHead.aspx"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
@@ -222,7 +224,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Today/Today.aspx"],
+      "matches": ["*://*/Kripo/Today/Today.aspx"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
@@ -240,7 +242,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Employee/newEmployee.aspx"],
+      "matches": ["*://*/Kripo/Employee/newEmployee.aspx"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
@@ -255,7 +257,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://niu.wrk.at/Kripo/Header.aspx"],
+      "matches": ["*://*/Kripo/Header.aspx"],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
