@@ -162,7 +162,7 @@ $(document).ready(function () {
   });
 
   var FilterContainer =
-      "<div style='clear:both; font-weight:bold; text-align:left; border-top: 1px solid red; line-height: 150%;'></div>";
+      "<div style='clear:both; font-weight:bold; text-align:left; border-top: 1px solid black; line-height: 150%;'></div>";
 
   var $FilterDay = $(FilterContainer)
       .html("Nur Dienste an folgenden Tagen:");
@@ -262,6 +262,7 @@ $(document).ready(function () {
           $("<input/>")
               .addClass("TableHack DayRangeSelector")
               .css("display", "text-bottom")
+              .css("border", "1px black solid")
               .attr("type", "date")
               .val(today.toISOString().slice(0, 10))
               .attr("name", "range_begin")
@@ -272,6 +273,7 @@ $(document).ready(function () {
           $("<input/>")
               .addClass("TableHack DayRangeSelector")
               .css("display", "text-bottom")
+              .css("border", "1px black solid")
               .attr("type", "date")
               .val(next_month.toISOString().slice(0, 10))
               .attr("name", "range_end")
