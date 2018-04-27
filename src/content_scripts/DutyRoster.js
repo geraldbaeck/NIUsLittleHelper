@@ -38,7 +38,8 @@ $(document).ready(function() {
       DRCDate: getHeaderNumber($header, 'DRCDate'),
       DRCTime: getHeaderNumber($header, 'DRCTime'),
       DRCDivision: getHeaderNumber($header, 'DRCDivision'),
-      DRCComment: getHeaderNumber($header, 'DRCComment')
+      DRCComment: getHeaderNumber($header, 'DRCComment'),
+      DRCPal: getHeaderNumber($header, 'DRCPal')
     };
 
     $table.find('tr').each(function() {
@@ -61,6 +62,7 @@ $(document).ready(function() {
       var isMyDienst = false;
       var dienstLaenge;
       var employees = [];
+      var isPAL = false;
 
       $(this).find('td').each(function(rowNr, rawTdContent) {
         var tdContent = rawTdContent.innerHTML.replace('&nbsp;', '').replace('<em>', '').replace('</em>', '').trim();
@@ -108,6 +110,14 @@ $(document).ready(function() {
             }
             break;
 
+          case headerNr['DRCPal']:  // PAL Dienst
+            console.log("hi " + tdContent);
+            if (tdContent.includes('PAL')) {
+              isPAL = true;
+              rtrn.PAL = true;
+              console.log("gotcha");
+            }
+
           default:
             break;
         }
@@ -146,6 +156,7 @@ $(document).ready(function() {
       $DienstRow.attr('permanenzBS', permanenzBS);
       $DienstRow.attr('dienstLaenge', dienstLaenge);
       $DienstRow.attr('isMyDienst', isMyDienst);
+      $DienstRow.attr('isPAL', isPAL);      
 
       for (k in isMeldableAs) {
         $DienstRow.attr('isMeldableAs_' + isMeldableAs[k].toString(), true);
@@ -257,6 +268,10 @@ $(document).ready(function() {
       $('tr[isMyDienst=false]').hide();;
     }
 
+    if ($('#DutyRosterFilterPAL').is(':checked')) {
+      $('tr[isPAL=false]').hide();;
+    }
+
     $('tr[' + $('input[name=dienstTyp]:checked').val() + '=false]').hide();
 
   }
@@ -325,6 +340,9 @@ $(document).ready(function() {
     if (tbl.myDienst) {
         $ChkColumn.append(plcDiv + '<input type="checkbox" id="DutyRosterFiltermyDienst" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur eigene Dienste</div>');
         $('td.DRCCommands').css('width', '90px');
+    }
+    if (tbl.PAL) {
+      $ChkColumn.append(plcDiv + '<input type="checkbox" id="DutyRosterFilterPAL" class="TableHack" style="margin-right:0.3em;vertical-align:middle;">nur PAL Dienste</div>');
     }
 
     // Makes no sense to offer this
