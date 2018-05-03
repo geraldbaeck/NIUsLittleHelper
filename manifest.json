@@ -20,6 +20,7 @@
     "https://niu.wrk.at/*",
     "http://niu/*",
     "https://niu/*",
+    "file:///home/daniel/Downloads/unterschreiben.html",
     "storage",
     "webRequest",
     "webRequestBlocking"
@@ -266,8 +267,21 @@
       "css" : ["src/css/style.css"],
       "all_frames": true,
       "run_at": "document_end"
+    },
+    {
+      "matches": ["*://*/df/spezialdiensterfassung/unterschreiben.asp","*://*/df/df_no_access.asp"],
+      "js":[
+        "src/definitions.js",
+        "js/jquery/jquery.js",
+        "js/jquery-ui/jquery-ui.js",
+        "src/content_scripts/lib/lib.js",
+        "src/content_scripts/lib/staff-lib.js",
+        "src/content_scripts/spezialdienstUnterschreiben.js"
+      ],  
+      "css" : ["src/css/style.css", "js/datatable/jquery.dataTables.min.css"],
+      "all_frames": true,
+      "run_at": "document_end"
     }
-
   ],
   "manifest_version": 2
 }
