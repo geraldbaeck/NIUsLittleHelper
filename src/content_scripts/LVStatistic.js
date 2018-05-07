@@ -5,11 +5,12 @@ $(document).ready(function() {
     var dienstAggregate = {};
     dienstAggregate['KTW'] = new RegExp('KTW|Tag |Nacht ');
     dienstAggregate['RTW'] = new RegExp('RKL|RKS|RKP');
-    dienstAggregate['KHD'] = new RegExp('KHD Einsatz|KHD Mitarbeit|KAT ');
-    dienstAggregate['BT-SAN'] = new RegExp('KHD Bereitschaft SAN');
+    dienstAggregate['KHD'] = new RegExp('KHD Einsatz|KHD Mitarbeit|KAT |KAT-|KHD Übung|Einsatz FlüHi');
+    dienstAggregate['BT-SAN'] = new RegExp('KHD Bereitschaft SAN|KHD Rufbereitschaft BT-SAN');
     dienstAggregate['Ausbildung'] = new RegExp('Ausbildung');
     dienstAggregate['Ambulanzen'] = new RegExp('Ambulanz');
     dienstAggregate['Sonstiges'] = new RegExp('Mitarbeit LV');
+    dienstAggregate['Bezirksstelle'] = new RegExp('Bez\\. ');
     var dienstSum = {};
 
 
