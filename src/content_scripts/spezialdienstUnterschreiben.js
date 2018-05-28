@@ -1,24 +1,20 @@
-var clicked = {};
 $(document).ready(function() {
- var header = $("style");
- var path = chrome.extension.getURL("src/webcontent/spezialdienstUnterschreiben.html");
-  $.get(path, function(data) {
-    header.after(data);
-    $("#menu").menu();
-    var tdok = document.querySelectorAll('.tdok input[type="checkbox"]');
-    var tddel = document.querySelectorAll('.tddel input[type="checkbox"]');
-    
-    $("#approveAll").click(function() {
-      for(var i = 0; i<tdok.length; i++){
-        tdok[i].checked = 'checked';
-      }    
-    });
-    
-    $("#denyAll").click(function() {
-      for(var i = 0; i<tdok.length; i++){
+  console.log("Spezialdienst Unterschreiben.");
 
-        tddel[i].checked = 'checked';
-      }    
-    });
-  });
+  var tdok = document.querySelectorAll('.tdok input[type="checkbox"]');
+  var tddel = document.querySelectorAll('.tddel input[type="checkbox"]');
+  
+  function approveALL(e) {
+    e.preventDefault();
+    console.log("approve all clicked");
+    for(var i = 0; i<tdok.length; i++) {
+      tdok[i].checked = 'checked';
+    }    
+  }
+
+  var button = document.createElement('button');
+  button.className = "everyone";
+  button.onclick = approveALL;
+  $("th.th:contains(OK)").html(button);
+  $(".everyone").text("OK");
 });

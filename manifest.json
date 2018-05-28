@@ -3,7 +3,7 @@
   "short_name": "NIU++",
   "author": "Gerald Baeck",
   "description": "Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz (NIU).",
-  "version": "0.52.13",
+  "version": "0.52.14",
   "homepage_url": "http://baeck.at",
   "options_ui" : {
     "page" : "src/options.html",
@@ -268,7 +268,7 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["*://*/df/spezialdiensterfassung/unterschreiben.asp","*://*/df/df_no_access.asp"],
+      "matches": ["*://*/df/spezialdiensterfassung/?nterschreiben.asp*","*://*/df/df_no_access.asp", "https://niu.wrk.at/df/spezialdiensterfassung/unterschreiben.asp*"],
       "js":[
         "src/definitions.js",
         "js/jquery/jquery.js",
