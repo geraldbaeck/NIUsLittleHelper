@@ -1017,15 +1017,17 @@ function checkCourseAttendanceNotCached(args) {
 
                     });
 
+                    console.log(registeredCourses);
+                    console.log(courseDict);
 
                     for(var course in courseDict) {
 
                             for(var regCourse in registeredCourses) {
 
                             if(registeredCourses[regCourse].abzID === courseDict[course].courseID) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
-                            if(registeredCourses[regCourse].titel === courseDict[course].Name) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
-                            if(registeredCourses[regCourse].titel === courseDict[course].altName1) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
-                            if(registeredCourses[regCourse].titel === courseDict[course].altName2) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
+                            if(registeredCourses[regCourse].titel.includes(courseDict[course].Name) && courseDict[course].Name !== "") { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
+                            if(registeredCourses[regCourse].titel.includes(courseDict[course].altName1)  && courseDict[course].altName1 !== "") { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
+                            if(registeredCourses[regCourse].titel.includes(courseDict[course].altName2)  && courseDict[course].altName2 !== "") { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
 
                             }
 

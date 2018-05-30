@@ -490,9 +490,9 @@ $(document).ready(function() {
        //verkettete Promises...
 
        var pflichtfortb = {
-                           UID : "pfb2",
-                           kurs1 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Kommunikation & Übergabe", "altName1" : "SAN - Fortbildung §50 - Pflichtfortbildung - Kommunikation und Übergabe", "altName2" : "", "courseID" : "A03241", "tnStatus" : "nein" },
-                           kurs2 : { "Name" : "SAN - Fortbildung §50 - RD-Fortbildung Großeinsatz - First Car", "altName1" : "", "altName2" : "", "courseID" : "", "tnStatus" : "nein" }
+                           UID : "pfb4",
+                           kurs1 : { "Name" : "Kommunikation & Übergabe", "altName1" : "", "altName2" : "", "courseID" : "A03241", "tnStatus" : "nein" },
+                           kurs2 : { "Name" : "First Car", "altName1" : "", "altName2" : "", "courseID" : "", "tnStatus" : "nein" }
                          };
 
         return dnrToIdentifier(dnr)
