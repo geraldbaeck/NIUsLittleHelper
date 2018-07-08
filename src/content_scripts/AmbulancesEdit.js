@@ -28,7 +28,7 @@ $(document).ready(function() {
       var verwendung = firstRow.first().text().split('/');
       employee.Position = verwendung[0].trim();
       employee.Funktion = verwendung[1].trim();
-      employee.dNr = parseInt(firstRow.eq(1).text().trim());
+      employee.dNr = parseInt(firstRow.eq(1).text().trim()) || parseInt(firstRow.eq(1).find('input').first().val().trim());
       var name = getEmployeeDataFromLink(firstRow.eq(2).find('a').first(), 'EmployeeID');
       employee.Name = name;
       employee.Dienststelle = firstRow.eq(3).text().trim();
@@ -36,7 +36,7 @@ $(document).ready(function() {
       employee.Abfahrt = {};
       employee.Abfahrt.Ort = abfahrt[0].trim();
       employee.Abfahrt.Zeitpunkt = moment(abfahrt[1].replace(')', '').trim(), 'D.MM.YYYY HH:mm').toDate();
-      employee.Anmerkung = $(this).find('span[id$="_m_AmbulanceFunctionDisplay_m_FunctionNotes"]').first().text().trim();
+      employee.Anmerkung = $(this).find('span[id$="_m_AmbulanceFunctionDisplay_m_FunctionNotes"]').first().text().trim() || $(this).find('input[id$="m_EditFunctionNotes"]').first().val().trim();
       ambulance.employees.push(employee);
     });
 
