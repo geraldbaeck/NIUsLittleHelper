@@ -490,9 +490,10 @@ $(document).ready(function() {
        //verkettete Promises...
 
        var pflichtfortb = {
-                           UID : "pfb4",
-                           kurs1 : { "Name" : "Kommunikation & Übergabe", "altName1" : "", "altName2" : "", "courseID" : "A03241", "tnStatus" : "nein" },
-                           kurs2 : { "Name" : "First Car", "altName1" : "", "altName2" : "", "courseID" : "", "tnStatus" : "nein" }
+                           UID : "pfb5",
+                           kurs1 : { "Name" : "Kommunikation & Übergabe", "altName1" : "Kommunikation und Übergabe", "altName2" : "", "courseID" : "A03241", "altcourseID" : "", "tnStatus" : "nein" },
+                           kurs2 : { "Name" : "First Car", "altName1" : "", "altName2" : "", "courseID" : "", "altcourseID" : "", "tnStatus" : "nein" },
+                           kurs3 : { "Name" : "", "altName1" : "", "altName2" : "", "courseID" : "A04194", "altcourseID" : "A04200", "tnStatus" : "nein"}
                          };
 
         return dnrToIdentifier(dnr)
@@ -500,7 +501,7 @@ $(document).ready(function() {
           console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
           return checkCourseAttendance(result.EID, pflichtfortb)
         }).then( function(resultDict) {
-          return ("K&&Uuml;: " + resultDict.kurs1.tnStatus + "<br />First Car: " + resultDict.kurs2.tnStatus);
+          return ("K&&Uuml;: " + resultDict.kurs1.tnStatus + "<br />First Car: " + resultDict.kurs2.tnStatus + "<br />TAG-Modul: " + resultDict.kurs3.tnStatus);
         });
 
      });
@@ -509,11 +510,11 @@ $(document).ready(function() {
        //verkettete Promises...
 
        var grundkurse = {
-                           UID : "grk2",
+                           UID : "grk3",
                            kurs1 : { "Name" : "BAS - Ausbildung - Das Rote Kreuz - Auch du bist ein Teil davon! (QM)", "altName1" : "BAS - Ausbildung - Das Rote Kreuz - auch du bist ein Teil davon!", "altName2" : "", "courseID" : "", "tnStatus" : "nein" },
-                           kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "courseID" : "", "tnStatus" : "nein" },
-                           kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "courseID" : "", "tnStatus" : "nein" },
-                           kurs4 : { "Name" : "SAN - Ausbildung - San1-Seminar", "altName1" : "SAN - Ausbildung - SAN1-Seminar", "altName2" : "", "courseID" : "", "tnStatus" : "nein" }
+                           kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "courseID" : "", "altcourseID" : "", "tnStatus" : "nein" },
+                           kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "courseID" : "", "altcourseID" : "", "tnStatus" : "nein" },
+                           kurs4 : { "Name" : "SAN - Ausbildung - San1-Seminar", "altName1" : "SAN - Ausbildung - SAN1-Seminar", "altName2" : "", "courseID" : "", "altcourseID" : "", "tnStatus" : "nein" }
                          };
 
         return dnrToIdentifier(dnr)

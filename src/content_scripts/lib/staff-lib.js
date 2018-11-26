@@ -958,9 +958,9 @@ function checkCourseAttendanceNotCached(args) {
     // Function accepts courseDict in format of:
     //var courseDict = {
     //                    UID : "Unique ID for Cache"
-    //                    kurs1 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "tnStatus" : "nein" },
-    //                    kurs2 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "tnStatus" : "nein" },
-    //                    kurs3 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", "tnStatus" : "nein" }
+    //                    kurs1 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", altcourseID : "Course Number", "tnStatus" : "nein" },
+    //                    kurs2 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", altcourseID : "Course Number", "tnStatus" : "nein" },
+    //                    kurs3 : { "Name" : "Main Course Name", "altName1" : "Alternative Name 1", "altName2" : "Alternative Name 2", courseID : "Course Number", altcourseID : "Course Number", "tnStatus" : "nein" }
     // [... unlimited additions to dictionary possible but format has to remain the same! ]
     //                  };
 
@@ -1025,6 +1025,7 @@ function checkCourseAttendanceNotCached(args) {
                             for(var regCourse in registeredCourses) {
 
                             if(registeredCourses[regCourse].abzID === courseDict[course].courseID) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
+                            if(registeredCourses[regCourse].abzID === courseDict[course].altcourseID) { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
                             if(registeredCourses[regCourse].titel.includes(courseDict[course].Name) && courseDict[course].Name !== "") { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
                             if(registeredCourses[regCourse].titel.includes(courseDict[course].altName1)  && courseDict[course].altName1 !== "") { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
                             if(registeredCourses[regCourse].titel.includes(courseDict[course].altName2)  && courseDict[course].altName2 !== "") { courseDict[course].tnStatus = registeredCourses[regCourse].tnStatus; }
