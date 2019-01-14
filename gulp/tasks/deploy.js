@@ -26,7 +26,7 @@ gulp.task('deploy', function(cb) {
   };
 
   request(options, function (error, response, body) {
-    if (error || 'error' in body) {
+    if (error) {
       console.log("Error getting access token.")
       console.log(error);
       throw new Error(error);
