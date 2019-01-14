@@ -17,15 +17,18 @@ gulp.task('deploy', function(cb) {
       'content-type': 'application/x-www-form-urlencoded'
     },
     form: {
-      refresh_token: config.OAuth.refreshToken,
+      code: config.OAuth.refreshToken,
       client_id: config.OAuth.clientID,
       client_secret: config.OAuth.clientSecret,
-      grant_type: 'refresh_token'
+      grant_type: 'authorization_code',
+      redirect_uri: 'urn:ietf:wg:oauth:2.0:oob'
     }
   };
 
   request(options, function (error, response, body) {
-    if (error) {
+    if (error || 'error' in body) {
+      console.log("Error getting access token.")
+      console.log(error);
       throw new Error(error);
     }
 
