@@ -100,7 +100,13 @@ $(document).ready(function() {
             if (typeCode.includes('VS')) { permanenzBS = 'vs'; }
             if (typeCode.includes('BVS')) { permanenzBS = 'bvs'; }
 
+            // dienstort festlegen
             dienstOrt = department[$(this).text().trim()];
+            var dienstTyp = $("#ctl00_main_ddDutyType option:selected").text();
+            if (dienstTyp in dienstTypen) {
+              dienstOrt = dienstTypen[dienstTyp];
+            }
+            
             break;
 
           case headerNr['DRCComment']: // Bemerkung
@@ -111,11 +117,9 @@ $(document).ready(function() {
             break;
 
           case headerNr['DRCPal']:  // PAL Dienst
-            console.log("hi " + tdContent);
             if (tdContent.includes('PAL')) {
               isPAL = true;
               rtrn.PAL = true;
-              console.log("gotcha");
             }
 
           default:

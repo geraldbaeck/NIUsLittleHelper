@@ -144,20 +144,20 @@ var getDuty = function() {
   var requests = Array();
   var employees = {};
   $('<td style="text-align:center;width:80px;"></td>').appendTo('.DutyRosterHeader');
-  $('.MultiDutyRoster table').each(function(key, dutyTable) {
-    var dutyType = $(dutyTable).find('.MessageHeader').html();
+  $('.MultiDutyRoster .MessageTable').each(function(key, dutyTable) {
+    var dutyType_raw = $(dutyTable).find('.MessageHeader').html();
+    var dienstTyp = dutyType_raw.replace('fixiert', '').replace('geplant', '').trim();
     var dienste = $(dutyTable).find('#DutyRosterTable tbody tr');
     dienste_count += dienste.length;
     $(dienste).each(function(key, duty) {
       var tmp = $(duty).find('td');
       var parts = $(tmp).siblings();
 
-      var titel = dutyType.replace('fixiert', '').replace('geplant', '').trim();
+      var titel = dienstTyp;
       if (titel.includes('RTW') || titel.includes('KTW')) {
-        if (dutyType.includes('fixiert')) {
+        if (dutyType_raw.includes('fixiert')) {
           titel += ' &#x1f691; ' + $(parts[4]).text();
         }
-        titel += ' (' + dienststellenKuerzel[$(parts[3]).text()] + ')';
       }
 
       var timeVon = $(parts[2]).html().substr(0, $(parts[2]).html().indexOf(' - '));
@@ -172,7 +172,10 @@ var getDuty = function() {
       var startDate = new Date(usDate + ' ' + timeVon);
       var endDate = new Date(usDate + ' ' + timeVon).addHours(duration);
 
-      var dienststelle = department[$(parts[3]).html()];
+      var dienstOrt = department[$(parts[3]).html()];
+      if (dienstTyp in dienstTypen) {
+        dienstOrt = dienstTypen[dienstTyp];
+      }
       var dutyID = $(duty).attr('id');
 
       var comment = '';
@@ -208,7 +211,7 @@ var getDuty = function() {
       }
       description += comment;
 
-      cal.addEvent(titel, description, dienststelle, startDate.toISOString(), endDate.toISOString());
+      cal.addEvent(titel, description, dienstOrt, startDate.toISOString(), endDate.toISOString());
       var calDienst = createCalendar({
         options: {
           class: 'calExport',
@@ -220,7 +223,7 @@ var getDuty = function() {
           start: startDate,
           duration: duration * 60,
           // end: new Date('June 15, 2013 23:00'), // If an end time is set, this will take precedence over duration
-          address: dienststelle,
+          address: dienstOrt,
           description: description
         }
       });
