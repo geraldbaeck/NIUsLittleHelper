@@ -7,11 +7,14 @@ const request = require('request');
 
 const config = require('../config').deploy;
 
+// https://developer.chrome.com/webstore/using_webstore_api
+// https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de
+
 gulp.task('deploy', function(cb) {
   // Get access token
   var options = {
     method: 'POST',
-    url: 'https://www.googleapis.com/oauth2/v4/token',
+    url: 'https://accounts.google.com/o/oauth2/token',
     headers: {
       'cache-control': 'no-cache',
       'content-type': 'application/x-www-form-urlencoded'
@@ -31,6 +34,8 @@ gulp.task('deploy', function(cb) {
       console.log(error);
       throw new Error(error);
     }
+
+    console.log(body);
 
     var tokenAuth = JSON.parse(body).access_token;
     var options = {
