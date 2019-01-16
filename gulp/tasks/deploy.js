@@ -7,23 +7,30 @@ const request = require('request');
 
 const config = require('../config').deploy;
 
+// get auth code
+// https://accounts.google.com/o/oauth2/auth?response_type=code&scope=https://www.googleapis.com/auth/chromewebstore&client_id=128541779160-kluj57pq14a9b63a58rp4v34eanponav.apps.googleusercontent.com&redirect_uri=urn:ietf:wg:oauth:2.0:oob
+
+// get token
+// curl "https://accounts.google.com/o/oauth2/token" -d "client_id=128541779160-kluj57pq14a9b63a58rp4v34eanponav.apps.googleusercontent.com&client_secret=jK5c8FNxC9ZJArFO1nQ7Qt70&code=$CODE&grant_type=authorization_code&redirect_uri=urn:ietf:wg:oauth:2.0:oob"
+
 // https://developer.chrome.com/webstore/using_webstore_api
 // https://chrome.google.com/webstore/detail/nius-litte-helper/fdldehahkijcfpmjhgnkggopliakcknj?hl=de
 
 gulp.task('deploy', function(cb) {
-  // Get access token
+  // Create new access token with refresh token
+  // https://developers.google.com/identity/protocols/OAuth2WebServer#offline
   var options = {
     method: 'POST',
-    url: 'https://accounts.google.com/o/oauth2/token',
+    url: 'https://www.googleapis.com/oauth2/v4/token',
     headers: {
       'cache-control': 'no-cache',
       'content-type': 'application/x-www-form-urlencoded'
     },
     form: {
-      code: config.OAuth.refreshToken,
+      refresh_token: config.OAuth.refreshToken,
       client_id: config.OAuth.clientID,
       client_secret: config.OAuth.clientSecret,
-      grant_type: 'authorization_code',
+      grant_type: 'refresh_token',
       redirect_uri: 'urn:ietf:wg:oauth:2.0:oob'
     }
   };
