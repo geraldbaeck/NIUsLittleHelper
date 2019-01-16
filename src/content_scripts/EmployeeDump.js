@@ -490,10 +490,10 @@ $(document).ready(function() {
        //verkettete Promises...
 
        var pflichtfortb = {
-                           UID : "pfb5",
-                           kurs1 : { "Name" : "Kommunikation & Übergabe", "altName1" : "Kommunikation und Übergabe", "altName2" : "", "courseID" : "A03241", "altcourseID" : "", "tnStatus" : "nein" },
-                           kurs2 : { "Name" : "First Car", "altName1" : "", "altName2" : "", "courseID" : "", "altcourseID" : "", "tnStatus" : "nein" },
-                           kurs3 : { "Name" : "", "altName1" : "", "altName2" : "", "courseID" : "A04194", "altcourseID" : "A04200", "tnStatus" : "nein"}
+                           UID : "pfb6",
+                           kurs1 : { "Name" : "Kommunikation & Übergabe|Kommunikation und Übergabe", "courseID" : "A03241", "tnStatus" : "nein" },
+                           kurs2 : { "Name" : "First Car", "courseID" : "", "tnStatus" : "nein" },
+                           kurs3 : { "Name" : "", "courseID" : "A04194|A04200|A04477", "tnStatus" : "nein"}
                          };
 
         return dnrToIdentifier(dnr)
@@ -510,11 +510,11 @@ $(document).ready(function() {
        //verkettete Promises...
 
        var grundkurse = {
-                           UID : "grk3",
-                           kurs1 : { "Name" : "BAS - Ausbildung - Das Rote Kreuz - Auch du bist ein Teil davon! (QM)", "altName1" : "BAS - Ausbildung - Das Rote Kreuz - auch du bist ein Teil davon!", "altName2" : "", "courseID" : "", "tnStatus" : "nein" },
-                           kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "altName1" : "", "altName2" : "", "courseID" : "", "altcourseID" : "", "tnStatus" : "nein" },
-                           kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis", "altName1" : "BAS - Ausbildung - KHD-Praxistag", "altName2" : "", "courseID" : "", "altcourseID" : "", "tnStatus" : "nein" },
-                           kurs4 : { "Name" : "SAN - Ausbildung - San1-Seminar", "altName1" : "SAN - Ausbildung - SAN1-Seminar", "altName2" : "", "courseID" : "", "altcourseID" : "", "tnStatus" : "nein" }
+                           UID : "grk4",
+                           kurs1 : { "Name" : "Das Rote Kreuz", "courseID" : "", "tnStatus" : "nein" },
+                           kurs2 : { "Name" : "SAN - Ausbildung - RS Ambulanzseminar", "courseID" : "", "tnStatus" : "nein" },
+                           kurs3 : { "Name" : "BAS - Ausbildung - KHD-SD-Praxis|BAS - Ausbildung - KHD-Praxistag", "courseID" : "", "tnStatus" : "nein" },
+                           kurs4 : { "Name" : "SAN - Ausbildung - San1-Seminar|SAN - Ausbildung - SAN1-Seminar", "courseID" : "", "tnStatus" : "nein" }
                          };
 
         return dnrToIdentifier(dnr)
