@@ -56,5 +56,49 @@ $(document).ready(function() {
   name = name.trim();
 
   $('#Kontakte_box').after('<div class="Whitebox" id="copybox"><textarea rows="4" cols="77" style="font-size:80%;" id="copycontent">' + name + "\n" + address + '</textarea><div>');
-  $('#copybox').append('<a href="#" id="adr_copy" data-clipboard-target="#copycontent">' + copyImage + '</a></div>');
+  $('#copybox').append('<a href="#" id="adr_copy" data-clipboard-target="#copycontent">' + copyImage + '</a>');
+
+  $('#copybox').append('<a href="#" id="btn_word">' + copyImage + '</a></div>');
+  $('#copybox').append('<input id="template_word" name="Select Template" type="file" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document">');
+  function loadFile(url,callback){
+    JSZipUtils.getBinaryContent(url,callback);
+  }
+  $(document).on('click', '#btn_word', function() { 
+    console.log("started?");
+    console.log($('#template_word'));
+    console.log(chrome.runtime.getURL($('#template_word').val()));
+    loadFile("https://docxtemplater.com/tag-example.docx",function(error, content){
+        console.log("File loaded");
+        if (error) { throw error };
+        var zip = new JSZip(content);
+        var doc = new Docxtemplater().loadZip(zip)
+        doc.setData({
+            first_name: 'John',
+            last_name: 'Doe',
+            phone: '0652455478',
+            description: 'New Website'
+        });
+        try {
+            // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
+            doc.render()
+        }
+        catch (error) {
+            var e = {
+                message: error.message,
+                name: error.name,
+                stack: error.stack,
+                properties: error.properties,
+            }
+            console.log(JSON.stringify({error: e}));
+            // The error thrown here contains additional information when logged with JSON.stringify (it contains a property object).
+            throw error;
+        }
+        var out=doc.getZip().generate({
+            type:"blob",
+            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        }) //Output the document using Data-URI
+        saveAs(out,"output.docx")
+        console.log("saved?");
+    });
+  });
 });

@@ -26,7 +26,8 @@
   ],
   "web_accessible_resources": [
     "img/*",
-    "/src/webcontent/*"
+    "/src/webcontent/*",
+    "/templates/*"
   ],
   "background": {
     "scripts": ["src/background/background.js"]
@@ -118,6 +119,10 @@
         "js/jquery/jquery.js",
         "js/pnotify/pnotify.custom.min.js",
         "js/clipboard/clipboard.min.js",
+        "js/docxtemplater/docxtemplater-latest.min.js",
+        "js/docxtemplater/jszip.min.js",
+        "js/docxtemplater/jszip-utils.min.js",
+        "js/FileSaver/FileSaver.min.js",
         "src/content_scripts/lib/var.js",
         "src/content_scripts/detailEmployee.js"
       ],
