@@ -124,6 +124,7 @@
         "js/docxtemplater/jszip-utils.min.js",
         "js/FileSaver/FileSaver.min.js",
         "src/content_scripts/lib/var.js",
+        "src/content_scripts/lib/staff-lib.js",
         "src/content_scripts/detailEmployee.js"
       ],
       "all_frames": true,

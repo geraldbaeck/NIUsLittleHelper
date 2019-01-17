@@ -28,56 +28,99 @@ $(document).ready(function() {
     }
   });
 
+  var person_data = {};
+
+  getKuerzel().then(function(kuerzel) {
+    person_data.admin_kuerzel = kuerzel;
+  });
+
+  person_data.anrede = $('#ctl00_main_m_Employee_m_ccEmployeeMain__salutation option:selected').text();  // Herr/Frau
+  person_data.vorname = $('#ctl00_main_m_Employee_m_ccEmployeeMain__firstName').val();
+  person_data.nachname = $('#ctl00_main_m_Employee_m_ccEmployeeMain__lastName').val();
+  person_data.berufstitel = $('#ctl00_main_m_Employee_m_ccEmployeeMain__professionTitle option:selected').text();
+  person_data.titel = $('ctl00_main_m_Employee_m_ccEmployeeMain__preAcademicTitle option:selected').text();
+  person_data.PGtitel = $('ctl00_main_m_Employee_m_ccEmployeeMain__postAcademicTitle option:selected').text();
+
+  person_data.strasse = $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_Street').val();
+  person_data.hausnummer = $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_StreetNumber').val();
+  person_data.plz = $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_PostalCode').val();
+  person_data.ort = $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_City').val();
+  person_data.land = $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_Country option:selected').text();
+
+  // Volle Anschrift mit Zeilenübrüchen
+  person_data.anschrift = person_data.strasse + " " + person_data.hausnummer + "\n" + person_data.plz + " " + person_data.ort + "\n" + person_data.land;
+
+  // Geschlecht
+  person_data.geschlecht = "";
+  person_data.anrede_lieber = "Hallo";
+  if (person_data.anrede == "Herr") {
+    person_data.geschlecht = "m";
+    person_data.anrede_lieber = "Lieber";
+  }
+  else if (person_data.anrede == "Frau") {
+    person_data.geschlecht = "w";
+    person_data.anrede_lieber = "Liebe";
+  }
+
+  // generiert den vollen Namen eg Oberstudienrätin Dr. Mag. Karin Muster, MBA
+  person_data.name = "";
+  if (person_data.berufstitel != '<Berufstitel>') {
+    person_data.name += person_data.berufstitel + " ";
+  }
+  if (person_data.titel != '<Titel>') {
+    person_data.name += person_data.titel + " ";
+  }
+  person_data.name += person_data.vorname + " ";
+  person_data.name += person_data.nachname + " ";
+  if (person_data.PGtitel != '<Titel>' && person_data.PGtitel.trim() != "") {
+    person_data.name += ", " + person_data.PGtitel;
+  }
+  person_data.name = person_data.name.trim();
+
+  // dienstnummer
+  person_data.dienstnummer = $('h1').text().substring($('h1').text().indexOf('(') + 1, $('h1').text().indexOf(')'));
+
   new ClipboardJS('#adr_copy');
+  $('#Kontakte_box').after('<div class="Whitebox" id="copybox"><textarea rows="4" cols="77" style="font-size:80%;" id="copycontent">' + person_data.name + "\n" + person_data.anschrift + '</textarea><div>');
+  $('#copybox').append('<a href="#" id="adr_copy" data-clipboard-target="#copycontent" style="float:right">' + copyImage + '</a>');
 
-  var address = $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_Street').val() + " ";  // Straße
-  address += $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_StreetNumber').val() + "\n";  // Hausnummer
-  address += $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_PostalCode').val() + " ";  // PLZ
-  address += $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_City').val() + "\n";  // Ort
-  address += $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_Country option:selected').text();
+  var templates = [
+    {
+      label: 'DDL Willkommensschreiben',
+      value: 'templates/DDL_Willkommensschreiben.docx'
+    },
+    {
+      label: 'DDL Brief nett',
+      value: 'templates/DDL_Brief_nett.docx'
+    },
+    {
+      label: 'DDL Brief böse',
+      value: 'templates/DDL_Brief_boese.docx'
+    },
+    {
+      label: 'DDL Blanko',
+      value: 'templates/DDL_Blanko.docx',
+      selected: true
+    }
+  ];
+  $('<select>', {
+    'id': 'select_template',
+    'html': templates.map(function(el, i) {
+      return new Option(el.label, el.value, el.selected).outerHTML;
+    }).join('')
+  }).appendTo('#copybox');
+  $('#copybox').append('<a href="#" id="btn_word">' + docImage + '</a></div>');
 
-  var name = "";
-  var berufstitel = $('#ctl00_main_m_Employee_m_ccEmployeeMain__professionTitle option:selected').text();
-  if (berufstitel != '<Berufstitel>') {
-    name += berufstitel + " ";
-  }
-  var titel = $('ctl00_main_m_Employee_m_ccEmployeeMain__preAcademicTitle option:selected').text();
-  if (titel != '<Titel>') {
-    name += titel + " ";
-  }
-  name += $('#ctl00_main_m_Employee_m_ccEmployeeMain__firstName').val() + " ";  // Vorname
-  name += $('#ctl00_main_m_Employee_m_ccEmployeeMain__lastName').val() + " ";  // Nachname
-  
-  var PGtitel = $('ctl00_main_m_Employee_m_ccEmployeeMain__postAcademicTitle option:selected').text();
-  console.log(PGtitel);
-  if (PGtitel != '<Titel>' && PGtitel.trim() != "") {
-    name += ", " + PGtitel;
-  }
-  name = name.trim();
-
-  $('#Kontakte_box').after('<div class="Whitebox" id="copybox"><textarea rows="4" cols="77" style="font-size:80%;" id="copycontent">' + name + "\n" + address + '</textarea><div>');
-  $('#copybox').append('<a href="#" id="adr_copy" data-clipboard-target="#copycontent">' + copyImage + '</a>');
-
-  $('#copybox').append('<a href="#" id="btn_word">' + copyImage + '</a></div>');
-  $('#copybox').append('<input id="template_word" name="Select Template" type="file" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document">');
   function loadFile(url,callback){
     JSZipUtils.getBinaryContent(url,callback);
   }
   $(document).on('click', '#btn_word', function() { 
-    console.log("started?");
-    console.log($('#template_word'));
-    console.log(chrome.runtime.getURL($('#template_word').val()));
-    loadFile("https://docxtemplater.com/tag-example.docx",function(error, content){
+    loadFile(chrome.runtime.getURL($('#select_template option:selected').val()),function(error, content){
         console.log("File loaded");
         if (error) { throw error };
         var zip = new JSZip(content);
         var doc = new Docxtemplater().loadZip(zip)
-        doc.setData({
-            first_name: 'John',
-            last_name: 'Doe',
-            phone: '0652455478',
-            description: 'New Website'
-        });
+        doc.setData(person_data);
         try {
             // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
             doc.render()
