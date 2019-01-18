@@ -84,64 +84,60 @@ $(document).ready(function() {
   $('#Kontakte_box').after('<div class="Whitebox" id="copybox"><textarea rows="4" cols="77" style="font-size:80%;" id="copycontent">' + person_data.name + "\n" + person_data.anschrift + '</textarea><div>');
   $('#copybox').append('<a href="#" id="adr_copy" data-clipboard-target="#copycontent" style="float:right">' + copyImage + '</a>');
 
-  var templates = [
-    {
-      label: 'DDL Willkommensschreiben',
-      value: 'templates/DDL_Willkommensschreiben.docx'
-    },
-    {
-      label: 'DDL Brief nett',
-      value: 'templates/DDL_Brief_nett.docx'
-    },
-    {
-      label: 'DDL Brief böse',
-      value: 'templates/DDL_Brief_boese.docx'
-    },
-    {
-      label: 'DDL Blanko',
-      value: 'templates/DDL_Blanko.docx',
-      selected: true
-    }
-  ];
-  $('<select>', {
-    'id': 'select_template',
-    'html': templates.map(function(el, i) {
-      return new Option(el.label, el.value, el.selected).outerHTML;
-    }).join('')
-  }).appendTo('#copybox');
-  $('#copybox').append('<a href="#" id="btn_word">' + docImage + '</a></div>');
+
+  $('#copybox').append('<input type="file" id="upload_select_docx" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />');
+  //event listener for when the input changes
+  document.querySelector("#upload_select_docx").addEventListener('change',loadDocX, false);
 
   function loadFile(url,callback){
     JSZipUtils.getBinaryContent(url,callback);
   }
-  $(document).on('click', '#btn_word', function() { 
-    loadFile(chrome.runtime.getURL($('#select_template option:selected').val()),function(error, content){
-        console.log("File loaded");
-        if (error) { throw error };
-        var zip = new JSZip(content);
-        var doc = new Docxtemplater().loadZip(zip)
-        doc.setData(person_data);
-        try {
-            // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
-            doc.render()
-        }
-        catch (error) {
-            var e = {
-                message: error.message,
-                name: error.name,
-                stack: error.stack,
-                properties: error.properties,
-            }
-            console.log(JSON.stringify({error: e}));
-            // The error thrown here contains additional information when logged with JSON.stringify (it contains a property object).
-            throw error;
-        }
-        var out=doc.getZip().generate({
-            type:"blob",
-            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        }) //Output the document using Data-URI
-        saveAs(out,"output.docx")
-        console.log("saved?");
-    });
+
+  function loadDocX(evt){
+    var url;
+    var file;
+    file = evt.target.files[0];
+    reader = new FileReader();
+    //we need to instantiate a new FileReader object
+    reader.addEventListener("load", readDocx, false);
+    //we add an event listener for when a file is loaded by the FileReader
+    //this will call our function 'readDocx()'
+    
+    reader.readAsDataURL(file);
+    //we now read the data
+  }
+  function readDocx(event) {
+    // event.target.result;
+    //the event has a target property, the FileReader with a property 'result',
+    //which is where the value we read is located
+
+    loadFile(event.target.result,function(error, content){
+      console.log("File loaded");
+      if (error) { throw error };
+      var zip = new JSZip(content);
+      var doc = new Docxtemplater().loadZip(zip)
+      doc.setData(person_data);
+      try {
+          // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
+          doc.render()
+      }
+      catch (error) {
+          var e = {
+              message: error.message,
+              name: error.name,
+              stack: error.stack,
+              properties: error.properties,
+          }
+          console.log(JSON.stringify({error: e}));
+          // The error thrown here contains additional information when logged with JSON.stringify (it contains a property object).
+          throw error;
+      }
+      var out=doc.getZip().generate({
+          type:"blob",
+          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      }) //Output the document using Data-URI
+      saveAs(out,"output.docx")
+      console.log("saved?");
   });
+  }
 });
