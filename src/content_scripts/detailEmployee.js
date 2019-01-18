@@ -84,8 +84,7 @@ $(document).ready(function() {
   $('#Kontakte_box').after('<div class="Whitebox" id="copybox"><textarea rows="4" cols="77" style="font-size:80%;" id="copycontent">' + person_data.name + "\n" + person_data.anschrift + '</textarea><div>');
   $('#copybox').append('<a href="#" id="adr_copy" data-clipboard-target="#copycontent" style="float:right">' + copyImage + '</a>');
 
-
-  $('#copybox').append('<input type="file" id="upload_select_docx" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />');
+  $('#copybox').append('<input type="file" id="upload_select_docx" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" /><a href="' + chrome.extension.getURL("/src/webcontent/template_help.html") + '" rel="modal:open">' + helpImage + '</a>');
   //event listener for when the input changes
   document.querySelector("#upload_select_docx").addEventListener('change',loadDocX, false);
 

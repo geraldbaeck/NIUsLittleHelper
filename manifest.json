@@ -113,10 +113,14 @@
     },
     {
       "matches": ["*://*/Kripo/Employee/detailEmployee.aspx*"],
-      "css": ["js/pnotify/pnotify.custom.min.css"],
+      "css": [
+        "js/pnotify/pnotify.custom.min.css",
+        "js/jquery-modal/jquery.modal.min.css"
+      ],
       "js": [
         "src/definitions.js",
         "js/jquery/jquery.js",
+        "js/jquery-modal/jquery.modal.min.js",
         "js/pnotify/pnotify.custom.min.js",
         "js/clipboard/clipboard.min.js",
         "js/docxtemplater/docxtemplater-latest.min.js",
