@@ -29,3 +29,35 @@ var xlsxImage = '<img style="vertical-align:middle;opacity:.65;" height="19" src
 var copyImage = '<img style="vertical-align:middle;opacity:.65;" height="19" src="' + chrome.extension.getURL("/img/copy-icon.png") + '" />';
 var docImage = '<img style="vertical-align:middle;opacity:.65;" height="19" src="' + chrome.extension.getURL("/img/doc_icon.png") + '" />';
 var helpImage = '<img style="vertical-align:middle;opacity:.65;" height="19" src="' + chrome.extension.getURL("/img/help.png") + '" />';
+
+var dienstgrade = {
+  RKJ1: 'RK-Jugend-1.Jahr',
+  RKJ2: 'RK-Jugend-2.Jahr',
+  RKJ3: 'RK-Jugend-3.Jahr',
+  RKJ4: 'RK-Jugend-4.Jahr',
+  PH: 'Probehelfer',
+  H: 'Helfer',
+  OH: 'Oberhelfer',
+  HH: 'Haupthelfer',
+  ZGF: 'Zugsführer',
+  OZF: 'Oberzugsführer',
+  HZF: 'Hauptzugsführer',
+  SM: 'Sanitätsmeister',
+  OSM: 'Obersanitätsmeister',
+  HSM: 'Hauptsanitätsmeister',
+  BK: 'Bereitschaftskommandant',
+  AK: 'Abteilungskommandant',
+  KK: 'Kolonnenkommandant',
+  RR: 'Rettungsrat',
+  ORR: 'Oberrettungsrat',
+  LRR: 'Landesrettungsrat',
+  BRR: 'Bundesrettungsrat',
+  'BK-A': 'Bereitschaftskommandant-Arzt',
+  'AK-A': 'Abteilungskommandant-Arzt',
+  'KK-A': 'Kolonnenkommandant-Arzt',
+  'RR-A': 'Rettungsrat-Arzt',
+  'ORR-A': 'Oberrettungsrat-Arzt',
+  'LRR-A': 'Landesrettungsrat-Arzt',
+  'vPRÄS': 'Vizepräsident',
+  'PRÄS': 'Präsident'
+}
