@@ -2,13 +2,22 @@
     tr {
         height: 1.7rem;
     }
+    td {
+        padding-left: 4px;
+    }
+    .subheader {
+        background: #bb0000; 
+        font-weight: bold;
+        color: white;
+    }
 </style>
 <h1>Word Vorlagen</h1>
 <p>Hier kannst Du eine Vorlage, die mit MS Word (docx) erstellt wurde, hochladen und Dir mit den Daten des jeweiligen Mitglieds ausgeben lassen.</p>
 <p>Die Auszeichungssprache dafür ist relativ einfach. Das mögliche Feld einfach in eine geschwungene Klammer setzen und schon wird zum Beispiel aus {vorname} ein Karl:)</p>
 <p>
     Derzeit sind folgende Felder möglich:
-    <table border=1 frame=void rules=rows>
+    <table border=1 frame=void rules=rows style="font-size: 11px;">
+        <tr class="subheader"><td colspan="2">Empfängerdaten</td></tr>
         <tr><td>{anrede}</td><td>Frau / Herr</td></tr>
         <tr><td>{vorname}</td><td>Karl, Rosi, Detlev....</td></tr>
         <tr><td>{nachname}</td><td>Maier, Müller, Krzlpm...</td></tr>
@@ -17,16 +26,27 @@
         <tr><td>{PGtitel}</td><td>MsC, MBA,....</td></tr>
         <tr><td>{name}</td><td>Voller Name: zB Oberst DDr. Mag. Karin  Muster, MBA</td></tr>
         <tr><td>{geschlecht}</td><td>"m", "w" oder leer</td></tr>
+        <tr><td>{dienstgrad_kurz}</td><td>PH, H, PRÄS, ...</td></tr>
+        <tr><td>{dienstgrad}</td><td>Helfer, Präsident, ...</td></tr>
+        <tr><td>{mindestdienstzahl}</td><td>meistens 24</td></tr>
+        <tr><td>{geburtsdatum}</td><td></td></tr>
+        <tr><td>{ad_benutzername}</td><td>Active Directory Benutzername</td></tr>
         <tr><td>{anrede_lieber}</td><td>Gibt je nach Geschlecht, "Liebe", "Lieber" oder "Hallo" aus.</td></tr>
-        <tr><td colspan="2" style="background: white; height: 0.5rem;"></td></tr>
+        <tr class="subheader"><td colspan="2">Adressdaten</td></tr>
         <tr><td>{strasse}</td><td></td></tr>
         <tr><td>{hausnummer}</td><td></td></tr>
         <tr><td>{plz}</td><td></td></tr>
         <tr><td>{ort}</td><td></td></tr>
         <tr><td>{land}</td><td></td></tr>
         <tr><td>{anschrift}</td><td>Volle Anschrift mit Zeilenumbrüchen</td></tr>
-        <tr><td colspan="2" style="background: white; height: 0.5rem;"></td></tr>
-        <tr><td>{dienstnummer}</td><td></td></tr>
+        <tr class="subheader"><td colspan="2">Kontodaten</td></tr>
+        <tr><td>{konto_inhaber}</td><td></td></tr>
+        <tr><td>{konto_iban}</td><td></td></tr>
+        <tr><td>{konto_bic}</td><td></td></tr>
+        <tr><td>{konto_bank}</td><td></td></tr>
+        <tr class="subheader"><td colspan="2">Admindaten</td></tr>
+        <tr><td>{admin_dnr}</td><td>Dienstnummer der BearbeiterIn</td></tr>
+        <tr><td>{admin_name}</td><td>Name der BearbeiterIn</td></tr>
         <tr><td>{admin_kuerzel}</td><td>Gibt das jeweilige Kürzel des Bearbeiters aus, muss vorher in den Optionen von niuslittlehelper festgelegt werden.</td></tr>
     </table>
 </p>
