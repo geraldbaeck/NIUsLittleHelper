@@ -34,6 +34,10 @@ $(document).ready(function() {
     person_data.admin_kuerzel = kuerzel;
   });
 
+  getOwnName().then(function(name) {
+    person_data.admin_name = name;
+  });
+
   person_data.anrede = $('#ctl00_main_m_Employee_m_ccEmployeeMain__salutation option:selected').text();  // Herr/Frau
   person_data.vorname = $('#ctl00_main_m_Employee_m_ccEmployeeMain__firstName').val();
   person_data.nachname = $('#ctl00_main_m_Employee_m_ccEmployeeMain__lastName').val();
@@ -47,8 +51,25 @@ $(document).ready(function() {
   person_data.ort = $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_City').val();
   person_data.land = $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_Country option:selected').text();
 
+  person_data.dienstgrad_kurz = $('#ctl00_main_m_Employee_m_ccEmployeeMain__rank  option:selected').text();
+  person_data.dienstgrad = dienstgrade[person_data.dienstgrad_kurz];
+  person_data.mindestdienstzahl = $('#ctl00_main_m_Employee_m_ccEmployeeExtention__annualMinDuties').val();
+
+  console.log(person_data);
+
+  person_data.geburtsdatum = $('#ctl00_main_m_Employee_m_ccEmployeeExtention__birthday_m_Textbox').val();
+
+  person_data.ad_benutzername = $('#ctl00_main_m_Employee_m_ccEmployeeExtention_m_Employee tr:contains("AD Benutzername:") td:last').text();
+
+
   // Volle Anschrift mit Zeilenübrüchen
   person_data.anschrift = person_data.strasse + " " + person_data.hausnummer + "\n" + person_data.plz + " " + person_data.ort + "\n" + person_data.land;
+
+  // Kontodaten
+  person_data.konto_inhaber = $('#ctl00_main_m_Employee_m_ucAccount_m_Name').val();
+  person_data.konto_iban = $('#ctl00_main_m_Employee_m_ucAccount_m_Iban').val();
+  person_data.konto_bank = $('#ctl00_main_m_Employee_m_ucAccount_m_BankName').val();
+  person_data.konto_bic = $('#ctl00_main_m_Employee_m_ucAccount_m_Bic').val();
 
   // Geschlecht
   person_data.geschlecht = "";
@@ -80,11 +101,15 @@ $(document).ready(function() {
   // dienstnummer
   person_data.dienstnummer = $('h1').text().substring($('h1').text().indexOf('(') + 1, $('h1').text().indexOf(')'));
 
-  new ClipboardJS('#adr_copy');
-  $('#Kontakte_box').after('<div class="Whitebox" id="copybox"><textarea rows="4" cols="77" style="font-size:80%;" id="copycontent">' + person_data.name + "\n" + person_data.anschrift + '</textarea><div>');
-  $('#copybox').append('<a href="#" id="adr_copy" data-clipboard-target="#copycontent" style="float:right">' + copyImage + '</a>');
+  // Template Box erstellen
+  $('#ctl00_main_m_Employee_m_ccEmployeeMain__employeeMain').after('<hr><span id="template_box"><h2>Brief erstellen:</h2></span>');
+  $('#template_box').append('<input type="file" id="upload_select_docx" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" /><a href="' + chrome.extension.getURL("/src/webcontent/template_help.html") + '" rel="modal:open">' + helpImage + '</a>');
 
-  $('#copybox').append('<input type="file" id="upload_select_docx" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" /><a href="' + chrome.extension.getURL("/src/webcontent/template_help.html") + '" rel="modal:open">' + helpImage + '</a>');
+  // Copybox für Adresse
+  new ClipboardJS('#adr_copy');
+  $('#template_box').before('<span id="copybox" style="float:right;display:inline-flex;;"><textarea rows="4" cols="77" style="font-size:80%;" id="copycontent">' + person_data.name + "\n" + person_data.anschrift + '</textarea><span>');
+  $('#copybox').append('<a href="#" id="adr_copy" data-clipboard-target="#copycontent">' + copyImage + '</a>');
+  
   //event listener for when the input changes
   document.querySelector("#upload_select_docx").addEventListener('change',loadDocX, false);
 
@@ -111,7 +136,9 @@ $(document).ready(function() {
     //which is where the value we read is located
 
     loadFile(event.target.result,function(error, content){
-      console.log("File loaded");
+      var filedate = (new Date()).toISOString().slice(0,10).replace(/-/g,"");
+      var template_name = $("#upload_select_docx").val().replace("C:\\fakepath\\", "");
+      var output_filename = [filedate, person_data.dienstnummer, person_data.nachname, person_data.vorname, template_name].join("_");
       if (error) { throw error };
       var zip = new JSZip(content);
       var doc = new Docxtemplater().loadZip(zip)
@@ -135,8 +162,7 @@ $(document).ready(function() {
           type:"blob",
           mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       }) //Output the document using Data-URI
-      saveAs(out,"output.docx")
-      console.log("saved?");
+      saveAs(out, output_filename)
   });
   }
 });

@@ -202,6 +202,23 @@ function getOwnDNRsNotCached()
     });
 }
 
+function getOwnName()
+{
+ return getFromCache("ownName", "", "", getOwnNameNotCached);
+}
+
+function getOwnNameNotCached()
+{
+    return $.get("https://niu.wrk.at/Kripo/Header.aspx")
+    .then(function(data) {
+
+    var nameStr = $(data).find("#userName").text().split('(')[0].trim();
+    console.log(nameStr);
+    return nameStr;
+
+    });
+}
+
 function writeMemo(MemoObj)
 {
     var post = {};
