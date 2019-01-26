@@ -38,6 +38,10 @@ $(document).ready(function() {
     person_data.admin_name = name;
   });
 
+  getOwnDNRs().then(function(dnrs){
+    person_data.admin_dnr = dnrs[0];
+  });
+
   person_data.anrede = $('#ctl00_main_m_Employee_m_ccEmployeeMain__salutation option:selected').text();  // Herr/Frau
   person_data.vorname = $('#ctl00_main_m_Employee_m_ccEmployeeMain__firstName').val();
   person_data.nachname = $('#ctl00_main_m_Employee_m_ccEmployeeMain__lastName').val();
@@ -54,8 +58,6 @@ $(document).ready(function() {
   person_data.dienstgrad_kurz = $('#ctl00_main_m_Employee_m_ccEmployeeMain__rank  option:selected').text();
   person_data.dienstgrad = dienstgrade[person_data.dienstgrad_kurz];
   person_data.mindestdienstzahl = $('#ctl00_main_m_Employee_m_ccEmployeeExtention__annualMinDuties').val();
-
-  console.log(person_data);
 
   person_data.geburtsdatum = $('#ctl00_main_m_Employee_m_ccEmployeeExtention__birthday_m_Textbox').val();
 
@@ -100,6 +102,8 @@ $(document).ready(function() {
 
   // dienstnummer
   person_data.dienstnummer = $('h1').text().substring($('h1').text().indexOf('(') + 1, $('h1').text().indexOf(')'));
+
+  console.log(person_data);
 
   // Template Box erstellen
   $('#ctl00_main_m_Employee_m_ccEmployeeMain__employeeMain').after('<hr><span id="template_box"><h2>Brief erstellen:</h2></span>');
