@@ -46,8 +46,8 @@ $(document).ready(function() {
   person_data.vorname = $('#ctl00_main_m_Employee_m_ccEmployeeMain__firstName').val();
   person_data.nachname = $('#ctl00_main_m_Employee_m_ccEmployeeMain__lastName').val();
   person_data.berufstitel = $('#ctl00_main_m_Employee_m_ccEmployeeMain__professionTitle option:selected').text();
-  person_data.titel = $('ctl00_main_m_Employee_m_ccEmployeeMain__preAcademicTitle option:selected').text();
-  person_data.PGtitel = $('ctl00_main_m_Employee_m_ccEmployeeMain__postAcademicTitle option:selected').text();
+  person_data.titel = $('#ctl00_main_m_Employee_m_ccEmployeeMain__preAcademicTitle option:selected').text();
+  person_data.PGtitel = $('#ctl00_main_m_Employee_m_ccEmployeeMain__postAcademicTitle option:selected').text();
 
   person_data.strasse = $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_Street').val();
   person_data.hausnummer = $('#ctl00_main_m_Employee_m_ccPersonAddress_m_ccAddress0_m_StreetNumber').val();
@@ -63,8 +63,7 @@ $(document).ready(function() {
 
   person_data.ad_benutzername = $('#ctl00_main_m_Employee_m_ccEmployeeExtention_m_Employee tr:contains("AD Benutzername:") td:last').text();
 
-
-  // Volle Anschrift mit Zeilenübrüchen
+  // Volle Anschrift mit Zeilenumbrüchen
   person_data.anschrift = person_data.strasse + " " + person_data.hausnummer + "\n" + person_data.plz + " " + person_data.ort + "\n" + person_data.land;
 
   // Kontodaten
@@ -90,13 +89,22 @@ $(document).ready(function() {
   if (person_data.berufstitel != '<Berufstitel>') {
     person_data.name += person_data.berufstitel + " ";
   }
+  else {
+    person_data.berufstitel = "";
+  }
   if (person_data.titel != '<Titel>') {
     person_data.name += person_data.titel + " ";
+  }
+  else {
+    person_data.titel = "";
   }
   person_data.name += person_data.vorname + " ";
   person_data.name += person_data.nachname + " ";
   if (person_data.PGtitel != '<Titel>' && person_data.PGtitel.trim() != "") {
     person_data.name += ", " + person_data.PGtitel;
+  }
+  else {
+    person_data.PGtitel = "";
   }
   person_data.name = person_data.name.trim();
 
