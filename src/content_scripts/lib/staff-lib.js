@@ -1007,6 +1007,7 @@ function checkCourseAttendanceNotCached(args) {
             post["ctl00$main$m_Options$0"] = "on";
             //post["ctl00$main$m_Options$2"] = "on"; only absolved courses
             post["ctl00$main$m_Options$5"] = "on";
+            post["ctl00$main$m_Options$6"] = "on";
             post["ctl00$main$m_CourseName"] = "";
 
 
