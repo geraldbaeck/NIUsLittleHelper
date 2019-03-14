@@ -60,7 +60,7 @@ function addCalculationHandler(id, names, callback) {
                r[name.calcname] = "<img id='ajaxloader' src='" + chrome.extension.getURL('/img/ajax-loader.gif') + "'>";
                datatable.cell(i, c).invalidate().draw();
 
-               var res = callback(r.DNR, name)
+               var res = callback(r.DNR, name, r)
                 .then(function(value) {
                   r[name.calcname] = value;
                   //console.log("get cell: " + i + "#" + c);
@@ -555,7 +555,7 @@ $(document).ready(function() {
 
      });
 
-     addCalculationHandler("#letztedienstleistung", [{calcname : "letztedienstleistung", uiname : "Letzte Dienstleistung"}], function(dnr, name) {
+     addCalculationHandler("#letztedienstleistung", [{calcname : "letztedienstleistung", uiname : "Letzte Dienstleistung"}], function(dnr, name, row) {
        //verkettete Promises...
 
         return dnrToIdentifier(dnr)
@@ -563,7 +563,11 @@ $(document).ready(function() {
           console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
           return getLastDuty(result.ENID)
         }).then( function(result) {
-          return result;
+          var mailtemp_name = row.Name.split(" ")[1];
+          var mailtemp_email = row.Email;
+          var lastDuty = result;
+          var mailtemp_link = "mailto:" + mailtemp_email + "?subject=Mitarbeiterdurchsicht%20-%20Dienstleistung&body=Liebe%2Fr%20" + mailtemp_name + "%2C%0A%0ABei%20der%20Durchsicht%20unserer%20Mitarbeiter%2Finnen%20ist%20uns%20aufgefallen%2C%20dass%20Dein%20letzter%20Dienst%20bereits%20l%C3%A4ngere%20Zeit%20zur%C3%BCck%20liegt.%20(" + lastDuty + ")%0AAls%20Mindestdienstleistung%20im%20Jahr%20erwarten%20wir%20ca.%2024%20(regelm%C3%A4%C3%9Fige)%20Dienste%20um%20die%20Qualit%C3%A4t%20unserer%20Arbeit%20aufrecht%20zu%20erhalten.%0A%0AHast%20Du%20derzeit%20irgendwelche%20Fragen%2C%20besondere%20erschwerende%20Lebensumst%C3%A4nde%20oder%20k%C3%B6nnen%20wir%20Dir%20sonst%20irgendwie%20behilflich%20sein%20Deinen%20Wiedereinstieg%20in%20eine%20regelm%C3%A4%C3%9Figere%20Dienstleistung%20zu%20realisieren%3F%0A%0ALiebe%20Gr%C3%BC%C3%9Fe%2C";
+          return lastDuty + " <a href='"+ mailtemp_link + "'><img src=" + chrome.extension.getURL('/img/envelope.svg') + " width='12'></a>";
         });
 
      });
@@ -744,14 +748,20 @@ $(document).ready(function() {
               );
       });
 
-      addCalculationHandler("#rddienste", [{calcname : "rddienste", uiname : "Dienste d. l. 6 Monate"}], function(dnr, name){
+      addCalculationHandler("#rddienste", [{calcname : "rddienste", uiname : "RD Dienste d. l. 6 Monate"}], function(dnr, name, row){
         return dnrToIdentifier(dnr).then(
                function(result) {
                  console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
                  return calculateDutyStatistic(result.ENID, "");
                }).then(
                  function(statresult) {
-                   return statresult.getDutyCount("SUM_RD");
+
+                   var mailtemp_name = row.Name.split(" ")[1];
+                   var mailtemp_email = row.Email;
+                   var totalDuties = statresult.getDutyCount("SUM_RD");
+                   var mailtemp_link = "mailto:" + mailtemp_email + "?subject=Mitarbeiterdurchsicht%20-%20Dienstleistung&body=Liebe%2Fr%20" + mailtemp_name + "%2C%0A%0ABei%20der%20Durchsicht%20unserer%20Mitarbeiter%2Finnen%20ist%20uns%20aufgefallen%2C%20dass%20Du%20in%20den%20letzten%206%20Monaten%20leider%20nur%20" + totalDuties + "%20Dienste%20f%C3%BCr%20das%20Wiener%20Rote%20Kreuz%20geleistet%20hast.%20%0AAls%20Mindestdienstleistung%20im%20Jahr%20erwarten%20wir%20ca.%2024%20Dienste%20um%20die%20Qualit%C3%A4t%20unserer%20Arbeit%20aufrecht%20zu%20erhalten.%0A%0AHast%20Du%20derzeit%20irgendwelche%20Fragen%2C%20besondere%20erschwerende%20Lebensumst%C3%A4nde%20oder%20k%C3%B6nnen%20wir%20Dir%20sonst%20irgendwie%20behilflich%20sein%20noch%20auf%20die%20notwendigen%2024%20Dienste%20zu%20kommen%3F%0A%0ALiebe%20Gr%C3%BC%C3%9Fe%2C";
+                   return totalDuties + " <a href='"+ mailtemp_link + "'><img src=" + chrome.extension.getURL('/img/envelope.svg') + " width='12'></a>";
+
                  }
                );
       });

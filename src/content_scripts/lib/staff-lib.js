@@ -683,7 +683,7 @@ function calculateDutyStatisticNonCached(args) {
 
                         //TODO: unterscheide zwischen NFR & KTW
 
-                        var isKTW = tableType.includes('KTW');
+                        var isKTW = tableType.includes('KTW ');
                         var isNFR = tableType.includes('RKS') || tableType.includes('RKL') || tableType.includes('RKP');
 
                         if (! (isKTW || isNFR)) {
