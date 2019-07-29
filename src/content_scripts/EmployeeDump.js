@@ -586,6 +586,14 @@ $(document).ready(function() {
 
      });
 
+    addCalculationHandler("#keys", [{calcname: "keys", uiname: "Ausgegebene / Eingezogene Schlüssel"}], function(dnr, name){
+      return dnrToIdentifier(dnr)
+        .then(async function(result) {
+            var keys = await getKeyInfo(result.EID);      
+            return keys; 
+        });
+    })
+
       addCalculationHandler("#fotofehlt", [{calcname : "fotofehlt", uiname : "Foto fehlt?"}], function(dnr, name) {
        //verkettete Promises...
 

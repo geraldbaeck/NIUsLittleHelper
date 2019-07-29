@@ -1,6 +1,6 @@
 {
   "name": "niuslittlehelper",
-  "version": "0.0.0",
+  "version": "0.57.0",
   "description": "Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz (NIU).",
   "main": "gulpfile.js",
   "scripts": {

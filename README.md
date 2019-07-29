@@ -84,6 +84,7 @@ Die Funktion Mitarbeiter / Neu öffnet normalerweise ein Formular, wodurch sich 
 + *0.46* Das Spezialdienst-Formular wird nun mit den Standardinformationen vorausgefüllt. (Datum, Enduhrzeit, Bez.-Funktionär)
 + *0.48* Dienste auf der Startseite lassen sich nun in diverse Kalenderprogramme exportieren. (Google, iCal etc..)
 + *0.50* Mitarbeiter bei Ambulanzdiensten lassen sich nun direkt per WhatsApp kontaktieren.
++ *0.57* Schlüsselauswertung hinzugefügt. 
 
 ## Built With
 * [Atom](https://github.com/atom/atom)
