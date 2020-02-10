@@ -3,7 +3,7 @@
 var counter = 0;
 var MemoAuthorsNames = [];
 
-$("body").prepend("<b>Memos f&uuml;r den ausgew&auml;hlten Zeitraum nach Autor filtern:</b> <select id='authorfilter'><option value='0'></option></select><br /><br />");
+$("body > form").append("<br /><b>Memos f&uuml;r den ausgew&auml;hlten Zeitraum nach Autor filtern:</b> <select id='authorfilter'><option value='0'></option></select>");
 
 $("th:contains('Memo über')").each(function( index ) {
 
