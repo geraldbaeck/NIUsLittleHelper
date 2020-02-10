@@ -1,10 +1,20 @@
 ﻿$(document).ready(function() {
 
 var counter = 0;
+var MemoAuthorsNames = [];
+
+$("body").prepend("<b>Memos f&uuml;r den ausgew&auml;hlten Zeitraum nach Autor filtern:</b> <select id='authorfilter'><option value='0'></option></select><br /><br />");
 
 $("th:contains('Memo über')").each(function( index ) {
 
 var tableObj = this;
+
+var MemoAuthorName = $(this).closest("tbody").children("tr:nth-child(2)").children("th:nth-child(1)").text().trim();
+
+var MemoAuthorOption = new Option(MemoAuthorName, MemoAuthorName);
+$(MemoAuthorOption).html(MemoAuthorName);
+
+if(!MemoAuthorsNames.includes(MemoAuthorName)) { MemoAuthorsNames.push(MemoAuthorName); $("#authorfilter").append(MemoAuthorOption); };
 
 $(tableObj).append(" <a id='mailButton" + counter + "'><img src=" + chrome.extension.getURL('/img/envelope.svg') + " width='12'></a>");
 $(tableObj).append(" <a id='gearButton" + counter + "'><img src=" + chrome.extension.getURL('/img/gear.svg') + " width='12'></a>");
@@ -43,6 +53,28 @@ return getEmployeeDataSheet(result.ENID) }).then( function(result) {
 });
 });
 counter++;
+});
+
+var select = $('#authorfilter');
+  select.html(select.find('option').sort(function(x, y) {
+    return $(x).text() > $(y).text() ? 1 : -1;
+  }))
+  select.val(0);
+
+$("#authorfilter").change(function ()
+{
+	var selVal = $(this).val();
+
+if(selVal == "0")
+	{
+		$("body > table, body > table + br").show();
+	}
+else
+	{
+		$("body > table, body > table + br").css("display", "none");
+		$("body > table:contains('" + selVal + "'), body > table:contains('" + selVal + "') + br").show();
+	}
+
 });
 
 });
