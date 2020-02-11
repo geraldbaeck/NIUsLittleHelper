@@ -907,9 +907,11 @@ function getEmployeeCoursesNotCached(args) {
       post["__EVENTTARGET"] = "ctl00$main$m_Search";
       post["ctl00$main$m_From$m_Textbox"] = dateFrom;
       post["ctl00$main$m_Until$m_Textbox"] = dateTo;
-      post["ctl00$main$m_Options$0"] = "on";
-      post["ctl00$main$m_Options$4"] = "on";
-      post["ctl00$main$m_Options$5"] = "on";
+      post["ctl00$main$m_Options$0"] = "on"; // Nur abgeschlossene Kurse
+      post["ctl00$main$m_Options$3"] = "on"; // Qualifikationen anzeigen
+      post["ctl00$main$m_Options$5"] = "on"; // Auch Stornos
+      post["ctl00$main$m_Options$6"] = "on"; // Auch Anrechnungskurse
+      post["ctl00$main$m_Options$7"] = "on"; // Auch E-Learning
       post["ctl00$main$m_CourseName"] = "";
 
       $.ajax({
@@ -990,10 +992,9 @@ function checkCourseAttendanceNotCached(args) {
       post["__EVENTTARGET"] = "ctl00$main$m_Search";
       post["ctl00$main$m_From$m_Textbox"] = "01.01.1995";
       post["ctl00$main$m_Until$m_Textbox"] = todaysDateString;
-      post["ctl00$main$m_Options$0"] = "on";
-      //post["ctl00$main$m_Options$2"] = "on"; only absolved courses
-      post["ctl00$main$m_Options$5"] = "on";
-      post["ctl00$main$m_Options$6"] = "on";
+      post["ctl00$main$m_Options$3"] = "on"; // Qualifikationen anzeigen
+      post["ctl00$main$m_Options$6"] = "on"; // Auch Anrechnungskurse
+      post["ctl00$main$m_Options$7"] = "on"; // Auch E-Learning
       post["ctl00$main$m_CourseName"] = "";
 
 

@@ -112,8 +112,11 @@ $(document).ready(function() {
             $("#ctl00_main_m_To_m_Textbox").val(tillDateString);
 
             $("#ctl00_main_m_Options input[type=checkbox]").remove("checked"); //alle checkboxen uncheck
-            $("#ctl00_main_m_Options_0").prop("checked", "true"); //setze qualifikationen anzeigen
-            $("#ctl00_main_m_Options_5").prop("checked", "true"); //setze auch anrechnungskurse anzeigen!
+            $("#ctl00_main_m_Options_3").prop("checked", "true"); // Qualifikationen anzeigen
+            $("#ctl00_main_m_Options_5").prop("checked", "true"); // Auch Stornos
+            $("#ctl00_main_m_Options_6").prop("checked", "true"); // Auch Anrechnungskurse
+            $("#ctl00_main_m_Options_7").prop("checked", "true"); // Auch E-Learning
+            $("#ctl00_main_m_Options_8").prop("checked", "true"); // Auch Warteliste
 
             $("#ctl00_main_m_Search").click();
         }
@@ -356,6 +359,7 @@ $(document).ready(function() {
               searchData.kurs.includes("KHD-Praxistag") ||
               searchData.kurs.includes("KHD-SD-Praxis") ||
               searchData.kurs.includes("Ambulanzseminar") ||
+              searchData.kurs.includes("San1-Seminar") ||
               searchData.kurs.includes("RS-Startmodul");
   });
 
@@ -363,8 +367,8 @@ $(document).ready(function() {
       return !(searchData.qualifikation.includes("§50") || searchData.kurs.includes("SAN")); //eher mehr ein Beispiel für mehrere spalten filter
   });
 
-  addSuchfilter(datatable, "kurs_nur_gsd", "Nur GSD", ["kurs"], function(searchData, index, rowData, counter) {
-      return searchData.kurs.includes("GSD");
+  addSuchfilter(datatable, "kurs_nur_gsd", "Nur FSD", ["kurs"], function(searchData, index, rowData, counter) {
+      return searchData.kurs.includes("FSD");
   });
 
   addSuchfilter(datatable, "kurs_nur_khd", "Nur KHD", ["kurs"], function(searchData, index, rowData, counter) {
