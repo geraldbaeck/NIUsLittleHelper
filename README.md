@@ -30,14 +30,10 @@ quartalsweise abgeschlossen!
 * Es wird das Formular Kursauswahl ausgeblendet
 * Die Tabelle mit den angezeigten Kursen ist sortierbar
 * Der Link um die Kursdetails zu öffnen ganz links öffnet einen neuen Kurs per standard in einem neuen BrowserFenster/BrowserTab
-
-## Kurssuche TODO bzw. in Arbeit:
-
-* Anmeldebutton für Benutzer, der ein EMail erzeugt per mailto in dem alle relevanten Daten für die Kursanmeldung bereits ausgefüllt sind. Wie zuständige Ausbildung, Kursnummer, Kursname, Dienstnummer, und Name.
-* Vordefinierte Filter um nur bestimmte Kurse anzeigen zu lassen, geplant sind zumindest alle §50 Kurse, FK-Kurse, etc.
+* Anmeldebutton für Benutzer, der ein EMail erzeugt per mailto in dem alle relevanten Daten für die Kursanmeldung bereits ausgefüllt sind
+* Vordefinierte Filter um nur bestimmte Kurse anzeigen zu lassen, z.B. alle §50 Kurse, FK-Kurse, etc.
 
 ### Kursdetails
-
 * Es wird die zuletzt verwendete Kostenstelle gespeichert
 * Es wird automatisch ein Kürzel eingetragen, das über die Optionen des Browser Plugins gesetzt werden kann
 * Das Drop-Down select Menü unterstützt jetzt eine Volltextsuche nach den Mitarbeiternamen bzw. der Dienstnummer
