@@ -4,10 +4,17 @@ $(document).ready(function() {
 
   $('#main-content').after('<hr><span id="template_box"><h2>Bescheidvorlage:</h2></span>');
   
-  $('#template_box').append('<input type="file" id="upload_select_docx" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" /><br /><sub>Sobald hier eine Bescheidvorlage eingefügt wird, startet automatisch der Download des fertig erstellten Bescheids.<br />Die in der Vorlage verwendeten Platzhalter werden automatisch mit den im Formular eingegebenen Daten ersetzt.</sub>');
+  $('#template_box').append('<input type="file" id="upload_select_docx" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" /><input type="button" id="generatebutton" value="Bescheid erstellen" /><br /><sub>Sobald hier eine Bescheidvorlage eingefügt wird, startet automatisch der Download des fertig erstellten Bescheids.<br />Die in der Vorlage verwendeten Platzhalter werden automatisch mit den im Formular eingegebenen Daten ersetzt.</sub>');
 
   //event listener for when the input changes
   document.querySelector("#upload_select_docx").addEventListener('change',loadDocX, false);
+  document.querySelector("#generatebutton").addEventListener('click',generateButtonClicked, false);
+
+  function generateButtonClicked()
+  {
+    document.querySelector("#upload_select_docx").value = "";
+    document.querySelector("#upload_select_docx").click();
+  }
 
   function loadFile(url,callback){
     JSZipUtils.getBinaryContent(url,callback);
