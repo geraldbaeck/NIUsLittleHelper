@@ -490,10 +490,11 @@ $(document).ready(function() {
        //verkettete Promises...
 
        var pflichtfortb = {
-                           UID : "pfb6",
+                           UID : "pfb7",
                            kurs1 : { "Name" : "Kommunikation & Übergabe|Kommunikation und Übergabe", "courseID" : "A03241", "tnStatus" : "nein" },
                            kurs2 : { "Name" : "First Car", "courseID" : "", "tnStatus" : "nein" },
-                           kurs3 : { "Name" : "", "courseID" : "A04194|A04200|A04477", "tnStatus" : "nein"}
+                           kurs3 : { "Name" : "", "courseID" : "A04194|A04200|A04477", "tnStatus" : "nein"},
+                           kurs4 : { "Name" : "Hygienefortbildung", "courseID" : "", "tnStatus" : "nein" }
                          };
 
         return dnrToIdentifier(dnr)
@@ -501,7 +502,7 @@ $(document).ready(function() {
           console.log("dnrToIdentifier result: ENID = " + result.ENID + " / EID = " + result.EID);
           return checkCourseAttendance(result.EID, pflichtfortb)
         }).then( function(resultDict) {
-          return ("K&&Uuml;: " + resultDict.kurs1.tnStatus + "<br />First Car: " + resultDict.kurs2.tnStatus + "<br />TAG-Modul: " + resultDict.kurs3.tnStatus);
+          return ("K&&Uuml;: " + resultDict.kurs1.tnStatus + "<br />First Car: " + resultDict.kurs2.tnStatus + "<br />TAG-Modul: " + resultDict.kurs3.tnStatus + "<br />Hygiene: " + resultDict.kurs4.tnStatus);
         });
 
      });
