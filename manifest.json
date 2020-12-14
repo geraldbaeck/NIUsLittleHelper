@@ -3,7 +3,7 @@
   "short_name": "NIU++",
   "author": "Gerald Baeck",
   "description": "Chrome Erweiterung zur einfacheren Bedienung des internen Verwaltungssystems des Wiener Roten Kreuz (NIU).",
-  "version": "0.58.2",
+  "version": "0.58.3",
   "homepage_url": "http://baeck.at",
   "options_ui" : {
     "page" : "src/options.html",
@@ -137,7 +137,7 @@
       "run_at": "document_end"
     },
 	{
-      "matches": ["*://intranet.wrk.at/*/VFM/Bescheiderstellung*"],
+      "matches": ["*://intranet.wrk.at/confluence/display/VFM/Bescheiderstellung*", "*://intranet.wrk.at/confluence/pages/viewpage.action?spaceKey=VFM&title=Bescheiderstellung*"],
       "css": [
         "js/jquery-modal/jquery.modal.min.css"
       ],

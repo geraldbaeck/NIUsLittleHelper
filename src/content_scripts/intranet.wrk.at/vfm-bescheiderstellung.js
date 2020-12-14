@@ -42,18 +42,26 @@ $(document).ready(function() {
       
       var person_data = {};
 
-      person_data.bescheiddatum = $("#i_formissuedate").val();
-      person_data.vorname = $("#i_formvorname").val();
-      person_data.nachname = $("#i_formnachname").val();
-      person_data.adresse = $("#i_formadresse").val();
-      person_data.geburtstag = $("#i_formbirthday").val();
-      person_data.arbeitsplatz = $("#i_formworkplace").val();
-      person_data.arzt = $("#i_formdoctor").val();
-      person_data.endedatum = $("#i_formenddate").val();
+      var def_fieldnames = $("#i_fieldnames").val().split(";");
+      var def_filename = $("#i_filename").val().split(";");
+      
+      var filename_constructed = "";
+
+      for(var i = 0; i < def_filename.length; i++)
+      {
+        def_filename[i] = $("#i_" + def_filename[i]).val();
+      }
+
+      filename_constructed = def_filename.join("_");
+
+      for(var i = 0; i < def_fieldnames.length; i++)
+      {
+        person_data[def_fieldnames[i]] = $("#i_" + def_fieldnames[i]).val();
+      }
 
       var filedate = (new Date()).toISOString().slice(0,10).replace(/-/g,"");
       var template_name = $("#upload_select_docx").val().replace("C:\\fakepath\\", "");
-      var output_filename = ["Bescheid", person_data.nachname, person_data.vorname, person_data.bescheiddatum].join("_");
+
       if (error) { throw error };
       var zip = new JSZip(content);
       var doc = new Docxtemplater().loadZip(zip)
@@ -77,7 +85,7 @@ $(document).ready(function() {
           type:"blob",
           mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       }) //Output the document using Data-URI
-      saveAs(out, output_filename + ".docx")
+      saveAs(out, filename_constructed + ".docx")
   });
   }
 
