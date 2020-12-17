@@ -44,6 +44,7 @@ $(document).ready(function() {
 
       var def_fieldnames = $("#i_fieldnames").val().split(";");
       var def_filename = $("#i_filename").val().split(";");
+      var def_dropdowns = $("#i_dropdowns").val().split(";")
       
       var filename_constructed = "";
 
@@ -57,6 +58,11 @@ $(document).ready(function() {
       for(var i = 0; i < def_fieldnames.length; i++)
       {
         person_data[def_fieldnames[i]] = $("#i_" + def_fieldnames[i]).val();
+      }
+
+      for(var i = 0; i < def_dropdowns.length; i++)
+      {
+        person_data[def_dropdowns[i]] = $("#i_" + def_dropdowns[i] + " option:selected").text();
       }
 
       var filedate = (new Date()).toISOString().slice(0,10).replace(/-/g,"");
