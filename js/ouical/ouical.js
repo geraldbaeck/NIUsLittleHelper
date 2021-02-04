@@ -74,7 +74,7 @@
           'BEGIN:VCALENDAR',
           'VERSION:2.0',
           'BEGIN:VEVENT',
-          'URL:' + document.URL,
+          'URL:' + encodeURIComponent(document.URL),
           'DTSTART:' + (startTime || ''),
           'DTEND:' + (endTime || ''),
           'SUMMARY:' + (event.title || ''),
