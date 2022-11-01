@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/geraldbaeck/NIUsLittleHelper#readme",
   "devDependencies": {
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-clean": "^0.3.2",
     "gulp-slack": "^0.1.2",
     "gulp-zip": "^4.0.0",
